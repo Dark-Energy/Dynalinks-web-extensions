@@ -4,6 +4,10 @@ function Vue_Application(dlink) {
     console.log("create vue application"), this.create_database(dlink);
 }
 
+function create_table_view(dlink) {
+    new Vue_Application(dlink);
+}
+
 function create_vue_app(dynalinks) {
     var category_list = dynalinks.category_list, categories = dynalinks.categories;
     return category_list[0] && categories[category_list[0].href], new Vue({
@@ -225,10 +229,12 @@ var saveAs = saveAs || function(view) {
 
 var mr;
 
-Application.prototype.create_database = function(dinalinks) {
-    console.log("Application create database..."), this.database = dynalinks.database, 
-    this.dynalinks = dynalinks, this.get_database_name();
-    this.initialize() && this.initialize();
+Application.prototype.create_database = function(dynalinks) {
+    if (dynalinks) {
+        console.log("Application create database..."), this.database = dynalinks.database, 
+        this.dynalinks = dynalinks, this.get_database_name();
+        this.initialize() && this.initialize();
+    } else console.error("Happened something horroribie! Dyanlinks database, getting to application is empty!");
 }, Application.prototype.remove_item = function(id) {
     var self = this;
     new PopupForm({
@@ -429,11 +435,7 @@ Vue_Application.prototype.initialize = function() {
         var key_name = data.key_name;
         key_name === self.key_name ? (console.log("this is true database", data), callback(data.db)) : fail("is not true database \n Name 'key_name' must be " + self.key_name + "\n However found " + key_name + "\nDump database down \n " + JSON.stringify(data));
     }, fail)) : fail("this is not extension!");
-}, console.log("app create"), console.log(JSON.stringify(My_Extension));
-
-var App = new Vue_Application(My_Extension.Dynalinks);
-
-console.log("end run.js!"), Vue.component("page-item", {
+}, console.log("app create"), console.log("end run.js!"), Vue.component("page-item", {
     props: [ "link_item" ],
     template: '<a v-bind:href="link_item.href"> {{link_item.text}} </a>'
 }), Vue.component("page-content-grid", {

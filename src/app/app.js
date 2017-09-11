@@ -10,8 +10,12 @@ function Application()
 
 }
 
-Application.prototype.create_database = function(dinalinks)
+Application.prototype.create_database = function(dynalinks)
 {
+    if (!dynalinks) {
+        console.error("Happened something horroribie! Dyanlinks database, getting to application is empty!");
+        return;
+    }
     console.log("Application create database...");
 	this.database = dynalinks.database;
 	this.dynalinks = dynalinks;

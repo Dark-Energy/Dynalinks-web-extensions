@@ -52,72 +52,6 @@ function view_listener(p)
 }
 */
 
-function Create_Dynalinks(callback)
-{
-   var key_name = "Dynalinks_Data"
-   console.log("creating dynalinks");
-   
-   if (My_Extension.Dynalinks) {
-    return;
-   }
-    var real_data;
-
-    browser.storage.local.get(My_Extension.key_name).then(success, fail);
-    //
-    function success(data)
-    {
-        //console.log("what we get", JSON.stringify(data,null,' '));
-        /*data = {dynalinks_data: object}*/
-        /*My_Extension.key_name = 'dynalinks_data' */
-        /*real data = object*/        
-        var real_data = data[My_Extension.key_name];
-        //console.log("what we get", JSON.stringify(real_data,null,' '));        
-        if (real_data) {
-            console.log("real data is loaded");
-            My_Extension.Dynalinks=new Dynalinks(real_data);
-            My_Extension.created = true;
-            if (callback) {
-                callback(My_Extension.Dynalinks);
-            }
-        } else {
-            console.error("data may be corrupted", JSON.stringify(data));
-        }
-    }
-    function fail(e)
-    {
-        console.error("Oh, my extension is fail!!!!");
-    }
-}
-
-
-function add_listener_to_database_changes()
-{
-    //console.log("created listener of changes in database ", My_Extension.Dynalinks, My_Extension.Dynalinks);
-    console.log("created listener of changes in database "); 
-    //dynalinks change own structur, have to write this changes into storage
-    function listener(m)
-    {
-        console.log("listen to change");
-        var json = My_Extension.Dynalinks.toJSON();
-        json.key_name = My_Extension.key_name;
-        var shit =  My_Extension.key_name;
-        
-        //inside listener my are doing another yet async call, fuck it
-        browser.storage.local.set({shit: json}).then (success, fail);
-        function fail()
-        {
-            console.log("failed to save database in callback");
-        }
-        
-        function success()
-        {
-            console.log("!success to save database in callback!")
-        }
-        
-    }
-    My_Extension.Dynalinks.$on("change", listener);
-}
-
 
 var proxy;
 
@@ -127,14 +61,11 @@ function creating_dynalinks()
    proxy = new Dynalinks_Proxy();
    proxy.onloaded = listener;
    proxy.Create_Dynalinks();
-
-   //Create_Dynalinks(listener);   
+   
    function listener(dynalinks)
    {
-        My_Extension.Dynalinks = proxy.Dynalinks;
+        My_Extension.Dynalinks = proxy.dynalinks;
         My_Extension.created = true;
-   
-      //add_listener_to_database_changes();    
    }
 }
 
@@ -155,6 +86,18 @@ this function process all communication
 send all commands and require all info's
 Its a listener onConnect and get port from function-caller
 */
+/*
+function message_dispatcher(m)
+{
+      if (m.command === "create_category")
+      {
+            //console.log("getting command create_ category with name "+ m.category_name);
+            var f = My_Extension.Dynalinks.add_category(m.category_name);
+            //console.log("result append ", JSON.stringify(My_Extension.Dynalinks, null, ' '));
+      } else if (m.command === "create_record") {
+      }
+}
+*/
 function dispatch(port)
 {
     console.log("proxy get connecting from ", port.name);
@@ -173,7 +116,20 @@ function dispatch(port)
       {
             console.log("getting command create_ category with name "+ m.category_name);
             var f = My_Extension.Dynalinks.add_category(m.category_name);
-            console.log("create cat = ", m.category_name, "createing is accepted ", f);
+            //console.log("result append ", JSON.stringify(My_Extension.Dynalinks, null, ' '));
+            port.postMessage({command:"create_category", result: "yes"});
+      } else if (m.command === "create_record")
+      {
+            //console.log("add record to database in category ", JSON.stringify(m, null, ' '));      
+            var record = 
+            {
+                tag: m.tag,
+                href: m.url,
+                text: m.title,
+            }
+            My_Extension.Dynalinks.add_record_to_category(record, m.record.category);
+            console.log("create record");
+            port.postMessage({command:"create_record", result: "yes"});
       } else if (m.command === "get") {
             if (m.info === "category_list") {
                 console.log("dialog require category list");

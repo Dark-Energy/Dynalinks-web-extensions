@@ -294,9 +294,13 @@ Vue_Application.prototype.find_database = function(callback, error)
 }
 
 
+
+
 console.log("app create");
+
+
 function create_table_view(dlink) {
-    console.log(JSON.stringify(dlink));
+    //console.log("My Extension is ", JSON.stringify(My_Extension));
     var App = new Vue_Application(dlink);    
 }
 

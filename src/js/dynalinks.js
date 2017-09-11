@@ -456,11 +456,13 @@ Dynalinks.prototype.parse_database = function ()
 
 
 //category should exits
-Dynalinks.prototype.add_link_to_category = function (item, category)
+Dynalinks.prototype.add_link_to_category = 
+Dynalinks.prototype.add_record_to_category = function (item, category)
 {
 	//first add to database
 	if (!this.database[category]) {
 		console.log("Error! This category doesn't exits!", category);
+        return false;
 	}
 	/*
 	//we must push the item in context and database
@@ -472,6 +474,8 @@ Dynalinks.prototype.add_link_to_category = function (item, category)
 	context.add_item(item);
     
     this.$emit("change", "add record");
+    
+    return true;
 }
 
 
