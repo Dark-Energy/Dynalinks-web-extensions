@@ -1,0 +1,22 @@
+set{"Dynalinks: 
+{
+    key_name: "Dynalinks,
+    db : {
+        "unknown": [{},{},etc]
+   },
+    names : {
+    },
+    features,
+};
+
+
+get("Dynalinks") = 
+"Dynalinks": {
+    key_name: "Dynalinks,
+    db : {
+        "unknown": [{},{},etc]
+   },
+    names : {
+    },
+    features,
+};

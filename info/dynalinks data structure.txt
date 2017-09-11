@@ -1,0 +1,21 @@
+
+Object Dynalinks
+names = dictionary of {hash: name}
+categories = dictionary of {hash: Context}
+category_list = array of {href: hash, text: name}
+context = name;
+current_page = array of record
+current_category = category hash
+current_page = this.context.pages[name]
+
+
+class Context
+{
+	category_name: string,
+	pages : dictionary of Array of Record,
+	favorites : array,
+	tags: array of String,
+}
+	
+
+

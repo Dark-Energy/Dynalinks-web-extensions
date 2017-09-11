@@ -1,0 +1,17 @@
+html, body {
+  width: 100px;
+}
+
+
+.popup-menu  div
+{
+    margin: 5px 5px;
+    padding: 5px 5px;
+}
+
+
+.popup-menu  div:hover
+{
+    background-color: #CC0000;
+    color: #FFFFFF;
+}

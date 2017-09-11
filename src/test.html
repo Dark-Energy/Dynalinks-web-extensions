@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+   <link rel="stylesheet" type="text/css" href="css/news-2.css"  />
+      <link rel="stylesheet" type="text/css" href="css/line-menu.css"  />
+      <link rel="stylesheet" type="text/css" href="css/edit-form.css"  />	  
+      <!-link rel="stylesheet" type="text/css" href="css/main.css"  /-->
+
+</head>
+
+<body>
+
+
+<div id="main-menu-app">
+	<application-main-menu></application-main-menu>
+</div>
+<div class="clear-block"></div>
+
+
+<!--mt-edit-form v-bind:params="{'element_type':'text'}"  ></mt-edit-form-->
+<!--mt-edit-form v-bind:params="{'element_type':'select', 'options':options}"></mt-edit-form-->
+
+	
+<div id="app">
+
+<mt-edit-form   ></mt-edit-form>	
+
+	<!--category-menu v-bind:base_url="base_url" v-bind:category_list="category_list"></category-menu-->
+	
+<dropdown-category-menu v-bind:base_url="base_url" v-bind:category_list="category_list" :categories="categories"> </dropdown-category-menu>
+	    
+<div class="clear-block"></div>
+	
+<features-line v-bind:features="features">
+</features-line>
+	
+	
+	<page-menu v-bind:tags="current_category.tags" v-bind:base_url="category_url">
+	</page-menu>
+
+
+	<keep-alive>
+		<component :is='page_content_view' :page_content="page_content" >
+		</component>
+	</keep-alive>
+	
+	
+</div>
+</body>
+
+<script type="text/javascript" src="lib/vue.min.js"> </script>
+<script type="text/javascript" src="database/test.txt"> </script>
+<script type="text/javascript" src="js/FileSaver.js"> </script>
+<script type="text/javascript" src="js/utils.js"> </script>
+<script type="text/javascript" src="js/edit-form.js"> </script>
+<script type="text/javascript" src="js/my_router.js"> </script>
+<script type="text/javascript" src="js/dynalinks_file_mixin.js"> </script>
+<script type="text/javascript" src="js/dynalinks.js"> </script>
+<script type="text/javascript" src="js/main-menu.js"> </script>
+<script type="text/javascript" src="js/app-vue.js"> </script>
+<script type="text/javascript" src="js/app.js"> </script>
+<script type="text/javascript" src="js/run.js"> </script>
+<script type="text/javascript" src="js/edit-form-vue.js"> </script>

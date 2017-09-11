@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+      <link rel="stylesheet" type="text/css" href="/css/dialog.css"  />
+<div class="form-containter">
+    <form>
+
+        <div class="record border2">
+        <p>title <input type="text" id="title-input" size="80">
+        <p>url <input type="text" id="url-input" size="80">
+        </div>
+        
+        <div class="category-block border2">
+            <span id="select-category-containter"></span>    
+                <span>Добавить новую категорию</span>
+                <input type="text" id="new_cat_text"> 
+                <button type="button" id="new_cat_button">Добавить</button>
+        </div>
+        
+        <div class="tag-block border2">
+            <span id="select-tag"></span>
+            <input type="text" id="new_tag_text">
+            <button type="button" id="new_tag_button">Добавить</button>
+        </div>
+  
+        <p>category <input type="text" id="category-input">
+        <p>new tag <input type="text" id="new tag-input"> <button type="button" id="new_tag_button">Add new tag</button>
+        
+        <button type="button" id="cancel_button">Отмена</button>
+        <button type="button" id="ok_button">ОК</button>
+    </form>
+</div>
+<script type="text/javascript" src="/lib/utils.js"></script>
+
+<script src="dialog_script.js">
+    
+</script>
+</body>

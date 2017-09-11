@@ -1,0 +1,11 @@
+.record
+{
+    
+}
+
+.border2
+{
+    border: 2px double #000;
+    margin: 5px 5px;
+    padding: 5px 5px;
+}

@@ -1,0 +1,21 @@
+Data Manipulation Methods
+Dynalinks.prototype.add_link_to_category = function (item, category)
+
+remove record by id from category
+Dynalinks.prototype.remove_by_id = function (id)
+	var item = remove_by_field_value(this.database[this.context.category_name], '_id', id);
+	this.context.remove_item(item);	
+
+    
+Dynalinks.prototype.add_category = function (name)    
+
+
+
+Dynalinks.prototype.remove_tag = function (category, tag)
+
+Dynalinks.prototype.move_tag = function (tag, old_category, new_category)
+
+
+Dynalinks.prototype.update_item = function(old, new_value)
+
+Dynalinks.prototype.remove_category = function (name)
