@@ -1,0 +1,87 @@
+/*
+//await while tab awaike and start connect
+//1) this function get connection with port
+//2) wait message with require
+//3) post message
+function connected(port) {
+    if (port.name !== 'request_tabinfo') {
+        console.log("background get connect from "+port.name + " reject this");
+        return;
+    }
+    port.postMessage({"ready":true});
+    port.onMessage.addListener(send_tab_info);
+    
+    function send_tab_info(m)
+    {  
+        //send fucking data
+       console.log("background get message from " + port.name+" with " + JSON.stringify(m));
+        if (m.command === 'get' && m.info === 'tab_info') {
+            var response = {
+                url: Dialog_Tab.url,
+                title: Dialog_Tab.title
+            };
+            port.postMessage(response);
+        } else {
+        }
+    }
+}
+browser.runtime.onConnect.addListener(connected);
+*/
+
+
+function trying_get_url_and_title()
+{
+
+    console.log("dialog request url and title");
+    //open port and wait parent send url and title
+    var dialog_port = browser.runtime.connect({name:"request_tabinfo"});
+    //dialog_port.onMessage(function (m) { });
+    dialog_port.postMessage({command: "get", info: "tab_info"});
+    dialog_port.onMessage.addListener(function(m) {
+        console.log("tab info get", dialog_port.name);
+                    url_input.value = "shit";
+        title_input.value = "fuck";
+
+        url_input.value = m.url;
+        title_input.value = m.title;
+        we_got_info = true;
+    });
+}
+
+//trying_get_url_and_title_through_message();
+if (!we_got_info) {
+    trying_get_url_and_title();
+}
+
+
+
+
+
+
+/*
+//get url, title from background
+console.log("set listener connect from creatora");
+browser.runtime.onConnect.addListener(function (port) {
+    console.log("get connection " + port.name);
+    if (port.name === 'open-dialog') {
+        port.postMessage({ready:true});
+        port.onMessage.addListener(function (m) {
+            console.log("tab info get", JSON.stringify(m));
+            url_input.value = m.url;
+            title_input.value = m.title;
+        });
+    }
+});
+*/
+
+
+function trying_get_url_and_title_through_message()
+{
+    console.log("trying get info without port");
+   browser.runtime.sendMessage({command: "get_tabinfo"}).then( function (m) {
+        console.log("get message from master!", m);
+        url_input.value = m.url;
+        title_input.value = m.title;
+        we_got_info=true;
+   },null);
+}

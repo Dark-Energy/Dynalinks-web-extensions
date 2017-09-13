@@ -28,11 +28,11 @@
 
   "background": {
     "scripts": [ 
+        "lib/postal.js",
+        "scripts/background.js",         
         "lib/browser-polyfill.min.js",
         "lib/utils.js",  
-        "lib/postal.js",
         "scripts/dialog_fabric.js",
-        "scripts/background.js", 
         "scripts/dynalinks.min.js", 
         "scripts/create_dynalinks.js", 
         "scripts/proxy_data.js", 
@@ -43,6 +43,7 @@
     
     "web_accessible_resources": [
         "/pages/dialog/dialog.html",
+        "/css/dialog.css",
         "/pages/links_view/links_view.html"
     ],
    

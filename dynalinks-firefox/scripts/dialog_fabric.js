@@ -1,34 +1,5 @@
-console.log("dialog connection loading");
+console.log("dialog fabric loading");
 
-/*
-//await while tab awaike and start connect
-//1) this function get connection with port
-//2) wait message with require
-//3) post message
-function connected(port) {
-    if (port.name !== 'request_tabinfo') {
-        console.log("background get connect from "+port.name + " reject this");
-        return;
-    }
-    port.postMessage({"ready":true});
-    port.onMessage.addListener(send_tab_info);
-    
-    function send_tab_info(m)
-    {  
-        //send fucking data
-       console.log("background get message from " + port.name+" with " + JSON.stringify(m));
-        if (m.command === 'get' && m.info === 'tab_info') {
-            var response = {
-                url: Dialog_Tab.url,
-                title: Dialog_Tab.title
-            };
-            port.postMessage(response);
-        } else {
-        }
-    }
-}
-browser.runtime.onConnect.addListener(connected);
-*/
 
 var Dialog_Tab = 
 {
@@ -43,12 +14,11 @@ var Dialog_Tab =
             url: this.url,
             title: this.title
         }
-        browser.runtime.onMessage.addListener(function (message, sender, callback) {
-            console.log("get message from nowhere", message);
-            //if (message.command === "get_tabinfo") {
-                 callback(record);
-            //}
-        });
+
+        var p = new Postal({command: "get_tabinfo"});
+        p.max_times = 1;
+        p.response = record;
+        p.wait();
       
     },
    
@@ -88,6 +58,6 @@ function open_append_record_dialog()
 
 
 
-console.log("dialog connection loaded");
+console.log("dialog fabric loaded");
 
 

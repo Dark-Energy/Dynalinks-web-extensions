@@ -28,20 +28,3 @@ post.response = {response: "Response from background script"};
 post.wait();
 
 
-
-/*
-function handleMessage(command, sender, sendResponse) {
-    //console.log("Message from nowhere", JSON.stringify(request));
-    if (command.command !== 'init') {
-        console.log("message from sender", sender);
-    } else 
-    {
-        sendResponse({response: "Response from background script"});
-        browser.runtime.onMessage.removeListener(handleMessage);
-        console.log("this removed listener response to message", request);
-    }
-}
-
-browser.runtime.onMessage.addListener(handleMessage);
-
-*/

@@ -3,28 +3,6 @@
 
 console.log("dialog script opened");
 
-function error(e)
-{
-    console.log("error write to storage", e);
-}
-
-
-
-/*
-//get url, title from background
-console.log("set listener connect from creatora");
-browser.runtime.onConnect.addListener(function (port) {
-    console.log("get connection " + port.name);
-    if (port.name === 'open-dialog') {
-        port.postMessage({ready:true});
-        port.onMessage.addListener(function (m) {
-            console.log("tab info get", JSON.stringify(m));
-            url_input.value = m.url;
-            title_input.value = m.title;
-        });
-    }
-});
-*/
 
 /*
     1. create port
@@ -35,67 +13,58 @@ browser.runtime.onConnect.addListener(function (port) {
 
 var we_got_info = false;
 
-function trying_get_url_and_title_through_message()
+var sender = new Sender({command: "get_tabinfo"});
+sender.action = function (m) 
 {
-    console.log("trying get info without port");
-   browser.runtime.sendMessage({command: "get_tabinfo"}).then( function (m) {
-        console.log("get message from master!", m);
-        url_input.value = m.url;
-        title_input.value = m.title;
-        we_got_info=true;
-   },null);
+    console.log("get response from sender");
+    url_input.value = m.url;
+    title_input.value = m.title;
+    we_got_info=true;
 }
+sender.send();
 
-function trying_get_url_and_title()
-{
 
-    console.log("dialog request url and title");
-    //open port and wait parent send url and title
-    var dialog_port = browser.runtime.connect({name:"request_tabinfo"});
-    //dialog_port.onMessage(function (m) { });
-    dialog_port.postMessage({command: "get", info: "tab_info"});
-    dialog_port.onMessage.addListener(function(m) {
-        console.log("tab info get", dialog_port.name);
-                    url_input.value = "shit";
-        title_input.value = "fuck";
 
-        url_input.value = m.url;
-        title_input.value = m.title;
-        we_got_info = true;
-    });
-}
 
-trying_get_url_and_title_through_message();
-if (!we_got_info) {
-    trying_get_url_and_title();
-}
-
-chrome.runtime.sendMessage({
-    "open_dialog": "request_info"
-}, function (resp) {
-    console.log("get response", resp);
-    //url_input.value = resp.url;
-    //title_input.value = rest.title;
-});
-
-/*
-function trying_extract_url_and_title()
-{
-    url_input.value = Dialog_Tab.url;
-    title_input.value = Dialog_Tab.title;
-}
-trying_extract_url_and_title();
-*/
 
 //get category list
 //this port using for connection with dynalinks_proxy only
+
 var category_port;
 
 function trying_get_category_list()
 {
-    //console.log("dialog create connect with name 'request to proxy'");
+    console.log("dialog create connect with name 'request to proxy'");    
+    var port = new Portman("request_to_proxy", true);
+    //console.log("post message <get catetory list>", );
+    port.post({command: "get", info: "category_list"});
+    port.process_message = function (m) {
+        //console.log("get response");        
+       //get cat list
+       if (m.command === 'set' && m.info === 'category_list')
+       {
+            var catlist= m.givin_data;
+            my_select_form.set_options(catlist, catlist[0]);
+           
+            //get tag list
+            port.post({command: "get", info: "tag_list", "category": catlist[0]});
+            port.process_message = function (m) {
+                if (m.command === 'set' && m.info === 'tag_list')
+                {
+                    console.log("tag list givin!");
+                    select_tag.set_options(m.givin, m.givin[0]);
+                }
+            }
+       }
+        
+    }
+}
+
+
+/*
+function trying_get_category_list()
+{
     category_port = browser.runtime.connect({name:"request_to_proxy"});
-    console.log("dialog request categories list and wait response");
     category_port.postMessage({command: "get", info: "category_list"});
     category_port.onMessage.addListener( function (m) {
        if (m.command === 'get' && m.info === 'category_list')
@@ -116,6 +85,7 @@ function trying_get_category_list()
        }
     });
 }
+*/
 
 trying_get_category_list();
 
@@ -206,7 +176,6 @@ function go_record()
            console.log("record accepted");
            print_message_div("record accepted");
         }
-        
         });
 }
 
@@ -214,8 +183,6 @@ function go_record()
 ok_button.addEventListener("click", function (event) {
     go_record();
 }, false);
-
-
 
 
 

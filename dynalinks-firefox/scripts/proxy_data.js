@@ -176,14 +176,14 @@ function dispatch(port)
                 response.givin_data =  values_to_array(My_Extension.Dynalinks.names);
                 response.type_data = "array";
                 response.info = m.info;
-                response.command = m.command;
+                response.command = "set"
                 port.postMessage(response);
-                //proxy_port.postMessage({"categories":
+
             } else if (m.info === "tag_list") {
                 var category = m.category;
                 if (category && My_Extension.Dynalinks.categories[category]) {
                     var result = {};
-                    result.command = "get";
+                    result.command = "set";
                     result.info = "tag_list";
                     result.category = category;
                     result.givin = My_Extension.Dynalinks.categories[category].tags;
@@ -196,3 +196,76 @@ function dispatch(port)
 
 //set main dispatch listener
 browser.runtime.onConnect.addListener(dispatch);
+
+var port = new PortObjListener("request_to_proxy");
+var switcher = new Switcher(port);
+switcher.add_command("get", "category_list", function (m)
+{
+    var response = {};
+    response.givin_data =  values_to_array(My_Extension.Dynalinks.names);
+    response.type_data = "array";
+    response.info = m.info;
+    response.command = "set"
+    this.send_response(response);
+}    
+
+switcher.add_command("get", "tag_list", function (m) {
+    var category = m.category;
+    var result = {};
+    result.command = "set";
+    result.info = "tag_list";
+    result.category = category;
+    
+    if (category && My_Extension.Dynalinks.categories[category]) {
+        result.givin = My_Extension.Dynalinks.categories[category].tags;
+    } else {
+        result.givin = [];
+    }
+    this.send_response(result);    
+}
+
+      
+/*
+Format of record in database
+var record = 
+{
+    id : (generated)
+    "tag": m.tag,
+    "href": m.url,
+    "text": m.title,
+};
+*/
+
+switcher.add_command("create", "record", function (m)
+      
+    var record = 
+    {
+        "tag": m.record.tag,
+        "href": m.record.url,
+        "text": m.record.title,
+    };
+    var result = My_Extension.Dynalinks.add_record_to_category(record, m.record.category);
+    var response =
+    {
+        command: m.command,
+        record: record,
+        result: result
+    }
+    this.send_response(response);
+}
+
+
+     if (m.command === "create_category")
+      {
+            var f = My_Extension.Dynalinks.add_category(m.category_name);
+            response = 
+            {
+                command: "create_category",
+                result: f,
+                name: m.category_name
+            };
+            port.postMessage(response);
+            
+      } else if (m.command === "create_record")
+ 
+port.run();
