@@ -1,0 +1,7 @@
+ {
+  "name": "fixer",
+  "description": "Example host for native messaging",
+  "path": "E:\\my_projects\\gitrep\\Dynalinks-web-extensions\\native\\fixer.bat",
+  "type": "stdio",
+  "allowed_extensions": [ "dark_energy_tester@jetpack" ]
+}

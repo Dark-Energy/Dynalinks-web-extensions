@@ -1,4 +1,9 @@
-﻿/*
+﻿if (typeof browser === 'undefined') 
+{
+    var browser = chrome;
+}
+
+/*
 This file not contain nothing but installation event listener and verification database. He write testing data, if think it need. He not need used no one page. He must run first of all. Prevent i think what this module must create application, but this is was wrong.
 */
 console.log("NAME init");

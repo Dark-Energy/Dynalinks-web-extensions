@@ -664,4 +664,3 @@ Dynalinks.prototype.search = function (fields, value)
 }
 
 
-Object.assign(Dynalinks.prototype, Dynalinks_File_Mixin);

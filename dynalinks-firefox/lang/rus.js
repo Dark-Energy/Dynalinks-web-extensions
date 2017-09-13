@@ -1,0 +1,3 @@
+var rus_strings = 
+{
+};

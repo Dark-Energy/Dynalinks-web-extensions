@@ -17,13 +17,17 @@ browser.runtime.onMessage.addListener(handleMessage);
 
 //other attempt to known, what yet go run
 console.log("dynalinks waiting to conditions for starting");
-var p = browser.runtime.connect("ready");
-p.onMessage.addListener( function (m) {
-    if (m.start === '!'){
+var start_port = browser.runtime.connect("ready");
+start_port.onMessage.addListener( start_running);
+function start_running (m) 
+{
+    if (m.start === '!') {
         creating_dynalinks();
+        start_port.onMessage.removeListener(start_running);
+        start_port.disconnect();
+        start_port = undefined;
     }
-    
-});
+}
 
 
 /*
@@ -98,38 +102,73 @@ function message_dispatcher(m)
       }
 }
 */
+      /*
+        request {
+            command: create category
+            name: category name
+        }
+        response {
+            result:"yes", "no", "exists"
+            "y","n","e"
+            "yes"/'y'/true, false/null/etc
+        }
+        */
+
+
 function dispatch(port)
 {
+    var response;
     console.log("proxy get connecting from ", port.name);
-    if (port.name !== "request_to_proxy")
+    if (port.name !== "request_to_proxy") {
+        console.log("where method 'reject', your, fags?!");
         return;
+    }
     console.log("proxy admrire call with " + port.name);
     //port.postMessage({"admire": true});
     console.log("proxy wait new requstess");
     
     //get message
     port.onMessage.addListener(function (m) {
-      //console.log("Proxy_data get message from " + port.name + " with message " + JSON.stringify(m));
-      //command - create category
-      //get - tag list
       if (m.command === "create_category")
       {
-            console.log("getting command create_ category with name "+ m.category_name);
             var f = My_Extension.Dynalinks.add_category(m.category_name);
-            //console.log("result append ", JSON.stringify(My_Extension.Dynalinks, null, ' '));
-            port.postMessage({command:"create_category", result: "yes"});
+            response = 
+            {
+                command: "create_category",
+                result: f,
+                name: m.category_name
+            };
+            port.postMessage(response);
+            
       } else if (m.command === "create_record")
       {
-            //console.log("add record to database in category ", JSON.stringify(m, null, ' '));      
+      
+            /*
+            Format of record in database
             var record = 
             {
-                tag: m.tag,
-                href: m.url,
-                text: m.title,
+                id : (generated)
+                "tag": m.tag,
+                "href": m.url,
+                "text": m.title,
+            };
+            */
+      
+            var record = 
+            {
+                "tag": m.record.tag,
+                "href": m.record.url,
+                "text": m.record.title,
+            };
+            //console.log("create record", JSON.stringify(record, null, ' '));            
+            var result = My_Extension.Dynalinks.add_record_to_category(record, m.record.category);
+            var response =
+            {
+                command: m.command,
+                record: record,
+                result: result
             }
-            My_Extension.Dynalinks.add_record_to_category(record, m.record.category);
-            console.log("create record");
-            port.postMessage({command:"create_record", result: "yes"});
+            port.postMessage(response);
       } else if (m.command === "get") {
             if (m.info === "category_list") {
                 console.log("dialog require category list");

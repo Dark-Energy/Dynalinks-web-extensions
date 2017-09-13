@@ -284,6 +284,7 @@ if (!Object.assign) {
 function My_Select_Form()
 {
     this.selected = '';
+    this.options = [];
 }
 
 Object.assign(My_Select_Form.prototype, {
@@ -351,4 +352,15 @@ Object.assign(My_Select_Form.prototype, {
     {
         return this.selected;
     },
+    clear: function ()
+    {
+        this.selected = '';
+        this.options = [];
+        
+        this.form.innerHTML = '';
+        /*while (this.form.firstChild) {
+            this.form.removeChild(myNode.firstChild);
+        }*/
+        
+    }
 }); 

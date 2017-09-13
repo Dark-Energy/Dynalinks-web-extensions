@@ -1,15 +1,7 @@
-﻿console.log("NAME back");
-
-function onError(e)
-{
-    console.error("error", e);
-}
-
-
 function open_table()
 {
     //get fucking url
-    var fullurl = browser.runtime.getURL("/pages/links_view.html");
+    var fullurl = browser.runtime.getURL("/pages/links_view/links_view.html");
     //create new tab and get fucking promise
     var creating = browser.tabs.create({
         active: true,

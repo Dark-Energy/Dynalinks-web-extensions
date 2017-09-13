@@ -1,13 +1,18 @@
-﻿/*
+﻿if (typeof browser === 'undefined') 
+{
+    var browser = chrome;
+}
+
+/*
 This file not contain nothing but installation event listener and verification database. He write testing data, if think it need. He not need used no one page. He must run first of all. Prevent i think what this module must create application, but this is was wrong.
 */
 console.log("NAME init");
 
 var My_Dynalinks_Extension = {};
-
 My_Dynalinks_Extension.App = null;
 My_Dynalinks_Extension.key_name = "Dynalinks_Data";
-
+My_Dynalinks_Extension.ready = undefined;
+My_Dynalinks_Extension.installed = false;
 
 My_Dynalinks_Extension.create_testing_data = function()  
 {
@@ -158,7 +163,7 @@ My_Dynalinks_Extension.create_empty_data = create_empty_data = function()
 
 My_Dynalinks_Extension.empty_data = My_Dynalinks_Extension.create_empty_data();
 My_Dynalinks_Extension.testing_data = My_Dynalinks_Extension.create_testing_data();
-My_Dynalinks_Extension.installed = false;
+
 My_Dynalinks_Extension.start_application = function () 
 {
     if (this.installed) {
@@ -194,7 +199,7 @@ My_Dynalinks_Extension.write_testing_data = function()
     function success(data) 
     {
         console.log("managed to add testing data!");
-        self.work_is_done("write testing data");
+        //self.work_is_done("write testing data");
     }
     
     function fail(e) 
@@ -204,14 +209,14 @@ My_Dynalinks_Extension.write_testing_data = function()
         
     console.log("Writing test data", this.testing_data.database, this.testing_data.names, this.testing_data.features);
     //console.log("Writing test data", JSON.stringify(shit));
-    chrome.storage.local.set( {"Dynalinks_Data": this.testing_data} ).then( success, fail);
+    browser.storage.local.set( {"Dynalinks_Data": this.testing_data} ).then( success, fail);
 
 }
     
 
 My_Dynalinks_Extension.load_real_data = function ()
 {
-    chrome.storage.local.get(this.key_name).then(success, fail);
+    browser.storage.local.get(this.key_name).then(success, fail);
     var self = this;
     function success(data)
     {
@@ -231,22 +236,19 @@ My_Dynalinks_Extension.load_real_data = function ()
     
 }    
 
-My_Dynalinks_Extension.ready = undefined;
+
 
 My_Dynalinks_Extension.work_is_done = function (message)
 {
     console.log("Work will be done for "+ message)
     if (!this.installed) {
-        //this.start_application(this.load_real_data || this.testing_data );
-        //Init_Popup_Listener();    
+   
+        console.log("Work is over. this.installed= true. Get Ready closed event");
+        if (this.ready) {
+            this.ready();
+        }
     }
-    this.installed = true; 
-    
-    console.log("Work_is_done, this.installed= true. Get Ready closed event");
-    if (this.ready) {
-        this.ready();
-    }
-    
+    this.installed = true;     
 }
 
 
@@ -271,6 +273,7 @@ My_Dynalinks_Extension.check_data = function(data)
         console.error("dump : ", JSON.stringify(dynalinks, null, ' '));
         return false;
     }
+    return true;
 }
 
 
@@ -286,7 +289,6 @@ My_Dynalinks_Extension.check_read_write = function ()
         }  else {
             console.log("its real data");
             //console.log("dump real data", JSON.stringify(data, null, ' '));
-            self.load_real_data();
         }
         self.work_is_done("check read write");
     }
@@ -295,8 +297,7 @@ My_Dynalinks_Extension.check_read_write = function ()
     {
         console.log("this is fail of starting my extension");
     }
-    console.log("get info from storage");
-    chrome.storage.local.get("Dynalinks_Data", success);
+    browser.storage.local.get("Dynalinks_Data").then ( success, fail);
  
 }
 
@@ -327,7 +328,7 @@ My_Dynalinks_Extension.mock_test_read_write = function ()
     {
         console.log("this is fail of starting my extension");
     }
-    chrome.storage.local.get("Dynalinks_Data").then ( success, fail);
+    browser.storage.local.get("Dynalinks_Data").then ( success, fail);
  
 }
 
@@ -349,15 +350,35 @@ My_Dynalinks_Extension.check_is_first = function ()
 
 function test_install()
 {
-    console.log("installation event");    
+    console.log("installation start...");    
     My_Dynalinks_Extension.check_is_first();
 }
+
+
+
+My_Dynalinks_Extension.ready =   function () {
+    console.log("...installation ends. Need messages send");
+    creating_dynalinks();
 /*
-    My_Dynalinks_Extension.ready =   function () {
-        console.log("testing as all writing");
-        My_Dynalinks_Extension.mock_test_read_write();
-    }
+//dynalinks wait conditions to start
+var ready_port;
+browser.runtime.onConnect.addListener(function (p) {
+    console.log("get connection from " + p.name);
+        if (p.name === "ready"){
+            console.log("ready_port was " + ready_port + " now become " + p);        
+            ready_port = p;
+       }
+   });
 
-*/
+    
+   //browser.runtime.sendMessage({init: true}).then(null, null);
+   if (ready_port !== undefined){
+    ready_port.postMessage({"start":"!"});
+    ready_port=undefined;
+   }
+*/   
+}
 
-chrome.runtime.onInstalled.addListener(test_install);
+
+
+browser.runtime.onInstalled.addListener(test_install);

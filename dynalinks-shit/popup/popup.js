@@ -6,12 +6,13 @@ function click_listener(e)
     var id = e.target.id;
     if (id === 'add-record') {
         console.log("open dialog");
-       open_dialog();
+       open_append_record_dialog();
     } else if (id === 'show-links') {
         console.log("open-view");
         open_table();
     } else {
-            console.log("clicking in empty place");
+        browser.tabs.reload();
+        window.close();
     }
 }
 

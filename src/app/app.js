@@ -120,12 +120,14 @@ Application.prototype.turn_edit = function ()
 
 Application.prototype.export_category = function ()
 {
-	this.dynalinks.export_category(this.dynalinks.context.category_name);
+    var saver = new Dynalinks_File_Proxy(this.dynalinks);
+	saver.export_category(this.dynalinks.context.category_name);
 }
 
 Application.prototype.export_tag = function ()
 {
-	this.dynalinks.export_tag(this.dynalinks.context.category_name, 
+    var saver = new Dynalinks_File_Proxy(this.dynalinks);
+	saver.export_tag(this.dynalinks.context.category_name, 
 		this.dynalinks.context.current_tag);
 }
 
@@ -220,7 +222,8 @@ Application.prototype.get_database_name = function ()
 
 Application.prototype.save_to_file = function (filename)
 {
-	this.dynalinks.save_to_file(filename || this.Save_Filename);
+    var saver = new Dynalinks_File_Proxy(this.dynalinks);
+	saver.save_to_file(filename || this.Save_Filename);
 }
 
 Application.prototype.initialize = function ()

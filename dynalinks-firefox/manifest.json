@@ -1,40 +1,51 @@
 {
-
+  "name": "Dynalinks",
+  "version": "1.0",  
   "description": "Dynalinks Firefox",
   "manifest_version": 2,
-  "name": "Dynalinks",
-  "version": "1.0",
   "homepage_url": "https://github.com/Dark-Energy",
   "icons": {
     "48": "icons/arrow.png"
   },
 
+  
   "permissions": [
     "activeTab",
     "tabs",
-    "storage"
+    "storage",
+    "nativeMessaging"
   ],
 
-"browser_action": {
-  "browser_style": true,
-  "default_icon": {
-    "48": "icons/arrow.png"
-  },
-  "default_title": "Hello!",
-  "default_popup": "popup/popup.html"
- },
+    "browser_action": {
+      "browser_style": true,
+      "default_icon": {
+        "48": "icons/arrow.png"
+      },
+      "default_title": "Hello!",
+      "default_popup": "popup/popup.html"
+     },
 
 
   "background": {
-    "scripts": [ "lib/utils.js",  "scripts/background.js", "scripts/dynalinks.min.js", "scripts/create_dynalinks.js", "scripts/proxy_data.js", "scripts/init.js"]
+    "scripts": [ 
+        "lib/browser-polyfill.min.js",
+        "lib/utils.js",  
+        "lib/postal.js",
+        "scripts/dialog_fabric.js",
+        "scripts/background.js", 
+        "scripts/dynalinks.min.js", 
+        "scripts/create_dynalinks.js", 
+        "scripts/proxy_data.js", 
+        "scripts/init.js"
+        ]
     },
  
     
     "web_accessible_resources": [
-        "/pages/dialog.html"
-   ],
+        "/pages/dialog/dialog.html",
+        "/pages/links_view/links_view.html"
+    ],
+   
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'" 
 
-
-      "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'" 
-      
 }

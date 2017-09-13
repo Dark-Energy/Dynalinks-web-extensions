@@ -9,10 +9,13 @@
     "48": "icons/arrow.png"
   },
 
+
+  
   "permissions": [
     "activeTab",
     "tabs",
-    "storage"
+    "storage",
+    "nativeMessaging"
   ],
 
 "browser_action": {
@@ -26,14 +29,20 @@
 
 
   "background": {
-    "scripts": [ "scripts/init.js", "scripts/background.js", "scripts/dynalinks.min.js", "scripts/proxy_data.js"]
+    "scripts": [ "scripts/browser-polyfill.min.js", "lib/utils.js",  "scripts/background.js", "scripts/dynalinks.min.js", "scripts/create_dynalinks.js", "scripts/proxy_data.js", "scripts/init.js"]
     },
  
     
     "web_accessible_resources": [
-        "/pages/dialog.html"
+        "/pages/dialog.html",
+        "/pages/dialog_form.js",
+        "/pages/open_dialog.js",
+        "/pages/dialog_script.js"
+        
    ],
 
 
       "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'" 
+
+      
 }

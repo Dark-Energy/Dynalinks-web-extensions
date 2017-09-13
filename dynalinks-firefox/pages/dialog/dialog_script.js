@@ -1,12 +1,15 @@
-﻿
+﻿'use strict';
+
+
+console.log("dialog script opened");
+
 function error(e)
 {
     console.log("error write to storage", e);
 }
 
-/* connection */
 
-console.log("dialog tab opened");
+
 /*
 //get url, title from background
 console.log("set listener connect from creatora");
@@ -28,20 +31,61 @@ browser.runtime.onConnect.addListener(function (port) {
     2. post message anybody who are awaiting
     3. wait message
 */
+
+
+var we_got_info = false;
+
+function trying_get_url_and_title_through_message()
+{
+    console.log("trying get info without port");
+   browser.runtime.sendMessage({command: "get_tabinfo"}).then( function (m) {
+        console.log("get message from master!", m);
+        url_input.value = m.url;
+        title_input.value = m.title;
+        we_got_info=true;
+   },null);
+}
+
 function trying_get_url_and_title()
 {
+
+    console.log("dialog request url and title");
     //open port and wait parent send url and title
     var dialog_port = browser.runtime.connect({name:"request_tabinfo"});
     //dialog_port.onMessage(function (m) { });
     dialog_port.postMessage({command: "get", info: "tab_info"});
     dialog_port.onMessage.addListener(function(m) {
         console.log("tab info get", dialog_port.name);
+                    url_input.value = "shit";
+        title_input.value = "fuck";
+
         url_input.value = m.url;
         title_input.value = m.title;
+        we_got_info = true;
     });
 }
 
-trying_get_url_and_title();
+trying_get_url_and_title_through_message();
+if (!we_got_info) {
+    trying_get_url_and_title();
+}
+
+chrome.runtime.sendMessage({
+    "open_dialog": "request_info"
+}, function (resp) {
+    console.log("get response", resp);
+    //url_input.value = resp.url;
+    //title_input.value = rest.title;
+});
+
+/*
+function trying_extract_url_and_title()
+{
+    url_input.value = Dialog_Tab.url;
+    title_input.value = Dialog_Tab.title;
+}
+trying_extract_url_and_title();
+*/
 
 //get category list
 //this port using for connection with dynalinks_proxy only
@@ -166,7 +210,12 @@ function go_record()
         });
 }
 
-button_ok = document.getElementById("ok_button");
-button_ok.addEventListener("click", function (event) {
+
+ok_button.addEventListener("click", function (event) {
     go_record();
 }, false);
+
+
+
+
+

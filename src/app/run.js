@@ -43,7 +43,6 @@ Vue_Application.prototype.clear_ls = function ()
 Vue_Application.prototype.save_to_ls = function ()
 {
     var text = this.dynalinks.toJSON();
-    //console.log("save to ls", text);
     localStorage.setItem("Dynalinks", text);
 }
 
