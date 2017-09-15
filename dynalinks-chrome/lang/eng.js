@@ -1,3 +1,0 @@
-var eng_strings = 
-{
-};

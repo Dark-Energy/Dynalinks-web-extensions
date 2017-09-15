@@ -1,0 +1,49 @@
+
+var port = new PortObjListener("request_to_proxy");
+port.process_connection = function (){console.log("connection with port", port.port);}
+port.process_message = function (m)
+{
+   if (m.info === "category_list") {
+                console.log("dialog require category list");
+                var response = {};
+                response.givin_data =  values_to_array(My_Extension.Dynalinks.names);
+                response.type_data = "array";
+                response.info = m.info;
+                response.command = "set"
+                port.post(response);
+    }
+}
+port.run();
+
+
+
+И снова лестница из условных конструкций. 
+
+
+
+function trying_get_category_list(port)
+{
+    //console.log("dialog create connect with name 'request to proxy'");    
+
+    //console.log("post message <get catetory list>", );
+    port.post({command: "get", info: "category_list"});
+    port.process_message = function (m) {
+      //get cat list
+       if (m.command === 'set' && m.info === 'category_list')
+       {
+            var catlist= m.givin_data;
+            my_select_form.set_options(catlist, catlist[0]);
+           
+            //get tag list
+            port.post({command: "get", info: "tag_list", "category": catlist[0]});
+            port.process_message = function (m) {
+                if (m.command === 'set' && m.info === 'tag_list')
+                {
+                        select_tag.set_options(m.givin, m.givin[0]);
+                }
+            }
+       }
+        
+    }
+}
+

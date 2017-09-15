@@ -1,12 +1,10 @@
-console.log("dialog fabric loading");
-
 
 var Dialog_Tab = 
 {
     url: '',
     title: '',
    
-   creating: function ()
+   prepare_postal: function ()
    {
         var self = this;
         var record = 
@@ -16,10 +14,8 @@ var Dialog_Tab =
         }
 
         var p = new Postal({command: "get_tabinfo"});
-        p.max_times = 1;
         p.response = record;
-        p.wait();
-      
+        p.wait();        
     },
    
     open: function (url,title)
@@ -28,36 +24,74 @@ var Dialog_Tab =
         this.title = title;
 
         var self =this;
+        
+
+        
         var fullurl = browser.runtime.getURL("/pages/dialog/dialog.html");
-        var creating = browser.tabs.create({
+        var params = 
+        {
             active: true,
             url: fullurl
-        });
+        };
         
-        creating.then( function (tab) {
-            //await while tab awaike and start connect
-            console.log("tab create, open and active, but not rendered yet");
-            self.creating();
-        },
-        null);
+        if (is_chrome) {
+            chrome.tabs.create(params, created);
+        } else {
+            browser.tabs.create(params).then(created, null);
+        }
 
-    },
+        function created (tab)
+        {
+            console.log("created tab");
+            //self.prepare_postal();
+            give_info();
+        }
+
+        
+        function give_info()
+        {
+            var ms = new MyStorage();
+            
+            ms.$on_write = function (key) {
+            }
+            console.log("write storage", {url: url, title:title});
+            ms.write("dlink-temp-tabinfo", {url: url, title:title});
+        }
+
+            
+        var self = this;
+        
+    }
 };
 
 
-function open_append_record_dialog()
+
+
+
+function find_active_tab()
 {
-    //first query active tab, then load in, then load to she info
-    console.log("open append_record_dialog");
-    browser.tabs.query({active: true, currentWindow: true}).then( function (tabs) {
+    function success(tabs)
+    {
         var tab = tabs[0];
         Dialog_Tab.open(tab.url, tab.title);
-    });
+    }
+    
+    var query_params = 
+    {
+        active: true,
+        currentWindow: true,
+    };
+    if (is_chrome) {
+        chrome.tabs.query(query_params, success);
+    } else {
+        browser.tabs.query(query_params).then( success );
+    }
     
 }
 
 
-
-console.log("dialog fabric loaded");
-
+function open_dialog()
+{
+   find_active_tab();
+}
 

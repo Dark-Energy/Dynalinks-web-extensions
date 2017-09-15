@@ -5,7 +5,7 @@ function click_listener(e)
 {
     var id = e.target.id;
     if (id === 'add-record') {
-       open_append_record_dialog();
+       open_dialog();
     } else if (id === 'show-links') {
         open_table();
     } else {

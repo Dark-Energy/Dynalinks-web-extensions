@@ -27,6 +27,7 @@ Postal.prototype.check_address = function (m)
     for(var key in this.address) {
         if (Object.prototype.hasOwnProperty.call(this.address, key)) {
             if (this.address[key] !== m[key]) {
+                console.log("address message is false", m, this.address);
                 return false;
             }
         }
@@ -42,28 +43,37 @@ Postal.prototype.check_times_limit = function()
     }
 }
 
+Postal.prototype._private_listener = function (message, sender, sendResponse)
+{
+    if (this.check_address(message)) {
+        sendResponse(this.response);   
+        if (this.action) {
+            this.action();
+        }
+        this.times += 1;
+        this.check_times_limit();
+    }
+    
+}
+
 Postal.prototype.create_listener = function ()
 {
     var self = this;
     function listener(message, sender, sendResponse) 
     {
-        if (self.check_address(message)) {
-            sendResponse(self.response);   
-            if (self.action) {
-                self.action();
-            }
-            self.times += 1;
-            self.check_times_limit();
-        }
+        self._private_listener;
     }
     this.listener = listener;
-    return listener;
 }
 
 Postal.prototype.wait = function ()
 {
-    var listener = this.create_listener();
-    browser.runtime.onMessage.addListener(listener);
+    this.create_listener();
+    if (is_chrome) {
+        chrome.runtime.onMessage.addListener(this.listener);
+    } else {
+        browser.runtime.onMessage.addListener(this.listener);
+    }
 }
 
 /*
@@ -148,26 +158,34 @@ Sender.prototype.reject = function ()
 Sender.prototype.send = function ()
 {
     this.create_listener();
-    if (typeof browser === 'undefined') {
+    if (is_chrome) {
         chrome.runtime.sendMessage(this.message, null, this.listener)
     }  else {
         var shit = browser.runtime.sendMessage(this.message);
+        shit.then(this.listener, this.reject);        
     }
-
-    shit.then(this.listener, this.reject);
 }
 
+Sender.prototype._private_listener = function (message)
+{
+    console.log("sender get a message", message);
+    if (message === undefined && is_chrome) {
+        console.log(chrome.runtime.lastError)
+        return;
+    }
+    this.response = message;
+    this.count += 1;
+    if (this.action) {
+       this.action(this.response);
+    }
+ }
 
 Sender.prototype.create_listener = function ()
 {
     var self = this;
     function listener(response) 
     {
-        self.response = response;
-        self.count += 1;
-        if (self.action) {
-           self.action(response);
-        }
+        self._private_listener(response);
     }
     this.listener = listener;
 }

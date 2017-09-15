@@ -20,10 +20,11 @@ var new_tag_button = document.getElementById("new_tag_button");
 
 var ok_button = document.getElementById("ok_button");
 
-/*
-//set event listenter for onchange
-my_select_form.onchange = function (value) {
-    //console.log("new select value choosed", value);
-    document.getElementById("category-input").value = value;
+
+
+var message_div = document.getElementById("message-div");
+
+function print_message_div(text)
+{
+    message_div.innerHTML = text;
 }
-*/

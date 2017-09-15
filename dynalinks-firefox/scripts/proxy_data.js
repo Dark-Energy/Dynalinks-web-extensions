@@ -44,17 +44,6 @@ function get_my_extension()
     return My_Extension;
 }
 
-/*
-//sending dynalinks data to view_links
-browser.runtime.onConnect.addListener(view_listener);
-function view_listener(p)
-{
-    if (p.name !== 'view_links') {
-        return;
-    }
-    p.postMessage({dlink: My_Extension.Dynalinks});
-}
-*/
 
 
 var proxy;
@@ -90,18 +79,6 @@ this function process all communication
 send all commands and require all info's
 Its a listener onConnect and get port from function-caller
 */
-/*
-function message_dispatcher(m)
-{
-      if (m.command === "create_category")
-      {
-            //console.log("getting command create_ category with name "+ m.category_name);
-            var f = My_Extension.Dynalinks.add_category(m.category_name);
-            //console.log("result append ", JSON.stringify(My_Extension.Dynalinks, null, ' '));
-      } else if (m.command === "create_record") {
-      }
-}
-*/
       /*
         request {
             command: create category
@@ -115,157 +92,82 @@ function message_dispatcher(m)
         */
 
 
-function dispatch(port)
+
+
+var proxy_mixin = 
 {
-    var response;
-    console.log("proxy get connecting from ", port.name);
-    if (port.name !== "request_to_proxy") {
-        console.log("where method 'reject', your, fags?!");
-        return;
-    }
-    console.log("proxy admrire call with " + port.name);
-    //port.postMessage({"admire": true});
-    console.log("proxy wait new requstess");
+    "get-category_list": function (m)
+    {
+        console.log("get category list");
+                    console.log("dialog require category list");
+                    var response = {};
+                    response.givin_data =  values_to_array(My_Extension.Dynalinks.names);
+                    response.type_data = "array";
+                    response.info = m.info;
+                    response.command = "set"
+        this.post_response(response);
+    },
     
-    //get message
-    port.onMessage.addListener(function (m) {
-      if (m.command === "create_category")
-      {
-            var f = My_Extension.Dynalinks.add_category(m.category_name);
-            response = 
-            {
-                command: "create_category",
-                result: f,
-                name: m.category_name
-            };
-            port.postMessage(response);
-            
-      } else if (m.command === "create_record")
-      {
-      
-            /*
-            Format of record in database
-            var record = 
-            {
-                id : (generated)
-                "tag": m.tag,
-                "href": m.url,
-                "text": m.title,
-            };
-            */
-      
-            var record = 
-            {
-                "tag": m.record.tag,
-                "href": m.record.url,
-                "text": m.record.title,
-            };
-            //console.log("create record", JSON.stringify(record, null, ' '));            
-            var result = My_Extension.Dynalinks.add_record_to_category(record, m.record.category);
-            var response =
-            {
-                command: m.command,
-                record: record,
-                result: result
-            }
-            port.postMessage(response);
-      } else if (m.command === "get") {
-            if (m.info === "category_list") {
-                console.log("dialog require category list");
-                var response = {};
-                response.givin_data =  values_to_array(My_Extension.Dynalinks.names);
-                response.type_data = "array";
-                response.info = m.info;
-                response.command = "set"
-                port.postMessage(response);
-
-            } else if (m.info === "tag_list") {
-                var category = m.category;
-                if (category && My_Extension.Dynalinks.categories[category]) {
-                    var result = {};
-                    result.command = "set";
-                    result.info = "tag_list";
-                    result.category = category;
-                    result.givin = My_Extension.Dynalinks.categories[category].tags;
-                    port.postMessage(result);
-                }
-            }
-      }
-  });
-}
-
-//set main dispatch listener
-browser.runtime.onConnect.addListener(dispatch);
-
-var port = new PortObjListener("request_to_proxy");
-var switcher = new Switcher(port);
-switcher.add_command("get", "category_list", function (m)
-{
-    var response = {};
-    response.givin_data =  values_to_array(My_Extension.Dynalinks.names);
-    response.type_data = "array";
-    response.info = m.info;
-    response.command = "set"
-    this.send_response(response);
-}    
-
-switcher.add_command("get", "tag_list", function (m) {
-    var category = m.category;
-    var result = {};
-    result.command = "set";
-    result.info = "tag_list";
-    result.category = category;
+    "get-tag_list": function (m) {
+        var category = m.category;
+        if (category && My_Extension.Dynalinks.categories[category]) {
+            var result = {};
+            result.command = "set";
+            result.info = "tag_list";
+            result.category = category;
+            result.givin = My_Extension.Dynalinks.categories[category].tags;
+            this.post_response(result);
+        }
+    },
     
-    if (category && My_Extension.Dynalinks.categories[category]) {
-        result.givin = My_Extension.Dynalinks.categories[category].tags;
-    } else {
-        result.givin = [];
-    }
-    this.send_response(result);    
-}
+    "create-category": function (m) 
+    {
+        var f = My_Extension.Dynalinks.add_category(m.category_name);
+        response = 
+        {
+            command: "create",
+            info: "category",
+            result: f,
+            name: m.category_name
+        };
+        this.post_response(response);
+    },
 
-      
-/*
-Format of record in database
-var record = 
-{
-    id : (generated)
-    "tag": m.tag,
-    "href": m.url,
-    "text": m.title,
+
+    "create-record": function (m)
+    {      
+        /*
+        Format of record in database
+        var record = 
+        {
+            id : (generated)
+            "tag": m.tag,
+            "href": m.url,
+            "text": m.title,
+        };
+        */
+
+        var record = 
+        {
+            "tag": m.record.tag,
+            "href": m.record.url,
+            "text": m.record.title,
+        };
+        //console.log("create record", JSON.stringify(record, null, ' '));            
+        var result = My_Extension.Dynalinks.add_record_to_category(record, m.record.category);
+        var response =
+        {
+            command: m.command,
+            info: m.info,
+            record: record,
+            result: result
+        }
+        this.post_response(response);
+    },
+    
 };
-*/
-
-switcher.add_command("create", "record", function (m)
-      
-    var record = 
-    {
-        "tag": m.record.tag,
-        "href": m.record.url,
-        "text": m.record.title,
-    };
-    var result = My_Extension.Dynalinks.add_record_to_category(record, m.record.category);
-    var response =
-    {
-        command: m.command,
-        record: record,
-        result: result
-    }
-    this.send_response(response);
-}
-
-
-     if (m.command === "create_category")
-      {
-            var f = My_Extension.Dynalinks.add_category(m.category_name);
-            response = 
-            {
-                command: "create_category",
-                result: f,
-                name: m.category_name
-            };
-            port.postMessage(response);
-            
-      } else if (m.command === "create_record")
- 
+var port = new PortObjListener("request_to_proxy");
+var switcher = new PortSwitcher(port);
+switcher.add_mixin(proxy_mixin, '-');
 port.run();
+

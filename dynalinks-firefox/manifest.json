@@ -28,22 +28,24 @@
 
   "background": {
     "scripts": [ 
+        "lib/utils.js",              
         "lib/postal.js",
+        "lib/my_storage.js",
+        "scripts/relation.js",
+        "scripts/testing_data.js",    
+        "scripts/init.js",
         "scripts/background.js",         
-        "lib/browser-polyfill.min.js",
-        "lib/utils.js",  
         "scripts/dialog_fabric.js",
         "scripts/dynalinks.min.js", 
         "scripts/create_dynalinks.js", 
-        "scripts/proxy_data.js", 
-        "scripts/init.js"
+        "scripts/proxy_data.js" 
         ]
     },
  
     
     "web_accessible_resources": [
+        "/css/dialog.css",    
         "/pages/dialog/dialog.html",
-        "/css/dialog.css",
         "/pages/links_view/links_view.html"
     ],
    

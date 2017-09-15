@@ -1,7 +1,12 @@
 ﻿'use strict';
 
 
-console.log("dialog script opened");
+if (chrome.extension && chrome.extension.getBackgroundPage)
+{
+    chrome.extension.getBackgroundPage().console.log('init dialog script');
+}
+
+//console.log("dialog script opened");
 
 
 /*
@@ -13,15 +18,34 @@ console.log("dialog script opened");
 
 var we_got_info = false;
 
+function set_data(url, title)
+{
+    url_input.value = url;
+    title_input.value = title;
+    we_got_info=true;
+}
+
+
 var sender = new Sender({command: "get_tabinfo"});
 sender.action = function (m) 
 {
-    console.log("get response from sender");
-    url_input.value = m.url;
-    title_input.value = m.title;
-    we_got_info=true;
+    if (m === undefined) {
+        console.log("Sender Message is failed because of human stupidity");
+        return;
+    }
+    set_data(m.url, m.title);
 }
 sender.send();
+
+
+var ms = new MyStorage();
+ms.$on_read = function (data)
+{
+    var obj = data['dlink-temp-tabinfo'];
+    set_data(obj.url, obj.title);
+    console.log("read storage", JSON.stringify(data));
+}
+ms.read('dlink-temp-tabinfo');
 
 
 
@@ -30,64 +54,45 @@ sender.send();
 //get category list
 //this port using for connection with dynalinks_proxy only
 
-var category_port;
+var category_port = new Portman("request_to_proxy", true);
 
-function trying_get_category_list()
-{
-    console.log("dialog create connect with name 'request to proxy'");    
-    var port = new Portman("request_to_proxy", true);
-    //console.log("post message <get catetory list>", );
-    port.post({command: "get", info: "category_list"});
-    port.process_message = function (m) {
-        //console.log("get response");        
-       //get cat list
-       if (m.command === 'set' && m.info === 'category_list')
-       {
-            var catlist= m.givin_data;
-            my_select_form.set_options(catlist, catlist[0]);
-           
-            //get tag list
-            port.post({command: "get", info: "tag_list", "category": catlist[0]});
-            port.process_message = function (m) {
-                if (m.command === 'set' && m.info === 'tag_list')
-                {
-                    console.log("tag list givin!");
-                    select_tag.set_options(m.givin, m.givin[0]);
-                }
-            }
-       }
-        
+
+
+
+
+var dialog_switcher;
+
+function trying_get_category_list(port) {
+    
+    //set event listenter for onchange
+    my_select_form.onchange = function (value) {
+        print_message_div("you choose new category <b>"+value+"</b>");
+        switcher.port.post({command: "get", info: "tag_list", "category": value});
     }
-}
-
-
-/*
-function trying_get_category_list()
-{
-    category_port = browser.runtime.connect({name:"request_to_proxy"});
-    category_port.postMessage({command: "get", info: "category_list"});
-    category_port.onMessage.addListener( function (m) {
-       if (m.command === 'get' && m.info === 'category_list')
-       {
-            var catlist= m.givin_data;
-            my_select_form.set_options(catlist, catlist[0]);
-            
-            //console.log("On Message: me get catlist!", JSON.stringify(m));
-            
-            category_port.postMessage({command: "get", info: "tag_list", "category": catlist[0]});
-            category_port.onMessage.addListener( function (m) {
-                if (m.command === 'get' && m.info === 'tag_list')
-                {
-                    console.log("tag list givin!");
-                    select_tag.set_options(m.givin, m.givin[0]);
-                }
-            });
-       }
+    
+    
+    
+    var switcher = new PortSwitcher(port);
+    switcher.add_command('set', 'tag_list', function (m) {
+        select_tag.set_options(m.givin, m.givin[0]);
     });
+    switcher.add_command("set", 'category_list', function (m) {
+        var catlist= m.givin_data;
+        my_select_form.set_options(catlist, catlist[0]);
+       
+        //get tag list
+        this.port.post({command: "get", info: "tag_list", "category": catlist[0]});
+            
+    });
+    port.post({command: "get", info: "category_list"});
+    
+    dialog_switcher = switcher;
 }
-*/
 
-trying_get_category_list();
+
+trying_get_category_list(category_port);
+
+
 
 function add_new_category(event)
 {
@@ -95,6 +100,7 @@ function add_new_category(event)
     //validate
     if (!name.trim()) {
         console.log("category name is empty!");
+
         return;
     }
    
@@ -107,13 +113,13 @@ document.getElementById("new_cat_button").addEventListener("click", add_new_cate
 
 function give_request_to_create_category(name)
 {
-    console.log("request to creating new category" );
-    category_port.postMessage({"command" : "create_category", "category_name" : name});
-    category_port.onMessage.addListener(function (m) {
-        console.log("response on request category create", JSON.stringify(m));
-        if (m.command === "create_category" && m.name ===  name && m.result)
+    //console.log("request to creating new category" );
+    category_port.post({"command" : "create", "info": "category", "category_name" : name});
+    category_port.process_message = function (m) {
+        //console.log("response on request category create", JSON.stringify(m));
+        if (m.result)
         {
-            //console.log("admiration creating new category");
+            //console.log("admiration creating new category", JSON.stringify(m));
             my_select_form.add_option(name);
             select_tag.clear();
             print_message_div("create new category  <b>"+name+"</b> is granted!");
@@ -121,18 +127,12 @@ function give_request_to_create_category(name)
         {
             print_message_div("create new category  <b>"+name+"</b> is rejected!");
         }
-    })
+    }
 }
 
 
 
 
-var message_div = document.getElementById("message-div");
-
-function print_message_div(text)
-{
-    message_div.innerHTML = text;
-}
 
 
 function validate_record(record)
@@ -167,16 +167,14 @@ function go_record()
     }
     console.log("record seemed valid");
  
-    //console.log("my record ", JSON.stringify(record));
-    category_port = browser.runtime.connect({name:"request_to_proxy"});
-    category_port.postMessage({"command" : "create_record", "record" : record});
-    category_port.onMessage.addListener(function (m) {
-        console.log("add message on append record");
-        if (m.command === "create_record" && m.result){
-           console.log("record accepted");
+    category_port = new Portman("request_to_proxy", true);
+    category_port.process_message = function (m) {
+        print_message_div("adding message on append record...");
+        if (m.command === "create" && m.info === "record" && m.result){
            print_message_div("record accepted");
         }
-        });
+    }
+    category_port.post({"command" : "create", "info": "record", "record" : record});
 }
 
 

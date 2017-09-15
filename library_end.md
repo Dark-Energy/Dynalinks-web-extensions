@@ -1,3 +1,15 @@
+*Library for working with ports, connects and messages*
+
+5 reasons was to creating this library.
+
+1) conviency
+2) reusability, once written code may be used multiply times
+3) 
+4)
+5) Especially one. There is a opportunity of isolation all code parts, related to different between Firefox and Chrome. And resolve this difference.
+
+
+
 Especially for work with message and connection and port and other ugly matter i created this library.
 
 Ojbect PortObjListener (name, run)
@@ -10,7 +22,7 @@ Object self carry out assign onConnect and onMmessage listeners.
 last_message - contain last arrived message
 
 process_message - optional handler message arraving
-process_connect = optional handler connecting
+process_connection = optional handler connecting
 
 $on_connect_event - is a function, which append another function, which process connecting
 i don't know' what i am this doing. This event fired before rest code process connection.
@@ -82,3 +94,34 @@ Unfortunatly, we again see many levels of inner functions. Though without ugly )
 
 
 
+*PortSwitcher*
+
+This is simple inteface, allowing execute command, tranported through port connection
+
+
+
+var port = new PortObjListener("request_to_proxy");
+port.run();
+
+
+var switcher = new PortSwitcher(port);
+switcher.add_command("get", "category_list", function (m)
+{
+    console.log("get category list");
+                console.log("dialog require category list");
+                var response = {};
+                response.givin_data =  values_to_array(My_Extension.Dynalinks.names);
+                response.type_data = "array";
+                response.info = m.info;
+                response.command = "set"
+    this.post_response(response);
+});    
+
+
+
+
+But this is too much. Because of i have invent mixin mixing.
+
+add_mixin(object, separator);
+
+First argument is a object contains key, who names separated by "command" and "info" especially symbol. This symbol pass as second argument. I mean, this keys must be functions. My method automcatically collect all this functions and append to command table. 
