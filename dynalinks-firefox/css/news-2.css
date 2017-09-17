@@ -445,3 +445,13 @@ end top-button
     background-color: #FcFc00;
     color: #000099;
 }
+
+
+
+.vueTableGrid td
+{
+   max-width: 200px;
+   /*word-wrap:break-word;*/
+   height: 50px;
+   overflow: hidden;
+}

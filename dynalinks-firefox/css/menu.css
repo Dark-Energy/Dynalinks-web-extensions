@@ -1,0 +1,19 @@
+.line-menu li, ul
+{
+    list-style: none;
+    display: inline-block;
+}
+.line-menu > li
+{
+    float: left;
+}
+
+.line-menu > ul > li
+{
+   float: none;
+}
+
+.line-menu a
+{
+    display: inline-block;
+}

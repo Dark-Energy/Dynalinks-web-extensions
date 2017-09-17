@@ -1,19 +1,4 @@
-console.log("NAME proxy");
 
-//attempt to make connect with init.js and say "prepare is done, go!" 
-//it's fucking fail
-/*
-function handleMessage(request, sender, sendResponse)
-{   
-    console.log("Message from the content script: " + request.init);    
-    if (request.init) {
-        creating_dynalinks();
-    }
-   //sendResponse({response: "Response from background script"});
-}
-
-browser.runtime.onMessage.addListener(handleMessage);
-*/
 
 //other attempt to known, what yet go run
 console.log("dynalinks waiting to conditions for starting");
@@ -116,6 +101,7 @@ var proxy_mixin =
             result.info = "tag_list";
             result.category = category;
             result.givin = My_Extension.Dynalinks.categories[category].tags;
+            console.log("tag list get ", JSON.stringify(result));
             this.post_response(result);
         }
     },

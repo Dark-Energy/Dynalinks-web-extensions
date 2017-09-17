@@ -1,10 +1,4 @@
-
-var Dialog_Tab = 
-{
-    url: '',
-    title: '',
-   
-   prepare_postal: function ()
+/*   prepare_postal: function ()
    {
         var self = this;
         var record = 
@@ -17,77 +11,38 @@ var Dialog_Tab =
         p.response = record;
         p.wait();        
     },
-   
-    open: function (url,title)
-    {
-        this.url = url;
-        this.title = title;
-
-        var self =this;
-        
-
-        
-        var fullurl = browser.runtime.getURL("/pages/dialog/dialog.html");
-        var params = 
-        {
-            active: true,
-            url: fullurl
-        };
-        
-        if (is_chrome) {
-            chrome.tabs.create(params, created);
-        } else {
-            browser.tabs.create(params).then(created, null);
-        }
-
-        function created (tab)
-        {
-            console.log("created tab");
-            //self.prepare_postal();
-            give_info();
-        }
-
-        
-        function give_info()
-        {
-            var ms = new MyStorage();
-            
-            ms.$on_write = function (key) {
-            }
-            console.log("write storage", {url: url, title:title});
-            ms.write("dlink-temp-tabinfo", {url: url, title:title});
-        }
-
-            
-        var self = this;
-        
-    }
-};
+*/
 
 
-
-
-
+var count = 0;
 function find_active_tab()
 {
-    function success(tabs)
-    {
-        var tab = tabs[0];
-        Dialog_Tab.open(tab.url, tab.title);
-    }
+    var url, title;
     
-    var query_params = 
+    function give_info()
     {
-        active: true,
-        currentWindow: true,
-    };
-    if (is_chrome) {
-        chrome.tabs.query(query_params, success);
-    } else {
-        browser.tabs.query(query_params).then( success );
+        count += 1;
+        console.log("give info ", count);
+        var ms = new MyStorage();
+        ms.$on_write = function (key) {
+              Tab_Manager.open_active_tab("/pages/dialog/dialog.html");
+              ms.$on_write = undefined;
+        }
+        ms.write("dlink-temp-tabinfo", {url: url, title:title});
     }
+
+    
+    Tab_Manager.$job_done = function (tab)
+    {
+        url = tab.url;
+        title = tab.title;
+        this.$job_done = undefined;
+        give_info();
+    }
+    Tab_Manager.find_active_tab();
     
 }
+
 
 
 function open_dialog()

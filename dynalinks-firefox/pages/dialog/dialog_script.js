@@ -53,12 +53,7 @@ ms.read('dlink-temp-tabinfo');
 
 //get category list
 //this port using for connection with dynalinks_proxy only
-
 var category_port = new Portman("request_to_proxy", true);
-
-
-
-
 
 var dialog_switcher;
 
@@ -75,6 +70,7 @@ function trying_get_category_list(port) {
     var switcher = new PortSwitcher(port);
     switcher.add_command('set', 'tag_list', function (m) {
         select_tag.set_options(m.givin, m.givin[0]);
+        console.log("tag list", JSON.stringify(m));
     });
     switcher.add_command("set", 'category_list', function (m) {
         var catlist= m.givin_data;

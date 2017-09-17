@@ -35,33 +35,6 @@ My_Dynalinks_Extension.create_testing_data = create_testing_data;
 
 My_Dynalinks_Extension.empty_data = My_Dynalinks_Extension.create_empty_data();
 My_Dynalinks_Extension.testing_data = My_Dynalinks_Extension.create_testing_data();
-
-My_Dynalinks_Extension.start_application = function () 
-{
-    if (this.installed) {
-        return;
-    }
-    //console.log("CREATE application!", this.real_data, this.testing_data, this.empty_data);    
-    console.log("CREATE application!");
-    var params =
-    {
-        ITS_EXTENSION: true,
-        key_name: My_Dynalinks_Extension.key_name,
-    };
-    
-    if (this.real_data) {
-        params.database= this.real_data;
-    } else if (this.testing_data) {
-        params.database= this.testing_data;
-    } else {
-        params.database = empty_data;
-    }
-
-    My_Dynalinks_Extension.App = new Vue_Application(params);
-    //this.installed = true;
-}
-
-
     
 
 My_Dynalinks_Extension.load_real_data = function ()
@@ -129,7 +102,7 @@ My_Dynalinks_Extension.check_read_write = function ()
     function read_first_time(data)
     {
         var valid = ms.check_data("Dynalinks_Data")        
-        console.log("Dump", JSON.stringify(data));
+        //console.log("Dump", JSON.stringify(data));
         if (valid.valid)
         {
             console.error("its real data!");

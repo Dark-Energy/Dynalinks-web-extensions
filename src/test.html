@@ -5,7 +5,6 @@
    <link rel="stylesheet" type="text/css" href="css/news-2.css"  />
       <link rel="stylesheet" type="text/css" href="css/line-menu.css"  />
       <link rel="stylesheet" type="text/css" href="css/edit-form.css"  />	  
-      <!-link rel="stylesheet" type="text/css" href="css/main.css"  /-->
 
 </head>
 
@@ -17,16 +16,9 @@
 </div>
 <div class="clear-block"></div>
 
-
-<!--mt-edit-form v-bind:params="{'element_type':'text'}"  ></mt-edit-form-->
-<!--mt-edit-form v-bind:params="{'element_type':'select', 'options':options}"></mt-edit-form-->
-
 	
 <div id="app">
 
-<mt-edit-form   ></mt-edit-form>	
-
-	<!--category-menu v-bind:base_url="base_url" v-bind:category_list="category_list"></category-menu-->
 	
 <dropdown-category-menu v-bind:base_url="base_url" v-bind:category_list="category_list" :categories="categories"> </dropdown-category-menu>
 	    
@@ -49,7 +41,7 @@
 </div>
 </body>
 
-<script type="text/javascript" src="lib/vue.min.js"> </script>
+<script type="text/javascript" src="lib/vue.js"> </script>
 <script type="text/javascript" src="database/test.txt"> </script>
 <script type="text/javascript" src="js/FileSaver.js"> </script>
 <script type="text/javascript" src="js/utils.js"> </script>

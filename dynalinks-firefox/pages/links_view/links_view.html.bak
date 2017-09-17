@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <head>
 <meta charset="utf-8">
+      <link rel="stylesheet" type="text/css" href="/css/news-2.css"  />
       <link rel="stylesheet" type="text/css" href="/css/line-menu.css"  />
-      <link rel="stylesheet" type="text/css" href="/css/edit-form.css"  />
-        <link rel="stylesheet" type="text/css" href="/css/news-2.css"  />
+      <link rel="stylesheet" type="text/css" href="/css/edit-form.css"  />	  
 
 </head>
 <body>
@@ -13,6 +13,24 @@
 </div>
 
 <div id="app">
+<dropdown-category-menu v-bind:base_url="base_url" v-bind:category_list="category_list" :categories="categories"> </dropdown-category-menu>
+	    
+<div class="clear-block"><br/></div>
+
+
+	<features-line v-bind:features="features">
+</features-line>
+
+	
+	<page-menu v-bind:tags="current_category.tags" v-bind:base_url="category_url">
+	</page-menu>
+
+
+	<keep-alive>
+		<component :is='page_content_view' :page_content="page_content" >
+		</component>
+	</keep-alive>
+	
 </div>
   <script src="/scripts/relation.js"></script>  
 <script type="text/javascript" src="/lib/vue.min.js"> </script>

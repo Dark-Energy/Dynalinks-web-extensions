@@ -28,13 +28,12 @@
 
   "background": {
     "scripts": [ 
+        "scripts/relation.js",    
         "lib/utils.js",              
-        "lib/postal.js",
-        "lib/my_storage.js",
-        "scripts/relation.js",
+        "lib/framework.js",
+        "lib/tab_manager.js",
         "scripts/testing_data.js",    
         "scripts/init.js",
-        "scripts/background.js",         
         "scripts/dialog_fabric.js",
         "scripts/dynalinks.min.js", 
         "scripts/create_dynalinks.js", 
@@ -45,10 +44,11 @@
     
     "web_accessible_resources": [
         "/css/dialog.css",    
+        "/css/line-menu.css",
+        "/css/news-2.css",
         "/pages/dialog/dialog.html",
         "/pages/links_view/links_view.html"
     ],
    
-    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'" 
-
+    "content_security_policy": "script-src 'self' 'unsafe-eval' 'unsafe-inline'; script-src moz-extension://* 'unsafe-eval'; object-src 'self'; img-src 'self' 'unsafe-eval'; "
 }

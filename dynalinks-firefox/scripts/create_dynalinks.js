@@ -13,7 +13,7 @@ Object.assign( Dynalinks_Proxy.prototype, {
     Create_Dynalinks : function()
     {
         if (this.dynalinks) {
-            console.log("already created");
+            console.error("already created");
             return;
         }
         var self = this;
@@ -32,7 +32,7 @@ Object.assign( Dynalinks_Proxy.prototype, {
         }
         function fail(e)
         {
-            console.log("Oh, my extension is fail!!!!");
+            console.error("Oh, my extension is fail!!!!");
         }
         
         /*
@@ -43,7 +43,6 @@ Object.assign( Dynalinks_Proxy.prototype, {
     read_data : function (data)
     {
 
-        //console.log("what we get", JSON.stringify(data,null,' '));
         /* 
         Data Scheme
         data = {dynalinks_data: object} 
@@ -53,7 +52,7 @@ Object.assign( Dynalinks_Proxy.prototype, {
         var real_data = data[this.key_name];
         //var real_data = data.Dynalinks_Data
         if (real_data) {
-            console.log("real data is loaded"); 
+            //console.log("real data is loaded"); 
             this.dynalinks = new Dynalinks(real_data);
             this.created = true;
             this.after_loaded();

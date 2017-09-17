@@ -1,28 +1,29 @@
-﻿function register_main_menu(application) 
+﻿function register_main_menu(application)
 {
 
-var main_menu_template = '<div class="top-line top-buttons line-menu">\
+
+var main_menu_template = '<div class="top-line line-menu top-buttons">\
 	<ul>\
-	<li><a href="javascript:void(0);" id="button-add" v-on:click="add_item">Добавить ссылку</a></li>\
-	<li><a href="javascript:void(0);" id="button-create-category" v-on:click="create_category">Создать категорию</a></li>\
-	<li><a href="javascript:void(0);" id="button-move" v-on:click="move_page">Перенести</a></li>\
-	<li><a href="javascript:void(0);"> Удалить</a>\
-		<ul>\
-			<li><a href="javascript:void(0);" id="button-remove-tag" v-on:click="remove_page"> страницу</a></li>\
-			<li><a href="javascript:void(0);" id="button-remove-category" v-on:click="remove_category"> категорию</a></li>\
-		</ul>\
-	</li>\
-	<li><A href="javascript:void(0);">Экспортировать</a>\
-		<ul>\
-		<li><a href="javascript:void(0);" id="button-export-tag" v-on:click="export_page"> страницу</a></li>\
-		<li><a href="javascript:void(0);" id="button-export-category" v-on:click="export_category"> категорию </a>	</li>\
-		</ul>\
-	</li>\
-	<!--li><a href="javascript:void(0);" id="button-edit-page" v-on:click="edit_mode">Правка</a></li-->\
-	<li><a href="javascript:void(0);" id="button-save" v-on:click="save_to_ls"> Сохранить локально</a></li>\
-	<li><a href="javascript:void(0);" id="button-save" v-on:click="save_all"> Сохранить в файл</a></li>\
-	<li><a href="javascript:void(0);" id="button-save" v-on:click="clear_ls"> Очистить хранилище</a></li>\
-	<li><input type="text" id="search-box" v-model="search_text" placeholder="искать..."><button type="button" id="search-button" v-on:click="search_record">искать</button></li>\
+        <li><a href="javascript:void(0);"> Edit</a>\
+            <ul>\
+                <li><a href="javascript:void(0);" id="button-add" v-on:click="add_item">Create record</a></li>\
+                <li><a href="javascript:void(0);" id="button-create-category" v-on:click="create_category"> Create  category </a></li>\
+                <li><a href="javascript:void(0);" id="button-move" v-on:click="move_page">Move page to other category</a></li>\
+                <li><a href="javascript:void(0);" id="button-remove-tag" v-on:click="remove_page"> Remove page</a></li>\
+                <li><a href="javascript:void(0);" id="button-remove-category" v-on:click="remove_category"> Remove category</a></li>\
+            </ul>\
+        </li>\
+        <li><a href="javascript:void(0);"> Files </a>\
+            <ul>\
+                <li><a href="javascript:void(0);" id="button-save" v-on:click="save_all"> Save to file </a></li>\
+                <li><a href="javascript:void(0);" id="button-export-tag" v-on:click="export_page"> Save page </a> </li>\
+                <li><a href="javascript:void(0);" id="button-export-category" v-on:click="export_category"> Save Category</a></li>\
+            </ul>\
+        </li>\
+        <li><a href="javascript:void(0);" id="button-save" v-on:click="look_tabs">Look tabs</a></li>\
+        <li><a href="javascript:void(0);" id="button-save" v-on:click="save_to_ls"> Сохранить локально</a></li>\
+        <li><a href="javascript:void(0);" id="button-save" v-on:click="clear_ls"> Очистить хранилище</a></li>\
+        <li><input type="text" id="search-box" v-model="search_text" placeholder="search..."><button type="button" id="search-button" v-on:click="search_record">Search</button></li>\
 	</ul>\
 </div>';
 
@@ -34,7 +35,7 @@ var Application_Main_Menu = {
 	},
 	template: main_menu_template,
 	methods: {
-        clear_ls: function () 
+        clear_ls: function ()
         {
             application.clear_ls();
         },
@@ -42,7 +43,7 @@ var Application_Main_Menu = {
         {
             application.save_to_ls();
         },
-		save_all: function () 
+		save_all: function ()
 		{
 			application.save_to_file();
 		},
@@ -78,21 +79,19 @@ var Application_Main_Menu = {
 		{
 			application.search(this.search_text);
 		},
-        /*
-		edit_mode: function ()
-		{
-			application.turn_edit_mode();
-		}
-        */
+        look_tabs: function ()
+        {
+            application.look_tabs();
+        }
 	}
 };
-	
+
 var main_menu_app = new Vue( {
 	el: "#main-menu-app",
 	components: {
-		"application-main-menu": Application_Main_Menu 
+		"application-main-menu": Application_Main_Menu
 	},
 	});
-	
+
 }
 

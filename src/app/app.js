@@ -228,8 +228,6 @@ Application.prototype.save_to_file = function (filename)
 
 Application.prototype.initialize = function ()
 {
-	var self = this;
-
 	this.init_router();
 	if (this._child_init) {
 		this._child_init();

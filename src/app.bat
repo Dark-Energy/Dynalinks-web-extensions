@@ -1,1 +1,1 @@
-grunt
+grunt > shit.txt

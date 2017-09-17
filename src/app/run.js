@@ -1,11 +1,11 @@
 console.log("run run.js!");
 
 var event_bus;
-
+var event_hub;
 
 function Vue_Application(dlink)
 {
-    console.log("create vue application");        
+    console.log("create vue application", dlink);        
  
     this.create_database(dlink);
 }
@@ -15,12 +15,12 @@ Vue_Application.prototype.constructor = Vue_Application;
 
 Vue_Application.prototype.initialize = function ()
 {
-	event_bus = new Vue();
-    console.log("create vue app");
-    //console.log("create vue menu");
+    //create event hub
+	event_hub = event_bus = new Vue();
+    //create main menu
     register_main_menu(this);
-    console.log("create main application");
-    console.log("dynalinks is true?", this.dynalinks.categories["English"] !== undefined);
+
+    //console.log("dynalinks is true?", this.dynalinks.categories["English"] !== undefined);
 	this.vue = create_vue_app(this.dynalinks);
 
 	this.init_router();	
@@ -166,6 +166,24 @@ Vue_Application.prototype.update_record = function (category, id)
     );
 }
 
+
+Vue_Application.prototype.look_tabs = function ()
+{
+    if (this.port === undefined) {
+        this.port = new Portman("tab-manager", true);
+        this.port.process_message = function (m)
+        {
+            console.log("test_Ojbect: get message from tab-manager =>" + JSON.stringify(m));
+            event_hub.$emit("set->tabinfo", m.tabinfo);
+        }
+        console.log("port created");            
+    }
+    this.port.post({command:"get", info:"alltabinfo"});
+    
+    this.vue.show_component('vueTableGrid');
+    
+}
+
 Vue_Application.prototype.init_router = function ()
 {
 	var self = this;
@@ -177,6 +195,8 @@ Vue_Application.prototype.init_router = function ()
 	
 	mr.add_route("update/:category/:id", this.update_record, this);
 	mr.add_route("add/:category", this.add_record_to_category, this);
+    
+    mr.add_route("tabs/all", this.look_tabs, this);
 	
 		
 	mr.add_default( function (url) 
@@ -248,16 +268,6 @@ Vue_Application.prototype.get_database_normal = function ()
 }
 
 
-Vue_Application.prototype.write_test_data_to_storage = function(data)
-{
-    if (this.ITS_EXTENSION) {
-        data.key_name = this.key_name;
-        var data = {};
-        data[this.key_name] = this.database;
-        browser.storage.local.set( data );
-    }
-}
-
 
 Vue_Application.prototype.find_database = function(callback, error)
 {
@@ -294,15 +304,4 @@ Vue_Application.prototype.find_database = function(callback, error)
 
 
 
-
-console.log("app create");
-
-
-function create_table_view(dlink) {
-    //console.log("My Extension is ", JSON.stringify(My_Extension));
-    var App = new Vue_Application(dlink);    
-}
-
-
-console.log("end run.js!");
 

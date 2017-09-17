@@ -1,17 +1,19 @@
 function Application() {}
 
 function Vue_Application(dlink) {
-    console.log("create vue application"), this.create_database(dlink);
-}
-
-function create_table_view(dlink) {
-    new Vue_Application(dlink);
+    console.log("create vue application", dlink), this.create_database(dlink);
 }
 
 function create_vue_app(dynalinks) {
     var category_list = dynalinks.category_list, categories = dynalinks.categories;
-    return category_list[0] && categories[category_list[0].href], new Vue({
+    category_list[0] && categories[category_list[0].href];
+    return new Vue({
         el: "#app",
+        template: '<div id="app">        <dropdown-category-menu v-bind:base_url="base_url" v-bind:category_list="category_list" :categories="categories"> </dropdown-category-menu>        <div class="clear-block"><br/></div>        <features-line v-bind:features="features"></features-line>        <page-menu v-bind:tags="current_category.tags" v-bind:base_url="category_url"> </page-menu>        \t<keep-alive>\t\t<component :is="page_content_view" :page_content="page_content" >\t\t</component>\t</keep-alive>    </div>',
+        components: {
+            "form-update": create_update_form(),
+            vueTableGrid: vueTableGrid
+        },
         data: {
             current_category: {},
             category_url: "",
@@ -69,6 +71,9 @@ function create_vue_app(dynalinks) {
                     results: results
                 };
             },
+            show_component: function(view_name) {
+                this.page_content_view = view_name, this.page_content = {};
+            },
             change_page_view: function(new_view) {
                 this.main_page_view = new_view, this.show_page(this.active_page_name);
             }
@@ -115,7 +120,7 @@ function register_main_menu(application) {
                 search_text: ""
             };
         },
-        template: '<div class="top-line top-buttons line-menu">\t<ul>\t<li><a href="javascript:void(0);" id="button-add" v-on:click="add_item">Добавить ссылку</a></li>\t<li><a href="javascript:void(0);" id="button-create-category" v-on:click="create_category">Создать категорию</a></li>\t<li><a href="javascript:void(0);" id="button-move" v-on:click="move_page">Перенести</a></li>\t<li><a href="javascript:void(0);"> Удалить</a>\t\t<ul>\t\t\t<li><a href="javascript:void(0);" id="button-remove-tag" v-on:click="remove_page"> страницу</a></li>\t\t\t<li><a href="javascript:void(0);" id="button-remove-category" v-on:click="remove_category"> категорию</a></li>\t\t</ul>\t</li>\t<li><A href="javascript:void(0);">Экспортировать</a>\t\t<ul>\t\t<li><a href="javascript:void(0);" id="button-export-tag" v-on:click="export_page"> страницу</a></li>\t\t<li><a href="javascript:void(0);" id="button-export-category" v-on:click="export_category"> категорию </a>\t</li>\t\t</ul>\t</li>\t\x3c!--li><a href="javascript:void(0);" id="button-edit-page" v-on:click="edit_mode">Правка</a></li--\x3e\t<li><a href="javascript:void(0);" id="button-save" v-on:click="save_to_ls"> Сохранить локально</a></li>\t<li><a href="javascript:void(0);" id="button-save" v-on:click="save_all"> Сохранить в файл</a></li>\t<li><a href="javascript:void(0);" id="button-save" v-on:click="clear_ls"> Очистить хранилище</a></li>\t<li><input type="text" id="search-box" v-model="search_text" placeholder="искать..."><button type="button" id="search-button" v-on:click="search_record">искать</button></li>\t</ul></div>',
+        template: '<div class="top-line line-menu top-buttons">\t<ul>        <li><a href="javascript:void(0);"> Edit</a>            <ul>                <li><a href="javascript:void(0);" id="button-add" v-on:click="add_item">Create record</a></li>                <li><a href="javascript:void(0);" id="button-create-category" v-on:click="create_category"> Create  category </a></li>                <li><a href="javascript:void(0);" id="button-move" v-on:click="move_page">Move page to other category</a></li>                <li><a href="javascript:void(0);" id="button-remove-tag" v-on:click="remove_page"> Remove page</a></li>                <li><a href="javascript:void(0);" id="button-remove-category" v-on:click="remove_category"> Remove category</a></li>            </ul>        </li>        <li><a href="javascript:void(0);"> Files </a>            <ul>                <li><a href="javascript:void(0);" id="button-save" v-on:click="save_all"> Save to file </a></li>                <li><a href="javascript:void(0);" id="button-export-tag" v-on:click="export_page"> Save page </a> </li>                <li><a href="javascript:void(0);" id="button-export-category" v-on:click="export_category"> Save Category</a></li>            </ul>        </li>        <li><a href="javascript:void(0);" id="button-save" v-on:click="look_tabs">Look tabs</a></li>        <li><a href="javascript:void(0);" id="button-save" v-on:click="save_to_ls"> Сохранить локально</a></li>        <li><a href="javascript:void(0);" id="button-save" v-on:click="clear_ls"> Очистить хранилище</a></li>        <li><input type="text" id="search-box" v-model="search_text" placeholder="search..."><button type="button" id="search-button" v-on:click="search_record">Search</button></li>\t</ul></div>',
         methods: {
             clear_ls: function() {
                 application.clear_ls();
@@ -149,6 +154,9 @@ function register_main_menu(application) {
             },
             search_record: function() {
                 application.search(this.search_text);
+            },
+            look_tabs: function() {
+                application.look_tabs();
             }
         }
     };
@@ -162,6 +170,37 @@ function register_main_menu(application) {
 
 function My_Router() {
     this.routes = new Array();
+}
+
+function create_update_form() {
+    return {
+        props: [ "page_content" ],
+        methods: {
+            cancel: function() {
+                this.page_content.cancel_callback ? this.page_content.cancel_callback() : console.log("Error cancel add new record! Not given cancel callback!");
+            },
+            save: function() {
+                this.message && (this.message = ""), (this.page_content.item.tag || this.new_tag) && this.page_content.item.href && this.page_content.item.text ? (this.page_content.item.tag = this.new_tag || this.page_content.item.tag, 
+                this.page_content.callback && this.page_content.callback(this.page_content.item)) : this.message = "Одно или несколько обязательных полей не заполнены!";
+            },
+            is_favorite: function() {
+                return this.page_content.item.favorite = !!this.page_content.item.favorite, !!this.page_content.item.favorite;
+            },
+            change_favorite: function() {
+                this.my_features = this.page_content.item.favorite = !this.page_content.item.favorite, 
+                this.my_features && !this.page_content.item.favorite_text ? this.page_content.item.favorite_text = this.page_content.item.text : this.my_features || (this.page_content.item.favorite_text = "");
+            }
+        },
+        activated: function() {
+            this.my_features = this.is_favorite(), this.new_tag = void 0;
+        },
+        data: function() {
+            var data = {};
+            return data.message = "", data.new_tag = void 0, data.my_features = !1, data.page_content = {}, 
+            data;
+        },
+        template: '\t<div class="update-form" id="update-form">\t<h3>Создание новой записи</h3>\t<div v-if="message" class="warning-message">{{message}}</div>\t<div class="required-fields fields"> <h3>Обязательно заполните эти поля</h3>\tАдрес <br><input type="text" v-model="page_content.item.href" size=60>\t<p> Текст <br> <input type="text" v-model="page_content.item.text" size=60>\t<p> Выберите тег <select class="select-tag" v-model="page_content.item.tag"> <option v-for="tag in page_content.tags" v-bind:value="tag"> {{tag}} </otion> </select>\tили создайте новый <input type="text" v-model="new_tag">\t</div>    <div class="button-panel">\t<button class="save-button" type="button" v-on:click="save" id="update-form-save-button">Save</button>\t<button class="cancel-button" type="button" v-on:click="cancel">Отмена</button>    </div>\t<div class="other-fields fields">\t<p>Избранное <button type="button" v-on:click="change_favorite">{{is_favorite()?"Remove":"Add"}}</button>\tТекст для избранного <input v-model="page_content.item.favorite_text" v-bind:disabled="!my_features">\t</div>\t</div>'
+    };
 }
 
 var mr;
@@ -257,13 +296,12 @@ Application.prototype.create_database = function(dynalinks) {
     this.init_router(), this._child_init && this._child_init();
 }, console.log("run run.js!");
 
-var event_bus;
+var event_bus, event_hub;
 
 Vue_Application.prototype = Object.create(Application.prototype), Vue_Application.prototype.constructor = Vue_Application, 
 Vue_Application.prototype.initialize = function() {
-    event_bus = new Vue(), console.log("create vue app"), register_main_menu(this), 
-    console.log("create main application"), console.log("dynalinks is true?", void 0 !== this.dynalinks.categories.English), 
-    this.vue = create_vue_app(this.dynalinks), this.init_router();
+    event_hub = event_bus = new Vue(), register_main_menu(this), this.vue = create_vue_app(this.dynalinks), 
+    this.init_router();
     var self = this;
     event_bus.$on("delete-record", function(id) {
         self.remove_item(id);
@@ -325,11 +363,20 @@ Vue_Application.prototype.initialize = function() {
             });
         } else console.log("Error update record!");
     } else console.log("Error update record!");
+}, Vue_Application.prototype.look_tabs = function() {
+    void 0 === this.port && (this.port = new Portman("tab-manager", !0), this.port.process_message = function(m) {
+        console.log("test_Ojbect: get message from tab-manager =>" + JSON.stringify(m)), 
+        event_hub.$emit("set->tabinfo", m.tabinfo);
+    }, console.log("port created")), this.port.post({
+        command: "get",
+        info: "alltabinfo"
+    }), this.vue.show_component("vueTableGrid");
 }, Vue_Application.prototype.init_router = function() {
     var self = this;
     (mr = new My_Router()).add_route("view/:category", this.show_category_page, this), 
     mr.add_route("view/:category/:page", this.show_category_page, this), mr.add_route("update/:category/:id", this.update_record, this), 
-    mr.add_route("add/:category", this.add_record_to_category, this), mr.add_default(function(url) {
+    mr.add_route("add/:category", this.add_record_to_category, this), mr.add_route("tabs/all", this.look_tabs, this), 
+    mr.add_default(function(url) {
         name = self.vue.category_list[0] && self.vue.category_list[0].href, this.show_category_page(name);
     }, this), mr.add_route("search/:value", function(value) {
         self.show_search_result(decodeURIComponent(value));
@@ -358,9 +405,6 @@ Vue_Application.prototype.initialize = function() {
     }
     return void 0 === database && (console.log("Error! database is undefined! Created empty database!"), 
     database = this.create_empty_database()), database;
-}, Vue_Application.prototype.write_test_data_to_storage = function(data) {
-    this.ITS_EXTENSION && (data.key_name = this.key_name, (data = {})[this.key_name] = this.database, 
-    browser.storage.local.set(data));
 }, Vue_Application.prototype.find_database = function(callback, error) {
     function fail(err) {
         console.log("failed to read database from browser.storage.local", err), error();
@@ -372,7 +416,7 @@ Vue_Application.prototype.initialize = function() {
         var key_name = data.key_name;
         key_name === self.key_name ? (console.log("this is true database", data), callback(data.db)) : fail("is not true database \n Name 'key_name' must be " + self.key_name + "\n However found " + key_name + "\nDump database down \n " + JSON.stringify(data));
     }, fail)) : fail("this is not extension!");
-}, console.log("app create"), console.log("end run.js!"), Vue.component("page-item", {
+}, Vue.component("page-item", {
     props: [ "link_item" ],
     template: '<a v-bind:href="link_item.href"> {{link_item.text}} </a>'
 }), Vue.component("page-content-grid", {
@@ -437,33 +481,6 @@ Vue.component("routed-link", {
 }), Vue.component("page-menu", {
     props: [ "base_url", "tags" ],
     template: '<div class="buttons-headers" id="page-menu"> <routed-link v-for="item in tags" v-bind:url="item" v-bind:base_url="base_url"> </routed-link> </div>'
-}), Vue.component("form-update", {
-    props: [ "page_content" ],
-    methods: {
-        cancel: function() {
-            this.page_content.cancel_callback ? this.page_content.cancel_callback() : console.log("Error cancel add new record! Not given cancel callback!");
-        },
-        save: function() {
-            this.message && (this.message = ""), (this.page_content.item.tag || this.new_tag) && this.page_content.item.href && this.page_content.item.text ? (this.page_content.item.tag = this.new_tag || this.page_content.item.tag, 
-            this.page_content.callback && this.page_content.callback(this.page_content.item)) : this.message = "Одно или несколько обязательных полей не заполнены!";
-        },
-        is_favorite: function() {
-            return this.page_content.item.favorite = !!this.page_content.item.favorite, !!this.page_content.item.favorite;
-        },
-        change_favorite: function() {
-            this.my_features = this.page_content.item.favorite = !this.page_content.item.favorite, 
-            this.my_features && !this.page_content.item.favorite_text ? this.page_content.item.favorite_text = this.page_content.item.text : this.my_features || (this.page_content.item.favorite_text = "");
-        }
-    },
-    activated: function() {
-        this.my_features = this.is_favorite(), this.new_tag = void 0;
-    },
-    data: function() {
-        var data = {};
-        return data.message = "", data.new_tag = void 0, data.my_features = !1, data.page_content = {}, 
-        data;
-    },
-    template: '\t<div class="update-form" id="update-form">\t<h3>Создание новой записи</h3>\t<div v-if="message" class="warning-message">{{message}}</div>\t<div class="required-fields fields"> <h3>Обязательно заполните эти поля</h3>\tАдрес <br><input type="text" v-model="page_content.item.href" size=60>\t<p> Текст <br> <input type="text" v-model="page_content.item.text" size=60>\t<p> Выберите тег <select class="select-tag" v-model="page_content.item.tag"> <option v-for="tag in page_content.tags" v-bind:value="tag"> {{tag}} </otion> </select>\tили создайте новый <input type="text" v-model="new_tag">\t</div>    <div class="button-panel">\t<button class="save-button" type="button" v-on:click="save" id="update-form-save-button">Save</button>\t<button class="cancel-button" type="button" v-on:click="cancel">Отмена</button>    </div>\t<div class="other-fields fields">\t<p>Избранное <button type="button" v-on:click="change_favorite">{{is_favorite()?"Remove":"Add"}}</button>\tТекст для избранного <input v-model="page_content.item.favorite_text" v-bind:disabled="!my_features">\t</div>\t</div>'
 }), copy_object(Dynalinks_File_Proxy.prototype, {
     constructor: Dynalinks_File_Proxy,
     save_to_file: function(filename, varname) {
@@ -718,4 +735,29 @@ var saveAs = saveAs || function(view) {
     window.addEventListener("hashchange", function(e) {
         self.hash_change(e);
     }, !1), force_hash_change && this.hash_change();
+};
+
+var vueTableGrid = {};
+
+vueTableGrid.props = [ "event_hub" ], vueTableGrid.template = '<div><table cellpadding="10" border="1" class="vueTableGrid">        <thead  >        <tr>            <th>            <span v-on:click="sort_address"> Address</span>            </th>            <th>            <span v-on:click="sort_title">Title</span>            </th>        </tr>        </thead>        <tbody>        <tr v-for="item in tab_info_list">            <td><a v-bind:href="item.url">{{item.url}}</a></td>            <td>{{item.title}}</td>        </tr>        </tbody>    </table></div>', 
+vueTableGrid.methods = {
+    sort_address: function() {
+        this.tab_info_list.sort(function(a, b) {
+            return a.url > b.url ? 1 : a.url < b.url ? -1 : 0;
+        });
+    },
+    sort_title: function() {
+        this.tab_info_list.sort(function(a, b) {
+            return a = a.title.toLowerCase(), b = b.title.toLowerCase(), a > b ? 1 : a < b ? -1 : 0;
+        });
+    }
+}, vueTableGrid.data = function() {
+    return {
+        tab_info_list: []
+    };
+}, vueTableGrid.created = function() {
+    var self = this;
+    event_hub.$on("set->tabinfo", function(tabinfo) {
+        self.tab_info_list = tabinfo;
+    });
 };

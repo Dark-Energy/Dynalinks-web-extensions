@@ -1,10 +1,40 @@
-/*
-//this shit dont work
-create_table_view(My_Extension.Dynalinks);
-*/
-
 
 var proxy;
+
+///console.log("app create");
+
+
+function create_table_view(dlink) {
+    //console.log("My Extension is ", JSON.stringify(My_Extension));
+    var App = new Vue_Application(dlink);    
+}
+
+
+///console.log("end run.js!");
+
+/*
+var test_object =
+{
+    test : function()
+    {
+        
+            if (this.port === undefined) {
+            this.port = new Portman("tab-manager", true);
+            this.port.process_message = function (m)
+            {
+                console.log("test_Ojbect: get message from tab-manager =>" + JSON.stringify(m));
+            }
+        console.log("port created");            
+        }
+        this.port.post({command:"get", info:"alltabinfo"});
+        console.log("request sended");
+    }
+};
+
+console.log("!!!!!! test tab-manager");
+test_object.test();
+*/
+
 
 function creating_dynalinks_for_app()
 {
