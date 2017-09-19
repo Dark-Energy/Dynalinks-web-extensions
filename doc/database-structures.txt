@@ -1,0 +1,58 @@
+Dynalinks database scheme
+
+{
+
+    "database": {
+        "name of Category": [
+        {
+            "href": url
+            "text": title
+            "tag": tag name
+            favorite: deprecated
+            favorite_text: deprecated
+            _id : unique identifier
+        }
+        ]
+    }
+    "names: {
+        "name of category for human": "hash",
+    },
+    features: {
+        {
+            _id,
+            text,
+            href,
+            catname
+        }
+    }
+    key_name: string for validate database is correct
+}
+
+I am not satisfied this scheme. Favorites need remove to theri own table. Instead array of category, need make table of category names and identifiers and containing tags. All records contans in one array and eash record get id category and id tag. Features not yet related with 'normal records', they must edited particular. 
+
+
+
+
+
+set{"Dynalinks: 
+{
+    key_name: "Dynalinks,
+    db : {
+        "unknown": [{},{},etc]
+   },
+    names : {
+    },
+    features,
+};
+
+
+get("Dynalinks") = 
+"Dynalinks": {
+    key_name: "Dynalinks,
+    db : {
+        "unknown": [{},{},etc]
+   },
+    names : {
+    },
+    features,
+}; 

@@ -35,9 +35,6 @@ Object.assign( Dynalinks_Proxy.prototype, {
             console.error("Oh, my extension is fail!!!!");
         }
         
-        /*
-        browser.storage.local.get(this.key_name).then(success, fail);
-        */
     },
 
     read_data : function (data)
@@ -52,7 +49,6 @@ Object.assign( Dynalinks_Proxy.prototype, {
         var real_data = data[this.key_name];
         //var real_data = data.Dynalinks_Data
         if (real_data) {
-            //console.log("real data is loaded"); 
             this.dynalinks = new Dynalinks(real_data);
             this.created = true;
             this.after_loaded();
@@ -72,17 +68,7 @@ Object.assign( Dynalinks_Proxy.prototype, {
         ms.write(this.key_name, json);
         
         
-
-        /*
-        //inside listener my are doing another yet async call, fuck it
-        //i very haite javascript and brandon ick personally indeed
-        var shit = {};
-        var key_name = this.key_name;
-        var shit = {};
-        shit[key_name] = json;
-        browser.storage.local.set(shit).then (success, fail);
-        */
-        
+      
         /*
         console.log("where we write", JSON.stringify(json, null, ' '));
         browser.storage.local.get(this.key_name).then (function (data) {
@@ -104,7 +90,7 @@ Object.assign( Dynalinks_Proxy.prototype, {
     after_loaded : function ()
     {
         //add listener to change event to database
-        console.log("created listener of changes in database "); 
+        //console.log("created listener of changes in database "); 
         //when dynalinks change own structur, we have to write this changes into storage
         var self= this;
         this.dynalinks.$on("change", function () {

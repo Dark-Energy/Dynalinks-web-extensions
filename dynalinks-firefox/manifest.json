@@ -34,7 +34,7 @@
         "lib/tab_manager.js",
         "scripts/testing_data.js",    
         "scripts/init.js",
-        "scripts/dialog_fabric.js",
+        "scripts/fabric_dialog.js",
         "scripts/dynalinks.min.js", 
         "scripts/create_dynalinks.js", 
         "scripts/proxy_data.js" 
@@ -50,5 +50,5 @@
         "/pages/links_view/links_view.html"
     ],
    
-    "content_security_policy": "script-src 'self' 'unsafe-eval' 'unsafe-inline'; script-src moz-extension://* 'unsafe-eval'; object-src 'self'; img-src 'self' 'unsafe-eval'; "
+    "content_security_policy": "script-src 'self' moz-extension: chrome-extension: 'unsafe-eval' ; object-src 'self'; img-src 'self' 'unsafe-eval'"
 }

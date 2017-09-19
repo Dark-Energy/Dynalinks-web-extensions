@@ -124,6 +124,11 @@ Object.assign(MyStorage.prototype, {
             result.reason += "\n dump of all data: \n" + JSON.stringify(this.last_data, null, ' ');
         }
         return result;  
+      },
+      
+      remove: function (key)
+      {
+          browser.storage.local.remove(key);
       }
      
 }); 
@@ -322,71 +327,83 @@ function PortSwitcher(port)
     }
 }
 
-PortSwitcher.prototype._private_process_message = function(m)
-{
-    this.process_command(m);
-}
+Object.assign(PortSwitcher.prototype, {
+    constructor: PortSwitcher,
+    _private_process_message : function(m)
+    {
+        this.process_command(m);
+    },
 
-PortSwitcher.prototype.process_command  = function (m)
-{
-     //console.log("process command", JSON.stringify(m));
-    //commands = dict[][]
-    if (m.command) {
-        var layer = this.commands[m.command];
-        if (layer && m.info) {
-            var command = layer[m.info];
-            if (command) {
-               //typeof command === 'function'
-               //command.prototype.call is not a function
-               command.call(this, m);
-               return;
+    process_command  : function (m)
+    {
+         //console.log("process command", JSON.stringify(m));
+        //commands = dict[][]
+        if (m.command) {
+            var layer = this.commands[m.command];
+            if (layer && m.info) {
+                var command = layer[m.info];
+                if (command) {
+                   //typeof command === 'function'
+                   //command.prototype.call is not a function
+                   command.call(this, m);
+                   return;
+                }
             }
         }
-    }
+        
+        if (this.port.old_process_message) {
+            this.port.old_process_message(m);
+        }
+    },
+
+    add_command_layer : function(key)
+    {
+       this.commands[key] = {};
+    },
+
+    add_command : function (layer, key, func)
+    {
+        if (!this.commands[layer]) {
+           this.add_command_layer(layer);
+        }
+        this.commands[layer][key] = func;
+    },
+
+
+    post_response : function (response)
+    {
+       this.port.post(response);
+    },
+
+    add_mixin : function (mixin, splitter)
+    {
+        var separator = '-';
+        if (typeof splitter === 'string') {
+            separator = splitter;
+        }
+        for(var key in mixin){
+            if (Object.prototype.hasOwnProperty.call(mixin, key)){
+                var arr = key.split(separator)
+                //console.log("key is ", JSON.stringify(arr));
+                if (arr.length < 2) {
+                        console.error("PortSwitcher.add_mixin: Invalid property <"+ key +"> in mixin!");
+                }
+                this.add_command(arr[0], arr[1], mixin[key]);
+            }
+        }
+        //console.log("commands - > ", JSON.stringify(this.commands, null, ' '));
+    },
     
-    if (this.port.old_process_message) {
-        this.port.old_process_message(m);
+    send_command: function (command, info, data)
+    {
+        var message = {
+            command: command,
+            info: info,
+        };
+        Object.assign(message, data);
+        this.port.post(message);
     }
-}
-
-PortSwitcher.prototype.add_command_layer = function(key)
-{
-   this.commands[key] = {};
-}
-
-PortSwitcher.prototype.add_command = function (layer, key, func)
-{
-    if (!this.commands[layer]) {
-       this.add_command_layer(layer);
-    }
-    this.commands[layer][key] = func;
-}
-
-
-PortSwitcher.prototype.post_response = function (response)
-{
-   this.port.post(response);
-}
-
-PortSwitcher.prototype.add_mixin = function (mixin, splitter)
-{
-    var separator = '-';
-    if (typeof splitter === 'string') {
-        separator = splitter;
-    }
-    for(var key in mixin){
-        if (Object.prototype.hasOwnProperty.call(mixin, key)){
-            var arr = key.split(separator)
-            //console.log("key is ", JSON.stringify(arr));
-            if (arr.length < 2) {
-                    console.error("PortSwitcher.add_mixin: Invalid property <"+ key +"> in mixin!");
-            }
-            this.add_command(arr[0], arr[1], mixin[key]);
-        }
-    }
-    //console.log("commands - > ", JSON.stringify(this.commands, null, ' '));
-} 
-
+});
 
 /*
 params
@@ -470,7 +487,7 @@ Postal.prototype.wait = function ()
 function test_postal()
 {
     var true_address = {"address": "home"};
-    var false_address = {"fuck":"shit"}
+    var false_address = {"freak":"ugly"}
 
     var p = new Postal();
     p.response = {"home": "hello!"};

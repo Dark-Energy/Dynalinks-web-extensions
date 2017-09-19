@@ -9,8 +9,19 @@
 5) Especially one. There is a opportunity of isolation all code parts, related to different between Firefox and Chrome. And resolve this difference.
 
 
+* Object List * 
 
-Especially for work with message and connection and port and other ugly matter i created this library.
+PortObjListner - passive port
+Portman - active port
+MyStorage - pretty bad wrapper around storage
+PortSwitcher - system command execute. Command arrive in message, then by name of command look up function from table and execute. 
+Postal - wait for system message
+Sender - post system message
+(I not certain in correct working this two)
+
+
+* API *
+
 
 Ojbect PortObjListener (name, run)
 

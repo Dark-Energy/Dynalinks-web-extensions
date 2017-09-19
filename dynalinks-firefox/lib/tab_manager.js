@@ -30,7 +30,7 @@ Tab_Manager.call_job_done = function ()
    }
 }
 
-//fucking stack
+//just stack
 Tab_Manager.push_handler = function (handler)
 {
     this.$old_job_done = this.$job_done;
@@ -123,22 +123,121 @@ Tab_Manager.query = function (params)
 }
 
 
+Tab_Manager.tab_by_my_id = {};
+
+Tab_Manager.generate_my_info = function ()
+{
+   this.tab_by_my_id = {};    
+   this.tab_changer = {};
+   for(var i =0;i < this.tablist_info.length; i++) {
+        var record = this.tablist_info[i];
+        record.my_id = generateUUID();
+        this.tab_by_my_id[record.my_id] = record;
+        this.tab_changer[record.id] = record;
+   }
+   
+   //console.log("tab by my id => \n " + JSON.stringify(this.tab_by_my_id));
+   //console.log("tab changer => \n " + JSON.stringify(this.tab_changer));
+}
+
 Tab_Manager.collect_info = function(tabs)
 {
    //console.log("found " + this.tablist.length + " tabs");
    //console.log("all tabs => " + JSON.stringify(this.tablist));           
-   var arr = [];
+   this.tablist_info = [];
+  
    var t;
    for(var i =0; i < this.tablist.length; i++) {
          t = this.tablist[i];
          var record = {
             url:  t.url,
             title : t.title,
-            id : t.id
+            id : parseInt(t.id)
          }
-         arr.push(record);
+         this.tablist_info.push(record);
     }
-    this.tablist_info = arr;
+    
+    this.set_update_listener();
+    
+    this.generate_my_info();
+    
+}
+
+
+Tab_Manager.change_tab_id = function (newid, oldid)
+{
+    
+    if (oldid == newid) {
+        return;
+    }
+    var record = this.tab_changer[oldid];
+    delete this.tab_changer[oldid];
+    this.tab_changer[newid] = record;
+    record.id = newid;
+    
+}
+
+
+Tab_Manager.add_new_tab = function (id, url, title)
+{
+    var record = 
+    {
+        url: url,
+        title: title,
+        id: id,
+        my_id : generateUUID(),
+     
+    };
+
+    this.tablist_info.push(record);
+    this.tab_changer[newId] = record;
+    this.tab_by_my_id[record.my_id] = record;
+    
+    this.switcher.send_command("tab", "create", record);
+}
+
+Tab_Manager._private_update_listener = function(newId, changerInfo, tab)
+{
+    function get_id(newId, tab)
+    {
+        if (newId !== undefined) 
+            return newId
+        if (tab !== undefined) 
+            return tab.id;
+        return null;
+    }
+    
+    var tab_id = get_id(newId, tab);
+    if (tab_id === null) {
+        //console.error("Incorrect tab " + JSON.stringify(tab) + " newId " + newId + " changerInfo " + JSON.stringify(changerInfo));
+        return;
+    }
+        //new tab
+    var create_new = (tab === undefined || newId === undefined);
+    if (tab && (tab.id === newId && this.tab_changer[tab.id] === undefined)) 
+    
+    if (create_new)
+    {
+        this.add_new_tab(newId, changerInfo.url, changerInfo.title);
+    } else  {
+        this.change_tab_id(newId, tab.id);
+    }
+    
+}
+
+Tab_Manager.set_update_listener = function ()
+{
+    var self = this;
+    function callback(newId, changerInfo, tab)
+    {
+        self._private_update_listener(newId, changerInfo, tab);
+    }
+    
+    if (is_chrome) {
+        chrome.tabs.onUpdated.addListener(callback);
+    } else {
+        browser.tabs.onUpdated.addListener(callback)
+    }
 }
 
 
@@ -152,7 +251,39 @@ Tab_Manager.get_all_tabs_info = function ()
 }
 
 
-Tab_Manager.switcher.add_command("get", "alltabinfo", function (p)
+Tab_Manager.remove = function (my_id)
+{
+    //console.log("remove by my id " + my_id);
+    
+    var record = this.tab_by_my_id[my_id];
+    if (!record) {
+        return;
+    }
+
+    //FIX IT! First error, cause by fact what truth tab id is uuid, 
+    //but attribute named 'id'
+    remove_by_field_value(this.tablist_info, "my_id", my_id);        
+    delete this.tab_by_my_id[my_id];    
+    
+    var tab_id = record.id;
+    delete this.tab_changer[tab_id];
+    //console.log("my id " + my_id + "record id " + id;
+        
+    
+    
+    function error(e)
+    {
+        //console.log("tab <"+id+">removed ;;;" + typeof id);
+    }
+    id = parseInt(tab_id);
+    if (is_chrome) {
+        chrome.tabs.remove(tab_id, error);
+    } else {
+        browser.tabs.remove(tab_id).then(error);
+    }
+}
+
+Tab_Manager.get_all_tabs_info = function ()
 {
     var self = this;
     
@@ -164,7 +295,24 @@ Tab_Manager.switcher.add_command("get", "alltabinfo", function (p)
         self.port.post(message);
     }
     Tab_Manager.get_all_tabs();    
+    
+}
 
+
+Tab_Manager.switcher.add_command("get", "alltabinfo", function (p)
+{
+    Tab_Manager.get_all_tabs_info();
+});
+
+/*
+sender post message, where tab identifies by my uuid, 
+but names this key just 'id'
+this may become reason for errors
+*/
+Tab_Manager.switcher.add_command("tab", "remove", function (message) 
+{
+    //console.log("command: request for removing" + JSON.stringify(message));
+    Tab_Manager.remove(message.id);
 });
 
 

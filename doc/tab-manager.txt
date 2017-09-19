@@ -1,0 +1,70 @@
+Creating tab-manager become difficult problem. His not normal 'wrapper'. His have to watch for tabs ID changes and because of make own id for tab record. For purposes of own id i used uuid. Not very good indeed.
+
+* Commands *
+
+Tab_Manager have own PortSwitcher, executing some commands
+
+tab->remove (my_id/uuid)
+TM convers it to tab ID and remove it from browser and from inner structures
+
+get->alltabinfo
+Do query, returning all tabs. Collect info from tabs:
+
+record
+{
+    title: title
+    url: url,
+    id: id
+    my_id: uuid
+}
+
+
+Creating inner data structures
+
+tablist_info : array of record
+
+this.tab_by_my_id: dictionary 
+{
+    uuid: tab record
+}
+
+tab_chaner : dictionary
+{
+    tab.id: tab record
+}
+
+When tab.id changes, it changes inside tab_chaner
+
+
+    var record = this.tab_changer[oldid];
+    delete this.tab_changer[oldid];
+    this.tab_changer[newid] = record;
+    record.id = newid; 
+    
+    
+get->alltabinfo used own port for post collected informations 
+
+
+{
+    tabinfo: Tab_Manager.tablist_info
+};
+
+
+Yes, this array may be changes in any ends of extensions, heh. In spite of scope differece.
+
+
+* Methods API*
+
+remove(my_id)
+get_all_tab
+query(params)
+find_active_tab()
+open_active_tab(url)
+
+
+* Events *
+
+Tab_Manager.$job_done - one event for each action, pretty bad idea
+
+Tab_Manager.$query_done = event for any query done. Call by 'query' method, and all methods, which used query, including 'get_all_tabs', 'get_all_tabs_info'.
+

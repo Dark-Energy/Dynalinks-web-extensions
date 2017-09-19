@@ -1,3 +1,5 @@
+console.log("fabric dialog");
+
 /*   prepare_postal: function ()
    {
         var self = this;

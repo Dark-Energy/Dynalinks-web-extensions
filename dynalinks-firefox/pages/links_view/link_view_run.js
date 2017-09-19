@@ -1,40 +1,24 @@
 
 var proxy;
 
-///console.log("app create");
-
-
 function create_table_view(dlink) {
     //console.log("My Extension is ", JSON.stringify(My_Extension));
     var App = new Vue_Application(dlink);    
-}
 
-
-///console.log("end run.js!");
-
-/*
-var test_object =
-{
-    test : function()
+    var ms = new MyStorage();
+    ms.$on_read = function (data)
     {
-        
-            if (this.port === undefined) {
-            this.port = new Portman("tab-manager", true);
-            this.port.process_message = function (m)
-            {
-                console.log("test_Ojbect: get message from tab-manager =>" + JSON.stringify(m));
-            }
-        console.log("port created");            
+        var command = data['dlink-temp'];
+        ms.remove('dlink-temp');
+        console.log(JSON.stringify(data) + " data read app");
+        if (command === 'activate-manager') {
+            App.look_tabs();
         }
-        this.port.post({command:"get", info:"alltabinfo"});
-        console.log("request sended");
+        
     }
-};
+    ms.read('dlink-temp');
 
-console.log("!!!!!! test tab-manager");
-test_object.test();
-*/
-
+}
 
 function creating_dynalinks_for_app()
 {
@@ -49,6 +33,7 @@ function creating_dynalinks_for_app()
    }
 }
 
+//create dynalinks, dynalinks proxy, get created dynalinks and create app;
 creating_dynalinks_for_app()
 
 

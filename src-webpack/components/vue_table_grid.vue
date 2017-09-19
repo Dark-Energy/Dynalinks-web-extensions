@@ -1,31 +1,35 @@
-﻿var vueTableGrid = {};
+﻿<template>
+<div><table cellpadding="10" border="1" class="vueTableGrid">
+        <thead>
+        <tr>
+            <th>
+            <span v-on:click="sort_address"> Address </span>
+            </th>
+            <th>
+            <span v-on:click="sort_title"> Title </span>
+            </th>
+            <th>Close tab</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="item in tab_info_list">
+            <td><a v-bind:href="item.url">{{item.url}}</a></td>
+            <td>{{item.title}}</td>
+            <td v-on:click="close_tab" :key="item.id" style="grid-tab"><button type="button" :data-id="item.my_id">X</button></td>
+        </tr>
+        </tbody>
+    </table></div>
+</template>
 
+
+<script>
+
+var vueTableGrid = {};
+
+   vueTableGrid.name = "vueTableGrid";
    vueTableGrid.props = ["event_hub"];
 
-
-            
-   vueTableGrid.template = '<div><table cellpadding="10" border="1" class="vueTableGrid">\
-        <thead  >\
-        <tr>\
-            <th>\
-            <span v-on:click="sort_address"> Address</span>\
-            </th>\
-            <th>\
-            <span v-on:click="sort_title">Title</span>\
-            </th>\
-            <th>Close tab</th>\
-        </tr>\
-        </thead>\
-        <tbody>\
-        <tr v-for="item in tab_info_list">\
-            <td><a v-bind:href="item.url">{{item.url}}</a></td>\
-            <td>{{item.title}}</td>\
-            <td v-on:click="close_tab" :key="item.id" style="grid-tab"><button type="button" :data-id="item.my_id">X</button></td>\
-        </tr>\
-        </tbody>\
-    </table></div>';
-    
-    
+ 
     vueTableGrid.methods =
     {
         
@@ -98,7 +102,9 @@
     vueTableGrid.created = function ()
     {
         var self=this;
-        /*event_hub.$on("start", function () {
+        /*
+        //test code
+        event_hub.$on("start", function () {
             console.log("get started");
             event_hub.$emit("get", function (d) {
                 self.tab_info_list= d;
@@ -113,6 +119,8 @@
             
         });
     }
-    
+
+export default  vueTableGrid;
+</script>    
     
     

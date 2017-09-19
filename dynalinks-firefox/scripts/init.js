@@ -2,7 +2,7 @@
 /*
 This file not contain nothing but installation event listener and verification database. He write testing data, if think it need. He not need used no one page. He must run first of all. Prevent i think what this module must create application, but this is was wrong.
 */
-console.log("NAME init");
+
 
 var My_Dynalinks_Extension = {};
 My_Dynalinks_Extension.App = null;

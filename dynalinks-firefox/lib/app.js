@@ -1,7 +1,7 @@
 function Application() {}
 
 function Vue_Application(dlink) {
-    console.log("create vue application", dlink), this.create_database(dlink);
+    this.create_database(dlink);
 }
 
 function create_vue_app(dynalinks) {
@@ -294,7 +294,7 @@ Application.prototype.create_database = function(dynalinks) {
     new Dynalinks_File_Proxy(this.dynalinks).save_to_file(filename || this.Save_Filename);
 }, Application.prototype.initialize = function() {
     this.init_router(), this._child_init && this._child_init();
-}, console.log("run run.js!");
+};
 
 var event_bus, event_hub;
 
@@ -365,9 +365,8 @@ Vue_Application.prototype.initialize = function() {
     } else console.log("Error update record!");
 }, Vue_Application.prototype.look_tabs = function() {
     void 0 === this.port && (this.port = new Portman("tab-manager", !0), this.port.process_message = function(m) {
-        console.log("test_Ojbect: get message from tab-manager =>" + JSON.stringify(m)), 
-        event_hub.$emit("set->tabinfo", m.tabinfo);
-    }, console.log("port created")), this.port.post({
+        m && event_hub.$emit("set->tabinfo", m.tabinfo);
+    }), this.port.post({
         command: "get",
         info: "alltabinfo"
     }), this.vue.show_component("vueTableGrid");
@@ -739,8 +738,22 @@ var saveAs = saveAs || function(view) {
 
 var vueTableGrid = {};
 
-vueTableGrid.props = [ "event_hub" ], vueTableGrid.template = '<div><table cellpadding="10" border="1" class="vueTableGrid">        <thead  >        <tr>            <th>            <span v-on:click="sort_address"> Address</span>            </th>            <th>            <span v-on:click="sort_title">Title</span>            </th>        </tr>        </thead>        <tbody>        <tr v-for="item in tab_info_list">            <td><a v-bind:href="item.url">{{item.url}}</a></td>            <td>{{item.title}}</td>        </tr>        </tbody>    </table></div>', 
+vueTableGrid.props = [ "event_hub" ], vueTableGrid.template = '<div><table cellpadding="10" border="1" class="vueTableGrid">        <thead  >        <tr>            <th>            <span v-on:click="sort_address"> Address</span>            </th>            <th>            <span v-on:click="sort_title">Title</span>            </th>            <th>Close tab</th>        </tr>        </thead>        <tbody>        <tr v-for="item in tab_info_list">            <td><a v-bind:href="item.url">{{item.url}}</a></td>            <td>{{item.title}}</td>            <td v-on:click="close_tab" :key="item.id" style="grid-tab"><button type="button" :data-id="item.my_id">X</button></td>        </tr>        </tbody>    </table></div>', 
 vueTableGrid.methods = {
+    creating_remove_method: function(self) {
+        void 0 === this.port && (this.port = new Portman("tab-manager"), this._inner_close_tab = function(id) {
+            this.port.post({
+                command: "tab",
+                info: "remove",
+                id: id
+            }), remove_by_field_value(this.tab_info_list, "my_id", id);
+        });
+    },
+    close_tab: function(event) {
+        var id = event.target.getAttribute("data-id");
+        this._inner_close_tab(id);
+    },
+    move_to: function(e) {},
     sort_address: function() {
         this.tab_info_list.sort(function(a, b) {
             return a.url > b.url ? 1 : a.url < b.url ? -1 : 0;
@@ -758,6 +771,6 @@ vueTableGrid.methods = {
 }, vueTableGrid.created = function() {
     var self = this;
     event_hub.$on("set->tabinfo", function(tabinfo) {
-        self.tab_info_list = tabinfo;
+        self.tab_info_list = tabinfo, self.creating_remove_method();
     });
 };

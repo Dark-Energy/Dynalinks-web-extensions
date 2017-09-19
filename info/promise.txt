@@ -1,1 +1,0 @@
-функция success, переданная в  then (success, fail) может вызываться многократно в Firefox. Fuck it lang.

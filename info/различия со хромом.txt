@@ -1,8 +1,0 @@
-Большей частью времсто дурацких promises используется простая функция-обратка. Но есть извраты. 
-
-Вот, про откртыие вкладки.
-string	(optional) url	
-The URL to navigate the tab to initially. Fully-qualified URLs must include a scheme (i.e. 'http://www.google.com', not 'www.google.com'). Relative URLs will be relative to the current page within the extension. Defaults to the New Tab Page.
-
-
-"Could not establish connection. Receiving end does not exist."

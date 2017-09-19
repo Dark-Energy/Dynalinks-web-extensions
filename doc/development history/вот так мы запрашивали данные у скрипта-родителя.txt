@@ -13,7 +13,7 @@ function connected(port) {
     
     function send_tab_info(m)
     {  
-        //send fucking data
+        //send data
        console.log("background get message from " + port.name+" with " + JSON.stringify(m));
         if (m.command === 'get' && m.info === 'tab_info') {
             var response = {

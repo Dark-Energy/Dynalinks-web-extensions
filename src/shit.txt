@@ -1,4 +1,4 @@
 Running "uglify:build" (uglify) task
->> 1 file created 52.06 kB → 44.3 kB
+>> 1 file created 53.25 kB → 44.82 kB
 
 Done.

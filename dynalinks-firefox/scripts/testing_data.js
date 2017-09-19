@@ -1,8 +1,8 @@
 ﻿function create_testing_data ()
 {
 var my_links = {
+ "key_name" : "Dynalinks_Data",
  "database": {
-  "key_name" : "Dynalinks_Data",
   "English": [
    {
     "href": "http://envoc.ru/",
