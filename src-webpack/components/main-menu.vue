@@ -26,58 +26,59 @@
 
 <script>
 export default {
-    name: "main-menu-app",
+    name: "ApplicationMainMenu",
+    props: ["application"],
 	data: function () {
 		return {'search_text': ''};
 	},
 	methods: {
         clear_ls: function ()
         {
-            application.clear_ls();
+            this.application.clear_ls();
         },
         save_to_ls: function ()
         {
-            application.save_to_ls();
+            this.application.save_to_ls();
         },
 		save_all: function ()
 		{
-			application.save_to_file();
+			this.application.save_to_file();
 		},
 		add_item: function ()
 		{
-			application.add_item();
+			this.application.add_item();
 		},
 		create_category: function ()
 		{
-			application.create_category();
+			this.application.create_category();
 		},
 		remove_page: function ()
 		{
-			application.remove_tag();
+			this.application.remove_tag();
 		},
 		remove_category: function ()
 		{
-			application.remove_category();
+			this.application.remove_category();
 		},
 		move_page: function ()
 		{
-			application.move_tag();
+			this.application.move_tag();
 		},
 		export_category: function ()
 		{
-			application.export_category();
+			this.application.export_category();
 		},
 		export_page: function ()
 		{
-			application.export_tag();
+			this.application.export_tag();
 		},
 		search_record: function ()
 		{
-			application.search(this.search_text);
+			this.application.search(this.search_text);
 		},
         look_tabs: function ()
         {
-            application.look_tabs();
+            this.application.look_tabs();
         }
 	}
 };

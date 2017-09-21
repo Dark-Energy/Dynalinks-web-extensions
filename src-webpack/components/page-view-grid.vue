@@ -4,7 +4,7 @@
 		<a href="javascript:void(0);" class="edit-button link-button" v-on:click="turn_edit"> Правка </a>
 	</div>
     <div class="data-grid">
-        <div class="editable-link" v-for="item in page_content.data">
+        <div class="editable-link" v-for="item in links_array">
             <div class="button-panel" v-if="edit_mode">
                 <a class="edit-btn" v-bind:href="build_update_link(item)" v-bind:key="item._id"> Правка </a>
                 <button type="button" class="delete-btn"  v-on:click="delete_record(item._id)" v-bind:key="item._id"> Удалить </button>
@@ -17,26 +17,30 @@
 
 <script>
 
-import {event_bus} from '../src/event_bus.js'
+import {event_hub} from './event_hub.js'
 
 export default {
-	props: ['page_content'],
+	props: ['links_array', 'catetory'],
 	name: 'page-view-grid',
 	data: function () {
-		return {"edit_mode": false}
+		return {
+            "edit_mode": false,
+        }
 	},
+
+        
  	methods: {
         build_update_link: function(record)
         {
-           return '#update/'+this.page_content.category + '/'+record._id;
+           return '#update/'+this.category + '/'+record._id;
         },
     
 		turn_edit: function (event) {
 			this.edit_mode = !this.edit_mode;
 		},
 		delete_record: function (event) {
-			if (typeof event_bus === 'object') {
-				event_bus.$emit("delete-record", event);
+			if (typeof event_hub === 'object') {
+				event_hub.$emit("delete-record", event);
 			}
 		}
 	}

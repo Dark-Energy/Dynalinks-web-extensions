@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+
+</head>
+
+<body>
+
+
+<h1>TEST</h1>	
+<div id="app">
+<GlueLink :url="info_url" :base_url="base_url" />
+</div>
+</body>
+
+
+<script type="text/javascript" src="../external/vue.js"> </script>
+<script type="text/javascript" src="../build/render.js"> </script>
+
+
+<script>
+
+console.log(DAE);
+
+var app =  new Vue({
+    el: '#app',
+    data: {
+        info_url: "test",
+        base_url: "next"
+    },
+    components: {
+        'GlueLink': DAE.GlueLink,
+    }
+    });
+
+
+
+
+
+</script>

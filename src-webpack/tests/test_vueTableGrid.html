@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+
+</head>
+
+<body>
+
+
+<h1>TEST</h1>	
+<div id="app">
+
+</div>
+</body>
+
+
+<script type="text/javascript" src="../external/vue.js"> </script>
+<script type="text/javascript" src="../build/render.js"> </script>
+
+
+<script>
+
+
+
+var test_data =
+[
+    {
+        url: "!",
+        title: "fuck",
+        id: 0,
+        my_id: "asdf",
+        
+    },
+    
+    {
+        url: "2",
+        title: "shit",
+        id: 5,
+        my_id: ";lkj",
+    },
+    
+];
+
+
+
+console.log(DAE);
+
+var event_hub = new Vue();
+
+	var app = new Vue({
+		el: '#app',
+        data: {
+            event_hub: event_hub,
+        },
+        components: {
+            'vueTableGrid': DAE.vueTableGrid,
+        },
+        template: '<vueTableGrid v-bind:event_hub="event_hub"/>',
+    });
+
+    /*
+    event_hub.$on("get", function (callback) { 
+        console.log("give callback, have to give them info", test_data);
+        callback(test_data);
+    });  
+    
+    event_hub.$emit("start", "get started");
+    */
+    
+    event_hub.$emit("set->tabinfo", test_data);
+
+</script>

@@ -1,17 +1,17 @@
 <template>
 <div class="buttons-headers" id="page-menu"> 
-	<my-routed-link v-for="item in tags" v-bind:url="item" v-bind:base_url="base_url">
-	</my-routed-link> 
+	<GlueLink v-for="item in tags" :url="item" :base_url="base_url" />
+
 </div>
 </template>
  
 <script>
-import my_routed_link from './routed-link.vue'
+import GlueLink from './glue_link.vue'
 export default {
 	name : 'page-menu',
 	props: ["base_url",	"tags"],
 	components: {
-		'my-routed-link': my_routed_link
+		'GlueLink': GlueLink
 	}
 	}
 </script>

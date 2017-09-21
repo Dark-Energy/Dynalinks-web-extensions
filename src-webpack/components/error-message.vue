@@ -1,13 +1,13 @@
 <template>
 <div id="message-block" class="error-message">
 	<h1>Error</h1> 
-	<p>{{page_content.message}}</p>
+	<p>{{message}}</p>
 </div>
 </template>
 
 <script>
 export default {
-	props: ['page_content'],
-	name: 'error-message',
+	props: ['message'],
+	name: 'ErrorMessage',
 }
 </script>

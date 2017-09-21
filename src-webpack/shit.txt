@@ -1,0 +1,10 @@
+
+> dynalinks-gui@0.0.2 build e:\my_projects\gitrep\Dynalinks-web-extensions\src-webpack
+> cross-env NODE_ENV=production webpack --progress --hide-modules --config webpack.lib.js
+
+Hash: 41e2845a8e1cbeb30123
+Version: webpack 2.7.0
+Time: 2281ms
+        Asset     Size  Chunks             Chunk Names
+    render.js    59 kB       0  [emitted]  main
+render.js.map  73.2 kB       0  [emitted]  main

@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+
+</head>
+
+<body>
+
+
+<h1>TEST</h1>	
+<div id="main-menu-app">
+
+</div>
+
+
+<div id="app">
+</div>
+
+</body>
+
+
+<script type="text/javascript" src="../external/vue.js"> </script>
+<script type="text/javascript" src="js/utils.js"> </script>
+<script type="text/javascript" src="js/test_dynalinks.js"> </script>
+<script type="text/javascript" src="../build/render.js"> </script>
+<script type="text/javascript" src="../app/app.js"> </script>
+<script type="text/javascript" src="../app/run.js"> </script>
+<script type="text/javascript" src="js/testing_data.js"> </script>
+
+
+
+<script>
+
+console.log(DAE);
+
+var app = {};
+
+var dlinks = new Dynalinks(create_testing_data());
+
+console.log(JSON.stringify(dlinks, null, ' '));
+console.log(dlinks);
+
+var vue = DAE.create_vue_app(dlinks);
+console.log(vue);
+
+
+
+var event_hub = new Vue();
+
+	var app = new Vue({
+		el: '#app',
+        data: {
+            event_hub: event_hub,
+        },
+        components: {
+            'MainComponent': DAE.MainComponent,
+        },
+        template: '<MainComponent />',
+    });
+
+    
+
+/script>

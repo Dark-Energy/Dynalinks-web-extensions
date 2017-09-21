@@ -13,7 +13,8 @@ function open_manager()
     {
         Tab_Manager.open_active_tab("/pages/links_view/links_view.html");        
     }
-    ms.write({"dlink-temp": "activate-manager"});
+    ms.write({"dlink-temp": {"command": "activate-manager"}});
 }
+
 
 

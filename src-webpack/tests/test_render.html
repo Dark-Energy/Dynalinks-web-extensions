@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+
+</head>
+
+<body>
+
+
+<h1>TEST</h1>	
+<div id="main-menu-app">
+
+</div>
+
+
+<div id="app">
+</div>
+
+</body>
+
+
+<script type="text/javascript" src="../external/vue.js"> </script>
+<script type="text/javascript" src="js/utils.js"> </script>
+<script type="text/javascript" src="js/test_dynalinks.js"> </script>
+<script type="text/javascript" src="../build/render.js"> </script>
+<script type="text/javascript" src="../app/app.js"> </script>
+<script type="text/javascript" src="../app/run.js"> </script>
+<script type="text/javascript" src="js/testing_data.js"> </script>
+
+
+
+<script>
+
+//console.log(DAE);
+
+var event_hub = DAE.create_event_hub();
+
+var app = {};
+
+var dlinks = new Dynalinks(create_testing_data());
+
+//console.log(JSON.stringify(dlinks, null, ' '));
+//console.log(dlinks);
+
+var vue = DAE.create_vue_app(dlinks);
+///console.log(vue);
+
+vue.$emit("my_command", "show_page", "English", "Словари", dlinks);
+/*
+vue.$emit("my_command", "show_category", "English", dlinks);
+vue.$emit("my_command", "show_error", "fuck");
+vue.$emit("my_command", "show_page", "English", "Словари", dlinks);
+vue.$emit("my_command", "show_error", "shit");
+vue.$emit("my_command", "show_page", "English", "Словари", dlinks);
+vue.$emit("my_command", "show_error", "sucker");
+vue.$emit("my_command", "show_page", "English", "Словари", dlinks);
+*/
+
+/*
+vue.$emit("my_command", "show_update_form", true, 'English', "Словари", '', '', function (i) {
+    console.log(i)
+}, function(i) {console.log(i)});
+
+*/
+
+
+</script>

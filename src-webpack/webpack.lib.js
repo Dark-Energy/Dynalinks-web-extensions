@@ -1,11 +1,12 @@
 var path = require('path');
+var webpack = require('webpack')
 
 module.exports = {
   entry: './components/lib.js',
   output: {
-    filename: 'build.js',
+    filename: 'render.js',
 	library: 'DAE',
-	libraryTarget: 'umd',
+	libraryTarget: 'var',
     path: path.resolve(__dirname, 'build')
   },
      externals: [
@@ -39,24 +40,37 @@ module.exports = {
 
 };
 
-var webpack = require('webpack')
+
 if (process.env.NODE_ENV === 'production') {
   module.exports.devtool = '#source-map'
   // http://vue-loader.vuejs.org/en/workflow/production.html
-  module.exports.plugins = (module.exports.plugins || []).concat([
-    new webpack.DefinePlugin({
+  
+  if (module.exports.plugins === undefined) {
+      module.exports.plugins = [];
+  }
+  
+  var process_env = new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: '"production"'
       }
-    }),
-    new webpack.optimize.UglifyJsPlugin({
+    });
+    
+  module.exports.plugins.push(process_env);
+  
+  var uglify = new webpack.optimize.UglifyJsPlugin({
+      mangle: false,
+      beautify: false,      
       sourceMap: true,
       compress: {
         warnings: false
       }
-    }),
-    new webpack.LoaderOptionsPlugin({
+    });
+    
+    //module.exports.plugins.push(uglify);
+    
+    var options_loader = new webpack.LoaderOptionsPlugin({
       minimize: true
-    })
-  ])
+    });
+  
+    //module.exports.plugins.push(options_loader);
 } 

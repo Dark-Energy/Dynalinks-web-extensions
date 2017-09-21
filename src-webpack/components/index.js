@@ -1,5 +1,5 @@
 export {vueTableGrid} from './vue_table_grid.vue'
-export {MyRoutedLink} from './routed-link.vue';
+export {GlueLink} from './glue_link.vue';
 export {CategoryMenu} from './category-menu.vue';
 export {DropdownCategoryMenu} from './dropdown-category-menu.vue';
 export {DynamicLink} from './dynamic-link.vue';

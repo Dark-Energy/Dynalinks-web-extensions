@@ -8,13 +8,20 @@ function create_table_view(dlink) {
     var ms = new MyStorage();
     ms.$on_read = function (data)
     {
-        var command = data['dlink-temp'];
-        ms.remove('dlink-temp');
-        console.log(JSON.stringify(data) + " data read app");
+        //console.log("message to application from storage " + JSON.stringify(data));        
+        var dlink = data['dlink-temp'];
+        if (dlink === undefined) return;
+        
+        var command = dlink.command;
         if (command === 'activate-manager') {
             App.look_tabs();
+            
+        } else if (command == "create->record") {
+            var url = dlink.url;
+            var title = dlink.title;
+            App.add_record_from_browser(title, url);
         }
-        
+        ms.remove('dlink-temp');
     }
     ms.read('dlink-temp');
 
@@ -58,7 +65,7 @@ function open_table_to_append_record()
                 url: obj.url,
                 title: obj.title
             };
-            create_table_view(dlink, params);            
+            create_table_view(dlink, params);
         }
         ms.read('dlink-temp-tabinfo');
    }

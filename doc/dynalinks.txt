@@ -6,16 +6,35 @@ Dynalinks.prototype.remove_by_id = function (id)
 	var item = remove_by_field_value(this.database[this.context.category_name], '_id', id);
 	this.context.remove_item(item);	
 
+
+# Methods #
     
 Dynalinks.prototype.add_category = function (name)    
-
-
 
 Dynalinks.prototype.remove_tag = function (category, tag)
 
 Dynalinks.prototype.move_tag = function (tag, old_category, new_category)
 
-
 Dynalinks.prototype.update_item = function(old, new_value)
 
 Dynalinks.prototype.remove_category = function (name)
+
+
+# Properties #
+
+names = dictionary of {hash: name}
+categories = dictionary of {hash: Context}
+category_list = array of {href: hash, text: name}
+context = name;
+current_page = array of record
+current_category = category hash
+current_page = this.context.pages[name]
+
+
+class Context
+{
+	category_name: string,
+	pages : dictionary of Array of Record,
+	favorites : array,
+	tags: array of String,
+}

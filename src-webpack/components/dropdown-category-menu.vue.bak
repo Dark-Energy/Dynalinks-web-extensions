@@ -1,0 +1,30 @@
+
+<script>
+import GlueLink from './glue_link.vue';
+
+//its glue base url + item.url
+//category_list = array of string (name and hash simulationesly);
+export default {name: 'dropdown-category-menu',
+		props: ['category_list', 'base_url', 'categories'],
+        components: {
+            'GlueLink': GlueLink
+        }
+}
+</script>
+
+<template>
+<div class="line-menu">
+   <ul class="top-line top-buttons">
+        <li v-for="item in category_list">
+            <GlueLink  :url="item" :base_url="base_url" />
+            <ul v-if="categories[item.href]" class="submenu">
+                <li v-for="link in categories[item.href].favorites">
+                    <a :href="link.href">{{link.favorite_text || link.text}}</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+</template>
+
+    

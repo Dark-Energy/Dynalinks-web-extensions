@@ -43,10 +43,8 @@
  
     
     "web_accessible_resources": [
-        "/css/dialog.css",    
         "/css/line-menu.css",
         "/css/news-2.css",
-        "/pages/dialog/dialog.html",
         "/pages/links_view/links_view.html"
     ],
    
