@@ -370,6 +370,9 @@ function create_vue_app(dynalinks, element_id) {
 
 
 
+//import CategoryTagSelect from './category_tag_select.vue';
+//export {CategoryTagSelect}
+
 /***/ }),
 /* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -492,12 +495,12 @@ function create_vue_app(dynalinks, element_id) {
             this.categories = this.dynalinks.categories;
         }
 
-        console.log("catlist", this.category_list, this.dynalinks);
+        //console.log("catlist", this.category_list, this.dynalinks);
 
         var self = this;
         this.$root.$on("my_command", function (name) {
             var args = Array.prototype.slice.call(arguments, 1);
-            console.log("execute function " + name);
+            //console.log("execute function " + name);
             //console.log(" with arguments " + JSON.stringify(args));
             if (name === "show_error") {
                 self.show_error.apply(self, args);
@@ -509,11 +512,12 @@ function create_vue_app(dynalinks, element_id) {
                 self.show_update_form.apply(self, args);
             } else if (name === "tab_manager") {
                 self.show_component.apply(self, args);
+            } else if (name === "show_update_form") {
+                self.show_update_form.apply(self, args);
             }
 
             /*
              //var func = self.methods[name];
-             //console.log(self.name);
              if (self !== undefined) {
                  self.apply(this, args);
              }
@@ -531,37 +535,20 @@ function create_vue_app(dynalinks, element_id) {
     methods: {
 
         "show_error": function (error) {
-            console.log("this is shit");
             this.message = error;
             this.page_content_view = __WEBPACK_IMPORTED_MODULE_8__error_message_vue__["a" /* default */];
         },
         "show_update_form": function (message) {
             //console.log("Show update form", message);
 
-            this.page_content_view = __WEBPACK_IMPORTED_MODULE_9__vue_update_form_vue__["a" /* default */];
-            this.updated_record = {
-                _id: message._id,
-                href: message.href,
-                text: message.text
-            };
-            return;
-
-            if (create) {
-                this.update_info = {
-                    create_new: true,
-                    current_category: this.current_category_name,
-                    current_page: this.active_page_name,
-                    href: '',
-                    text: '',
-                    ok: callback,
-                    cancel: cancel
-                };
+            if (!message.from_browser) {
+                message.current_category = this.current_category_name;
+                message.current_page = this.active_page_name;
             }
+            this.updated_record = message;
             this.page_content_view = __WEBPACK_IMPORTED_MODULE_9__vue_update_form_vue__["a" /* default */];
 
-            //tags: this.tags,
-            //cancel_callback: cancel,
-            //};
+            //console.log("show message go to dialog ", message);
         },
         "check_error": function () {
             if (this.error_message.message) {
@@ -570,40 +557,42 @@ function create_vue_app(dynalinks, element_id) {
             }
         },
 
-        "show_category": function (category, dlink) {
-            if (!category) {
-                category = dlink.category_list[0].href;
+        "show_category": function (category_name, dlink) {
+            if (!category_name) {
+                category_name = dlink.category_list[0].href;
             }
-            //console.log(category,dlink.category_list);
-            var current_category = dlink.categories[category];
+            var current_category = dlink.categories[category_name];
             this.tags = current_category.tags;
-            this.features = current_category.favorites;
-            this.current_category_name = category;
-            this.category_url = this.base_url + category + "/";
+            this.features = current_category.features;
+            this.category_url = this.base_url + category_name + "/";
             this.active_page_name = '';
+            this.current_category_name = category_name;
         },
 
-        "show_page": function (category_name, page, dlink) {
+        "show_page": function (category_name, page_name, dlink) {
 
-            console.log("show page", category_name, page, dlink);
-            //show category only
-            if (page === null || page === undefined) {
-                this.show_category(category_name, dlink);
-            }
+            //console.log("show page category <<" + category_name+">>" +"page<<"+page_name+">>");
 
+            //need change category
             if (category_name && category_name !== this.current_category_name) {
                 this.show_category(category_name, dlink);
-                this.current_category_name = category_name;
             }
+
+            //show category only
+            if (!page_name) {
+                //this.show_category(category_name, dlink);
+                //return;
+            }
+
             var category = dlink.categories[this.current_category_name];
             if (!category) {
                 console.error("Terrify error! Category " + category_name + "was requsted, but undefined got");
             }
 
-            var page = category.pages[page];
+            var page = category.pages[page_name];
 
             this.current_page = page;
-            this.active_page_name = page;
+            this.active_page_name = page_name;
 
             this.page_content_view = __WEBPACK_IMPORTED_MODULE_5__page_view_grid_vue__["a" /* default */];
         },
@@ -663,9 +652,20 @@ function create_vue_app(dynalinks, element_id) {
             console.log("private ", data.category_list);
         });
     },*/
+    created: function () {
+        console.log("dropdown menu created", this.categorires);
+    },
     components: {
         'GlueLink': __WEBPACK_IMPORTED_MODULE_0__glue_link_vue__["a" /* default */]
     }
+
+    /*
+                <ul v-if="categories[item.href]" class="submenu">
+                    <li v-for="elem in categories[elem.href].features">
+                        <a :href="elem.href">{{elem.text}}</a>
+                    </li>
+                </ul>
+    */
 
 });
 
@@ -788,59 +788,131 @@ function create_vue_app(dynalinks, element_id) {
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
+
+
+var table = {};
+table.action_list = ["Edit", "Tabs", "Files", "Search"];
+table.actions = {};
+table.actions["Edit"] = [{
+    title: "Create record",
+    id: "create_record",
+    action: function () {
+        this.application.add_item();
+    }
+}, {
+    title: "Create category",
+    id: "create_category",
+    action: function () {
+        this.application.create_category();
+    }
+}, {
+    title: "Move page to other category",
+    id: "move_page",
+    action: function () {
+        this.application.move_tag();
+    }
+}, {
+    title: "Remove page",
+    id: "remove_page",
+    action: function () {
+        this.application.remove_tag();
+    }
+}, {
+    title: "Remove category",
+    id: "remove_category",
+    action: function () {
+        this.application.remove_category();
+    }
+}];
+
+table.actions["Files"] = [{
+    title: "Save to file",
+    id: "save_to_file",
+    action: function () {
+        this.application.save_to_file();
+    }
+}, {
+    title: "Save page",
+    id: "save_page",
+    action: function () {
+        this.application.export_tag();
+    }
+}, {
+    title: "Save category",
+    id: "save_category",
+    action: function () {
+        this.application.export_category();
+    }
+}, {
+    title: "Import database",
+    id: "import_database",
+    action: function () {
+        this.application.import_database();
+    }
+}];
+table.actions["Tabs"] = [{
+    title: "Tab list",
+    id: "tab_list",
+    action: function () {
+        this.application.look_tabs();
+    }
+}, {
+    title: "Tab Groups",
+    id: "tab_groups"
+}, {
+    title: "Mass operations",
+    id: "mass_operations"
+}];
+
+table.actions["Search"] = [{
+    title: "Search",
+    id: "search"
+}, {
+    title: "Advanced Search",
+    id: "advanced_search"
+}];
 
 /* harmony default export */ __webpack_exports__["a"] = ({
-	name: "ApplicationMainMenu",
-	props: ["application"],
-	data: function () {
-		return { 'search_text': '' };
-	},
-	methods: {
-		clear_ls: function () {
-			this.application.clear_ls();
-		},
-		save_to_ls: function () {
-			this.application.save_to_ls();
-		},
-		save_all: function () {
-			this.application.save_to_file();
-		},
-		add_item: function () {
-			this.application.add_item();
-		},
-		create_category: function () {
-			this.application.create_category();
-		},
-		remove_page: function () {
-			this.application.remove_tag();
-		},
-		remove_category: function () {
-			this.application.remove_category();
-		},
-		move_page: function () {
-			this.application.move_tag();
-		},
-		export_category: function () {
-			this.application.export_category();
-		},
-		export_page: function () {
-			this.application.export_tag();
-		},
-		search_record: function () {
-			this.application.search(this.search_text);
-		},
-		look_tabs: function () {
-			this.application.look_tabs();
-		}
-	}
+    name: "ApplicationMainMenu",
+    props: ["application"],
+    data: function () {
+
+        var actions = {};
+        every_property(table.actions, key => {
+            var funcs = table.actions[key];
+            //console.log("key in table", key, funcs);
+            if (funcs) {
+                for (var i = 0; i < funcs.length; i++) {
+                    actions[funcs[i].id] = funcs[i].action;
+                }
+            }
+        });
+
+        //console.log("actions get", JSON.stringify(actions), table);
+
+        return {
+            "table": table,
+            "actions": actions,
+            'search_text': ''
+        };
+    },
+    methods: {
+        onclick: function (event) {
+            var id = event.target.getAttribute('data-id');
+            console.log("id", id);
+            if (id) {
+                var func = this.actions[id];
+                console.log("func ", func);
+                if (func) {
+                    console.log("call");
+                    func.call(this);
+                }
+            }
+        },
+        search_record: function () {
+            //this.application.search(this.search_text);
+        }
+    }
 });
 
 /***/ }),
@@ -894,7 +966,7 @@ function create_vue_app(dynalinks, element_id) {
 
 
 /* harmony default export */ __webpack_exports__["a"] = ({
-	props: ['links_array', 'catetory'],
+	props: ['links_array', 'category'],
 	name: 'page-view-grid',
 	data: function () {
 		return {
@@ -989,40 +1061,19 @@ function create_vue_app(dynalinks, element_id) {
 //
 //
 //
+//
+//
 
 
+var Proxy_Object = {};
+
+//page manager
 var vueTableGrid = {};
 
 vueTableGrid.name = "vueTableGrid";
 vueTableGrid.props = ["event_hub"];
 
 vueTableGrid.methods = {
-
-    creating_remove_method: function (self) {
-        if (this.port === undefined) {
-            this.port = new Portman("tab-manager");
-        } else {
-            return;
-        }
-
-        this._inner_close_tab = function (id) {
-            this.port.post({
-                "command": "tab",
-                "info": "remove",
-                "id": id });
-            //console.log("require remove tab by id " + id);
-            //FIX IT! First error, cause by fact what truth tab id is uuid, 
-            //but attribute named 'id'
-            remove_by_field_value(this.tab_info_list, "my_id", id);
-        };
-    },
-
-    close_tab: function (event) {
-        var id = event.target.getAttribute('data-id');
-        this._inner_close_tab(id);
-    },
-
-    move_to: function (e) {},
 
     sort_address: function () {
         this.tab_info_list.sort(function (a, b) {
@@ -1039,7 +1090,66 @@ vueTableGrid.methods = {
             if (a < b) return -1;
             return 0;
         });
+    },
+
+    go: function (event) {
+        var uuid = event.target.getAttribute('data-id');
+        Tab_Manager.go(uuid);
+    },
+
+    close_tab: function (event) {
+        var uuid = event.target.getAttribute('data-id');
+        //console.log("remove tab " + uuid);            
+        this.remove_tab(uuid);
+        remove_by_field_value(this.tab_info_list, "my_id", uuid);
+    },
+
+    remove_tab: function (uuid) {
+        Tab_Manager.remove(uuid);
+    },
+    create_connection_and_get_info: function () {
+        //console.log(JSON.stringify(Tab_Manager), "tab manager");
+        Tab_Manager.$on("get_all_tabs_info", m => {
+            this.tab_info_list = m.tabinfo;
+            //console.log("tabinfo " + JSON.stringify(m, null, ' '));
+        });
+        Tab_Manager.get_all_tabs_info();
+        //console.log(JSON.stringify(Tab_Manager), "tab manager");            
     }
+
+    /*
+    remove_tab: function (uuid)
+    {
+        //CAVEAT! First error, cause by fact what truth tab id is uuid, 
+        //but attribute named 'id'
+        var command = {               
+            "command": "tab", 
+            "info" : "remove", 
+            "id": uuid
+        };
+        //console.log("command : tab->remove", uuid);
+        if (Proxy_Object.port.port === undefined ) console.log("WTF?");
+        console.log(Proxy_Object.port);
+        Proxy_Object.port.post(command);
+        
+    },
+      create_connection_and_get_info: function ()
+    {
+        var self = this;
+        console.log("request tabinfo");
+        //get info from tab-manager and give it tab-list    
+        if (Proxy_Object.port === undefined) {
+            Proxy_Object.port = new Portman("tab-manager", true);
+            Proxy_Object.port.process_message = function (m) {
+               console.log("get tabinfo");// + JSON.stringify(m));
+               self.tab_info_list = m.tabinfo;
+            Proxy_Object.port.process_message = undefined;   
+            }
+        }
+        Proxy_Object.port.post({command:"get", info:"alltabinfo"});
+    },
+    */
+
 };
 
 vueTableGrid.data = function () {
@@ -1051,21 +1161,8 @@ vueTableGrid.data = function () {
 
 vueTableGrid.created = function () {
     var self = this;
-    /*
-    //test code
-    event_hub.$on("start", function () {
-        console.log("get started");
-        event_hub.$emit("get", function (d) {
-            self.tab_info_list= d;
-            console.log("callback bring info", JSON.stringify(d));
-        });      
-    });*/
 
-    event_hub.$on("set->tabinfo", function (tabinfo) {
-        //console.log("get event set->tabinfo" + JSON.stringify(tabinfo));
-        self.tab_info_list = tabinfo;
-        self.creating_remove_method();
-    });
+    this.create_connection_and_get_info();
 };
 
 /* harmony default export */ __webpack_exports__["a"] = (vueTableGrid);
@@ -1108,6 +1205,13 @@ vueTableGrid.created = function () {
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -1117,6 +1221,8 @@ vueTableGrid.created = function () {
     props: ["updated_record"],
     data: function () {
         var data = {};
+        data.features = false;
+        data.features_title = '';
         data.message = '';
         data.new_tag = '';
         data.record = {};
@@ -1126,6 +1232,7 @@ vueTableGrid.created = function () {
         data.category = '';
         data.tag_list = [];
         data.choosed_tag = '';
+        data._id = '';
         if (this.$dynalinks) {
             data.category_list = this.$dynalinks.category_list;
         } else {
@@ -1137,9 +1244,8 @@ vueTableGrid.created = function () {
     created: function () {
         this.category_list = this.$dynalinks.category_list;
         this.category = this.$dynalinks.category_list[0].href;
-        this.change_category();
+        //this.change_category();
         this.prepare_updated_record(this.updated_record);
-        console.log("created");
         //this send empty
     },
 
@@ -1148,6 +1254,12 @@ vueTableGrid.created = function () {
             this.prepare_updated_record(value);
             console.log("watch ", value);
             //this not work
+        },
+
+        category: function (value) {
+            var context = this.$dynalinks.categories[this.category];
+            this.tag_list = context.tags;
+            this.choosed_tag = context.tags[0];
         }
     },
     methods: {
@@ -1155,38 +1267,59 @@ vueTableGrid.created = function () {
             console.log("prepare ", value);
             if (value === undefined) {
                 this.record = {
+                    _id: '',
                     href: '',
                     text: '',
                     tag: ''
                 };
                 return;
             }
-            //create new 
-            if (value._id === '') {
+
+            if (value.edit) {
                 this.record = {
+                    _id: value.record._id,
+                    href: value.record.href,
+                    text: value.record.text,
+                    tag: value.record.tag
+                };
+            } else {
+                this.record = {
+                    _id: value._id,
                     href: value.href === undefined ? '' : value.href,
                     text: value.text === undefined ? '' : value.text,
-                    tag: value.current_page
+                    tag: value.current_page === undefined ? '' : value.current_page
                 };
+            }
+
+            //first set category, then tag            
+            if (value.from_browser) {
+                if (this.$dynalinks.categories.length > 0) {
+                    this.category = this.$dynalinks.categories[0].href;
+                    var tag_list = this.$dynalinks.categories[href].tags;
+                    if (tag_list && tag_list.length > 0) {
+                        this.choosed_tag = tag_list[0];
+                    }
+                }
+            } else if (value.empty) {
+                this.category = value.current_category;
+                this.choosed_tag = value.current_page;
+            } else if (value.edit) {
+                this.category = value.current_category;
                 this.choosed_tag = value.current_page;
             }
-            this.category = value.current_category;
-            console.log("updated record", value);
+            //console.log( "new value => " + JSON.stringify(value));
         },
-
+        /*
         change_category() {
             var context = this.$dynalinks.categories[this.category];
             this.tag_list = context.tags;
             this.choosed_tag = context.tags[0];
-            //console.log("change category ", this.category, context);
-        },
+        },*/
         create_category: function (e) {
             var input = this.$refs["new_category_input"];
             var name = input.value.trim();
-            //console.log("create category " + name);
             if (name) {
                 var response = this.$dynalinks.add_category(name);
-                //console.log("create category " + name, response);
                 if (response.valid) {
                     this.category = name;
                     this.change_category(); //why ia must do it by hands? where mere reactivity?
@@ -1199,7 +1332,10 @@ vueTableGrid.created = function () {
             this.$root.$emit("record->update", "reject");
         },
         validate: function () {
-            var tag = this.tag.trim() !== '' || this.new_tag.trim();
+            if (this.new_tag === undefined) {
+                this.new_tag = '';
+            }
+            var tag = this.tag === undefined || this.tag.trim() !== '' || this.new_tag.trim();
             var valid = tag !== '' && href.trim() !== '' && title !== '';
             if (!valid) {
                 this.message = "Some of required fields is not filled!";
@@ -1219,19 +1355,28 @@ vueTableGrid.created = function () {
                 this.message = '';
             }
 
-            var tag = this.new_tag.trim();
+            var tag = this.new_tag && this.new_tag.trim();
             if (!tag) {
                 tag = this.choosed_tag;
             }
             this.record.tag = tag;
-            var r = this.$dynalinks.add_record_to_category(this.record, this.category);
-            if (r.valid) {
-                this.$root.$emit("record->update", "accept", this.record);
-            } else {
-                this.$root.$emit("record->update", "reject");
-                console.log("new record rejected becaouse of " + r.reason);
-            }
 
+            if (this.updated_record.edit) {
+                //console.log("update record ", this.record, this.updated_record.current_category);
+                this.$dynalinks.update_record(this.record, this.updated_record.current_category);
+                this.$root.$emit("record->update", "accecpt", this.record);
+            } else {
+                var r = this.$dynalinks.add_record_to_category(this.record, this.category);
+                if (r.valid) {
+                    this.$root.$emit("record->create", "accept", this.record, this.category);
+                    if (this.features) {
+                        this.$dynalinks.add_features(this.category, this.record, this.features_title);
+                    }
+                } else {
+                    this.$root.$emit("record->create", "reject");
+                    console.log("new record rejected becaouse of " + r.reason);
+                }
+            }
             /*
             var dlink;
             event_hub.$emit("get_database", function (db) {
@@ -1244,6 +1389,14 @@ vueTableGrid.created = function () {
                 }
             });
             */
+        },
+
+        change_features: function (e) {
+            this.features = !this.features;
+        },
+        is_features: function () {
+            if (this.features) return 'Remove';
+            return 'Add';
         }
     },
     activated: function () {
@@ -1517,7 +1670,7 @@ var Component = normalizeComponent(
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"tab-content",attrs:{"id":"page-content"}},[_c('div',{staticClass:"control-panel"},[_c('a',{staticClass:"edit-button link-button",attrs:{"href":"javascript:void(0);"},on:{"click":_vm.turn_edit}},[_vm._v(" Правка ")])]),_vm._v(" "),_c('div',{staticClass:"data-grid"},_vm._l((_vm.links_array),function(item){return _c('div',{staticClass:"editable-link"},[(_vm.edit_mode)?_c('div',{staticClass:"button-panel"},[_c('a',{key:item._id,staticClass:"edit-btn",attrs:{"href":_vm.build_update_link(item)}},[_vm._v(" Правка ")]),_vm._v(" "),_c('button',{key:item._id,staticClass:"delete-btn",attrs:{"type":"button"},on:{"click":function($event){_vm.delete_record(item._id)}}},[_vm._v(" Удалить ")])]):_vm._e(),_vm._v(" "),_c('a',{key:item._id,attrs:{"href":item.href}},[_vm._v(" "+_vm._s(item.text)+" ")])])}))])}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"tab-content",attrs:{"id":"page-content"}},[_c('div',{staticClass:"control-panel"},[_c('a',{staticClass:"edit-button link-button",attrs:{"href":""},on:{"click":function($event){$event.stopPropagation();$event.preventDefault();_vm.turn_edit($event)}}},[_vm._v(" Правка ")])]),_vm._v(" "),_c('div',{staticClass:"data-grid"},_vm._l((_vm.links_array),function(item){return _c('div',{staticClass:"editable-link"},[(_vm.edit_mode)?_c('div',{staticClass:"button-panel"},[_c('a',{key:item._id,staticClass:"edit-btn",attrs:{"href":_vm.build_update_link(item)}},[_vm._v(" Правка ")]),_vm._v(" "),_c('button',{key:item._id,staticClass:"delete-btn",attrs:{"type":"button"},on:{"click":function($event){_vm.delete_record(item._id)}}},[_vm._v(" Удалить ")])]):_vm._e(),_vm._v(" "),_c('a',{key:item._id,attrs:{"href":item.href}},[_vm._v(" "+_vm._s(item.text)+" ")])])}))])}
 var staticRenderFns = []
 var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
@@ -1567,7 +1720,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('table',{staticClass:"vueTableGrid",attrs:{"cellpadding":"10","border":"1"}},[_c('thead',[_c('tr',[_c('th',[_c('span',{on:{"click":_vm.sort_address}},[_vm._v(" Address ")])]),_vm._v(" "),_c('th',[_c('span',{on:{"click":_vm.sort_title}},[_vm._v(" Title ")])]),_vm._v(" "),_c('th',[_vm._v("Close tab")])])]),_vm._v(" "),_c('tbody',_vm._l((_vm.tab_info_list),function(item){return _c('tr',[_c('td',[_c('a',{attrs:{"href":item.url}},[_vm._v(_vm._s(item.url))])]),_vm._v(" "),_c('td',[_vm._v(_vm._s(item.title))]),_vm._v(" "),_c('td',{key:item.id,staticStyle:{},on:{"click":_vm.close_tab}},[_c('button',{attrs:{"type":"button","data-id":item.my_id}},[_vm._v("X")])])])}))])])}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('table',{staticClass:"vueTableGrid",attrs:{"cellpadding":"10","border":"1"}},[_c('thead',[_c('tr',[_c('th',[_c('span',{on:{"click":_vm.sort_address}},[_vm._v(" Address ")])]),_vm._v(" "),_c('th',[_c('span',{on:{"click":_vm.sort_title}},[_vm._v(" Title ")])]),_vm._v(" "),_c('th',[_vm._v("Close tab")]),_vm._v(" "),_c('th',[_vm._v("Go")])])]),_vm._v(" "),_c('tbody',_vm._l((_vm.tab_info_list),function(item){return _c('tr',[_c('td',[_c('a',{attrs:{"href":item.url}},[_vm._v(_vm._s(item.url))])]),_vm._v(" "),_c('td',[_vm._v(_vm._s(item.title))]),_vm._v(" "),_c('td',{key:item.id,staticStyle:{},on:{"click":_vm.close_tab}},[_c('button',{attrs:{"type":"button","data-id":item.my_id}},[_vm._v("X")])]),_vm._v(" "),_c('td',{key:item.id,staticStyle:{}},[_c('button',{attrs:{"type":"button","data-id":item.my_id},on:{"click":_vm.go}},[_vm._v("Go")])])])}))])])}
 var staticRenderFns = []
 var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
@@ -1587,7 +1740,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"top-line line-menu top-buttons"},[_c('ul',[_c('li',[_c('a',{attrs:{"href":"javascript:void(0);"}},[_vm._v(" Edit")]),_vm._v(" "),_c('ul',[_c('li',[_c('a',{attrs:{"href":"javascript:void(0);","id":"button-add"},on:{"click":_vm.add_item}},[_vm._v("Create record")])]),_vm._v(" "),_c('li',[_c('a',{attrs:{"href":"javascript:void(0);","id":"button-create-category"},on:{"click":_vm.create_category}},[_vm._v(" Create  category ")])]),_vm._v(" "),_c('li',[_c('a',{attrs:{"href":"javascript:void(0);","id":"button-move"},on:{"click":_vm.move_page}},[_vm._v("Move page to other category")])]),_vm._v(" "),_c('li',[_c('a',{attrs:{"href":"javascript:void(0);","id":"button-remove-tag"},on:{"click":_vm.remove_page}},[_vm._v(" Remove page")])]),_vm._v(" "),_c('li',[_c('a',{attrs:{"href":"javascript:void(0);","id":"button-remove-category"},on:{"click":_vm.remove_category}},[_vm._v(" Remove category")])])])]),_vm._v(" "),_c('li',[_c('a',{attrs:{"href":"javascript:void(0);"}},[_vm._v(" Files ")]),_vm._v(" "),_c('ul',[_c('li',[_c('a',{attrs:{"href":"javascript:void(0);","id":"button-save"},on:{"click":_vm.save_all}},[_vm._v(" Save to file ")])]),_vm._v(" "),_c('li',[_c('a',{attrs:{"href":"javascript:void(0);","id":"button-export-tag"},on:{"click":_vm.export_page}},[_vm._v(" Save page ")])]),_vm._v(" "),_c('li',[_c('a',{attrs:{"href":"javascript:void(0);","id":"button-export-category"},on:{"click":_vm.export_category}},[_vm._v(" Save Category")])])])]),_vm._v(" "),_c('li',[_c('a',{attrs:{"href":"javascript:void(0);","id":"button-save"},on:{"click":_vm.look_tabs}},[_vm._v("Look tabs")])]),_vm._v(" "),_c('li',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.search_text),expression:"search_text"}],attrs:{"type":"text","id":"search-box","placeholder":"search..."},domProps:{"value":(_vm.search_text)},on:{"input":function($event){if($event.target.composing){ return; }_vm.search_text=$event.target.value}}}),_c('button',{attrs:{"type":"button","id":"search-button"},on:{"click":_vm.search_record}},[_vm._v("Search")])])])])}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"top-line line-menu top-buttons"},[_c('ul',_vm._l((_vm.table.action_list),function(name){return _c('li',[_c('a',{attrs:{"href":"#"},on:{"click":function($event){$event.preventDefault();_vm.onclick($event)}}},[_vm._v(" "+_vm._s(name)+" ")]),_vm._v(" "),(_vm.table.actions[name])?_c('ul',_vm._l((_vm.table.actions[name]),function(action){return _c('li',[_c('a',{attrs:{"href":"#","data-id":action.id},on:{"click":function($event){$event.preventDefault();_vm.onclick($event)}}},[_vm._v(_vm._s(action.title))])])})):_vm._e()])}))])}
 var staticRenderFns = []
 var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
@@ -1607,7 +1760,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"update-form",attrs:{"id":"update-form"}},[_c('h3',[_vm._v("Create new record")]),_vm._v(" "),_c('div',{staticClass:"required-fields fields"},[_c('h3',[_vm._v("Required fields")]),_vm._v(" "),_c('p',[_vm._v("Address  "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.record.href),expression:"record.href"}],attrs:{"type":"text","size":"60"},domProps:{"value":(_vm.record.href)},on:{"input":function($event){if($event.target.composing){ return; }_vm.record.href=$event.target.value}}})]),_vm._v(" "),_c('p',[_vm._v("Title  "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.record.text),expression:"record.text"}],attrs:{"type":"text","size":"60"},domProps:{"value":(_vm.record.text)},on:{"input":function($event){if($event.target.composing){ return; }_vm.record.text=$event.target.value}}})])]),_vm._v(" "),_c('div',{staticClass:"category-panel"},[_c('label',[_vm._v(" Select category")]),_vm._v(" "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.category),expression:"category"}],on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.category=$event.target.multiple ? $$selectedVal : $$selectedVal[0]},_vm.change_category]}},_vm._l((_vm.category_list),function(item){return _c('option',{domProps:{"value":item.href}},[_vm._v(" "+_vm._s(item.text))])})),_vm._v(" "),_c('label',[_vm._v("or create new ")]),_c('input',{ref:"new_category_input",attrs:{"type":"text","id":"new_category_input"}}),_vm._v(" "),_c('button',{attrs:{"type":"button"},on:{"click":_vm.create_category}},[_vm._v("Create")]),_vm._v(" "),_c('p',[_vm._v("select tag\n        "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.choosed_tag),expression:"choosed_tag"}],on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.choosed_tag=$event.target.multiple ? $$selectedVal : $$selectedVal[0]}}},_vm._l((_vm.tag_list),function(tag){return _c('option',{domProps:{"value":tag}},[_vm._v(_vm._s(tag))])})),_vm._v("\n        or add new "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.new_tag),expression:"new_tag"}],ref:"tag_input",attrs:{"type":"text","id":"tag_input"},domProps:{"value":(_vm.new_tag)},on:{"input":function($event){if($event.target.composing){ return; }_vm.new_tag=$event.target.value}}})])]),_vm._v(" "),_c('div',{staticClass:"button-panel"},[_c('button',{staticClass:"save-button",attrs:{"type":"button","id":"update-form-save-button"},on:{"click":_vm.save}},[_vm._v("Save")]),_vm._v(" "),_c('button',{staticClass:"cancel-button",attrs:{"type":"button"},on:{"click":_vm.cancel}},[_vm._v("Cancel")])])])}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"update-form",attrs:{"id":"update-form"}},[_c('h3',[_vm._v("Create new record")]),_vm._v(" "),_c('div',{staticClass:"required-fields fields"},[_c('h3',[_vm._v("Required fields")]),_vm._v(" "),_c('p',[_vm._v("Address  "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.record.href),expression:"record.href"}],attrs:{"type":"text","size":"60"},domProps:{"value":(_vm.record.href)},on:{"input":function($event){if($event.target.composing){ return; }_vm.record.href=$event.target.value}}})]),_vm._v(" "),_c('p',[_vm._v("Title  "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.record.text),expression:"record.text"}],attrs:{"type":"text","size":"60"},domProps:{"value":(_vm.record.text)},on:{"input":function($event){if($event.target.composing){ return; }_vm.record.text=$event.target.value}}})])]),_vm._v(" "),_c('div',{staticClass:"category-panel"},[_c('label',[_vm._v(" Select category")]),_vm._v(" "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.category),expression:"category"}],on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.category=$event.target.multiple ? $$selectedVal : $$selectedVal[0]},_vm.change_category]}},_vm._l((_vm.category_list),function(item){return _c('option',{domProps:{"value":item.href}},[_vm._v(" "+_vm._s(item.text))])})),_vm._v(" "),_c('label',[_vm._v("or create new ")]),_c('input',{ref:"new_category_input",attrs:{"type":"text","id":"new_category_input"}}),_vm._v(" "),_c('button',{attrs:{"type":"button"},on:{"click":_vm.create_category}},[_vm._v("Create")]),_vm._v(" "),_c('p',[_vm._v("select tag\n        "),_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.choosed_tag),expression:"choosed_tag"}],on:{"change":function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.choosed_tag=$event.target.multiple ? $$selectedVal : $$selectedVal[0]}}},_vm._l((_vm.tag_list),function(tag){return _c('option',{domProps:{"value":tag}},[_vm._v(_vm._s(tag))])})),_vm._v("\n        or add new "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.new_tag),expression:"new_tag"}],ref:"tag_input",attrs:{"type":"text","id":"tag_input"},domProps:{"value":(_vm.new_tag)},on:{"input":function($event){if($event.target.composing){ return; }_vm.new_tag=$event.target.value}}})])]),_vm._v(" "),_c('div',{staticClass:"button-panel"},[_c('button',{staticClass:"save-button",attrs:{"type":"button","id":"update-form-save-button"},on:{"click":_vm.save}},[_vm._v("Save")]),_vm._v(" "),_c('button',{staticClass:"cancel-button",attrs:{"type":"button"},on:{"click":_vm.cancel}},[_vm._v("Cancel")])]),_vm._v(" "),_c('div',{staticClass:"features-buttons other-fields fields"},[_c('p',[_vm._v("\n            Features\n            "),_c('button',{attrs:{"type":"button"},on:{"click":_vm.change_features}},[_vm._v(_vm._s(_vm.is_features()))]),_vm._v("\n            Text for features "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.features_title),expression:"features_title"}],domProps:{"value":(_vm.features_title)},on:{"input":function($event){if($event.target.composing){ return; }_vm.features_title=$event.target.value}}})])])])}
 var staticRenderFns = []
 var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);
@@ -1617,7 +1770,7 @@ var esExports = { render: render, staticRenderFns: staticRenderFns }
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('div',{staticClass:"features-line",attrs:{"id":"favorites-menu"}},_vm._l((_vm.features),function(item){return _c('a',{staticClass:"features-button",attrs:{"href":item.href}},[_vm._v(_vm._s(item.favorite_text)+"\n\t\t")])}))])}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('div',{staticClass:"features-line",attrs:{"id":"favorites-menu"}},_vm._l((_vm.features),function(item){return _c('a',{staticClass:"features-button",attrs:{"href":item.href}},[_vm._v(_vm._s(item.text)+"\n\t\t")])}))])}
 var staticRenderFns = []
 var esExports = { render: render, staticRenderFns: staticRenderFns }
 /* harmony default export */ __webpack_exports__["a"] = (esExports);

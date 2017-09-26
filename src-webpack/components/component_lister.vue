@@ -79,6 +79,7 @@ export default {
             return data;
 		},
 
+        
         created: function (){
 
             if (this.dynalinks) {
@@ -86,12 +87,12 @@ export default {
                 this.categories = this.dynalinks.categories;
             }
             
-            console.log("catlist", this.category_list, this.dynalinks);
+            //console.log("catlist", this.category_list, this.dynalinks);
         
             var self = this;
             this.$root.$on("my_command", function (name) {
                var args = Array.prototype.slice.call(arguments, 1);
-               console.log("execute function " + name);
+               //console.log("execute function " + name);
                //console.log(" with arguments " + JSON.stringify(args));
                if (name === "show_error") {
                     self.show_error.apply(self, args);
@@ -103,13 +104,13 @@ export default {
                     self.show_update_form.apply(self, args);
                } else if (name === "tab_manager") {
                     self.show_component.apply(self, args);
+               } else if (name === "show_update_form") {
+                    self.show_update_form.apply(self, args);
                }
-                           
                
 
                /*
                 //var func = self.methods[name];
-                //console.log(self.name);
                 if (self !== undefined) {
                     self.apply(this, args);
                 }
@@ -130,7 +131,6 @@ export default {
 
 			"show_error": function (error)
 			{
-                console.log("this is shit");
 				this.message = error;
                 this.page_content_view = ErrorMessage;
 			},
@@ -138,30 +138,15 @@ export default {
 			{
                 //console.log("Show update form", message);
                 
-                this.page_content_view = UpdateForm;
-                this.updated_record = {
-                    _id : message._id,
-                    href : message.href,
-                    text : message.text
-                };
-                return;
-                
-                if (create) {
-                    this.update_info = {
-                        create_new : true,
-                        current_category: this.current_category_name,
-                        current_page: this.active_page_name,
-                        href: '',
-                        text: '',
-                        ok: callback,
-                        cancel: cancel
-                    };
+                if (!message.from_browser) {
+                    message.current_category = this.current_category_name;
+                    message.current_page = this.active_page_name;
                 }
-				this.page_content_view = UpdateForm;
+                this.updated_record = message;
+                this.page_content_view = UpdateForm;                
+               
+                //console.log("show message go to dialog ", message);
 
-					//tags: this.tags,
-                    //cancel_callback: cancel,
-				//};
 			},
 			"check_error": function ()
 			{
@@ -171,46 +156,45 @@ export default {
 				}
 			},
 
-			"show_category": function (category, dlink)
+			"show_category": function (category_name, dlink)
 			{
-                if (!category) {
-                    category = dlink.category_list[0].href;
+                if (!category_name) {
+                    category_name = dlink.category_list[0].href;
                 }
-                //console.log(category,dlink.category_list);
-				var current_category = dlink.categories[category];
+				var current_category = dlink.categories[category_name];
                 this.tags = current_category.tags;
-                this.features = current_category.favorites;
-				this.current_category_name = category;
-				this.category_url = this.base_url + category + "/";
+                this.features = current_category.features;
+				this.category_url = this.base_url + category_name + "/";
 				this.active_page_name = '';
-
+				this.current_category_name = category_name;
 			},
 
 
-			"show_page": function (category_name, page, dlink)
+			"show_page": function (category_name, page_name, dlink)
 			{
 
-                console.log("show page", category_name, page, dlink);
-                //show category only
-                if (page === null || page === undefined)
-                {
-                    this.show_category(category_name, dlink);
-                }
-
-
+                //console.log("show page category <<" + category_name+">>" +"page<<"+page_name+">>");
+                
+                //need change category
                 if (category_name && category_name !== this.current_category_name) {
                     this.show_category(category_name, dlink);
-                    this.current_category_name = category_name;
                 }
+            
+                //show category only
+                if (!page_name) {
+                    //this.show_category(category_name, dlink);
+                    //return;
+                }
+
                 var category = dlink.categories[this.current_category_name];
                 if (!category) {
                     console.error("Terrify error! Category " + category_name + "was requsted, but undefined got");
                 }
 
-                var page = category.pages[page];
+                var page = category.pages[page_name];
 
 				this.current_page = page;
-                this.active_page_name = page;
+                this.active_page_name = page_name;
 
                 this.page_content_view = page_view_grid;
 

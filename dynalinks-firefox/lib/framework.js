@@ -1,4 +1,4 @@
-function MyStorage()
+﻿function MyStorage()
 {
     this.$on_read = undefined;
     this.$on_write = undefined;
@@ -8,7 +8,7 @@ function MyStorage()
 
 Object.assign(MyStorage.prototype, {
      constructor: MyStorage,
-     
+
      /*
      set anonimouse object {key: object}
      argument 'object' may be optional
@@ -17,7 +17,7 @@ Object.assign(MyStorage.prototype, {
      truly, you can write entire object, but how can you get his return?
      */
      write: function (key, obj) {
-        
+
         var self = this;
         //console.log("write ", key);
         function write_success()
@@ -31,7 +31,7 @@ Object.assign(MyStorage.prototype, {
         } else {
             this.last_written_data[key] = obj;
         }
-        
+
         if (is_chrome) {
             chrome.storage.local.set(this.last_written_data, write_success);
         } else {
@@ -47,18 +47,18 @@ Object.assign(MyStorage.prototype, {
         }
      },
      read: function (key) {
-        //get return anonimous object {key: object}         
+        //get return anonimous object {key: object}
          var self= this;
          function success(data)
          {
             self._private_read(data);
          }
-         
+
          function read_fail(e)
          {
             self._private_read_fail(e);
          }
-         
+
          //console.log("read <<"+key+">> data from storage");
          if (is_chrome) {
              chrome.storage.local.get(key, success);
@@ -89,7 +89,7 @@ Object.assign(MyStorage.prototype, {
           this function check if
           anonimouse object is not empty
           object_name exists and is not empty
-          additionly: 
+          additionly:
           object_name is object, containing key_name (for paranoics);
       }
       */
@@ -100,13 +100,13 @@ Object.assign(MyStorage.prototype, {
               valid: true,
               reason: '',
           };
-          
+
           if (!this.last_data) {
               result.reason = "data is undefined or null\n";
               result.valid = false;
               return result;
-          } 
-          
+          }
+
         var object_data = this.last_data[object_name];
         if (!object_data) {
             result.reason = "Object with name <<"+object_name+">> is undefined or null.\n";
@@ -116,42 +116,86 @@ Object.assign(MyStorage.prototype, {
             return result;
         }
         result.valid = true;
-        
+
         if (key_name !== undefined) {
             result.valid = object_data.key_name === key_name;
             result.reason = "Key_names is not or not identity.\n Data probably corrupted"
             result.reason += "key name is " + key_name + ", but data contains " + object_data[key_name];
             result.reason += "\n dump of all data: \n" + JSON.stringify(this.last_data, null, ' ');
         }
-        return result;  
+        return result;
       },
-      
+
       remove: function (key)
       {
           browser.storage.local.remove(key);
       }
-     
-}); 
-     
-  
-  
-  function Portman(name, bipolar)    
+
+});
+
+
+
+  function Portman(name, bipolar, try_reconnect)
 {
     this.name = name;
-    this.port = browser.runtime.connect({"name":this.name});
-    this.last_message = '';
+    this.bipolar = !!bipolar;
+    this.try_reconnect = !!try_reconnect;
     this.process_message = undefined;
-    this.bipolar = bipolar;
-    if (bipolar) {
-        this.create_message_listener();   
-        this.port.onMessage.addListener(this.message_listener);
-    }
+    this.last_message = '';
+
+
+    this.private_create_port();
+
+
 }
 
 
-Object.assign(Portman.prototype, 
+Object.assign(Portman.prototype,
 {
     constructor: Portman,
+
+    private_create_port: function ()
+    {
+        //console.log("Create port " + this.name);
+        if (this.port !== undefined) return;
+
+        this.port = browser.runtime.connect({"name":this.name});
+        if (this.bipolar) {
+            this.create_message_listener();
+            this.port.onMessage.addListener(this.message_listener);
+        }
+
+        var self = this;
+        this.disconnect_listener = function (port)
+        {
+            console.error("active port with name {{ " + port.name +" }}get message about disconnect");
+            console.error("port.error is "+port.error);
+            console.error("port object is ", port);
+            if (self.try_reconnect) {
+                self.restart_on_disconnect();
+            }
+        }
+
+        this.port.onDisconnect.addListener(this.disconnect_listener);
+
+    },
+
+    restart_on_disconnect: function ()
+    {
+        this.dispose();
+        console.log("trying create new port");
+        this.private_create_port();
+    },
+
+    dispose: function ()
+    {
+        if (this.port === undefined) return;
+        this.port.onDisconnect.removeListener( this.disconnect_listener);
+        this.port.onMessage.removeListener( this.message_listener);
+        this.port.disconnect();
+        this.port = undefined;
+    },
+
     post : function(message)
     {
         this.port.postMessage(message);
@@ -160,12 +204,17 @@ Object.assign(Portman.prototype,
 
     _private_message_listener : function (message)
     {
+        if (message.hands && message.hands === "?") {
+            this.hands = true;
+            console.log("get message about connection set between {{"+message.my+"}} and {{"+message.your+"}}");
+            return;
+        }
         this.last_message = message;
         //this.messages.push(message);
         if (this.process_message) {
             this.process_message(this.last_message);
         }
-        
+
     },
 
     create_message_listener: function ()
@@ -174,13 +223,13 @@ Object.assign(Portman.prototype,
             return;
        }
        var self = this;
-       function listener(message) 
+       function listener(message)
        {
-            self._private_message_listener(message);       
+            self._private_message_listener(message);
        }
-        this.message_listener = listener;
-    }
-}); 
+       this.message_listener = listener;
+    },
+});
 
 
 
@@ -192,9 +241,9 @@ function PortObjListener (name, immediatly)
     this.connect_events = [];
     this.process_message = undefined;
     this.process_connection = undefined;
-    
+
     this._inner_connect_listener = undefined;
-    
+
     if (immediatly) {
         this.run();
     }
@@ -210,7 +259,7 @@ Object.assign(PortObjListener.prototype, {
                 this.message_listener = undefined;
             }
         },
-        
+
         dispose : function ()
         {
            this.dispose_message_listener();
@@ -221,6 +270,19 @@ Object.assign(PortObjListener.prototype, {
                 }
            }
         },
+
+        private_set_disconnect_listener: function ()
+        {
+            if (!this.disconnect_listener) {
+                this.disconnect_listener = function (e)
+                {
+                    console.log("Disconnect port with name {{"+e.name+"}} with passive ends");
+                    console.log(e);
+                }
+            }
+            this.port.onDisconnect.addListener(this.disconnect_listener);
+        },
+
 
         $on_connect_event : function (callback)
         {
@@ -233,7 +295,7 @@ Object.assign(PortObjListener.prototype, {
         $emit_connect_event : function (port)
         {
             if (this.process_connection) {
-                this.process_connection();    
+                this.process_connection();
             }
             for(var i = 0; i <  this.connect_events.length; i++) {
                 var event = this.connect_events[i];
@@ -241,7 +303,7 @@ Object.assign(PortObjListener.prototype, {
                 //Function.prototype.call(event, port);
             }
         },
-        
+
         _private_message_listener: function (message)
         {
             //console.log("port "+this.port.name+"get message", message);
@@ -251,47 +313,47 @@ Object.assign(PortObjListener.prototype, {
                 this.process_message(this.last_message);
             }
         },
-        
+
         create_message_listener : function ()
         {
            if (this.message_listener !== undefined){
                 return;
            }
            var self = this;
-           function listener(message) 
+           function listener(message)
            {
                 self._private_message_listener(message);
            }
             this.message_listener = listener;
         },
-        
+
 
         _private_connect_listener : function (port)
         {
             this.$emit_connect_event(port);
-            
+            //console.log("connect offer", this.name, port.name);
             if (port.name === this.name) {
-               //console.log("name of ports identity<"+port.name+ ">, connect!");
+                //console.log("name of ports identity<"+port.name+ ">, connect!");
                this.port = port;
                this.create_message_listener();
-               this.port.onMessage.addListener(this.message_listener);               
-               /*this.port.onMessage.addListener(function (m) {console.log("objlistener: get message ",m);});*/
-               
+               this.port.onMessage.addListener(this.message_listener);
+               this.port.postMessage({"hands": "?", "my": this.name, "your": port.name});
+
             }
         },
 
         create_connect_listener : function ()
         {
             var self = this;
-            function listener(port) 
+            function listener(port)
             {
-                //console.log("connect offer", this.name, port.name);
+
                 //console.log("connect offer<"+port.name+ "> to <"+self.name+"> ");
                 self._private_connect_listener(port);
             }
             this._inner_connect_listener = listener;
         },
-        
+
         run : function ()
         {
             if (this._inner_connect_listener === undefined) {
@@ -300,12 +362,12 @@ Object.assign(PortObjListener.prototype, {
             }
         },
 
-        post: function (message) 
+        post: function (message)
         {
             this.port.postMessage(message);
         },
-        
-}); 
+
+});
 
 
 
@@ -316,13 +378,13 @@ Object.assign(PortObjListener.prototype, {
 
 function PortSwitcher(port)
 {
- 
+
     this.port = port;
     this.commands = {};
     this.port.old_process_message = port.process_message;
     var self = this;
-    
-    this.port.process_message = function (m) { 
+
+    this.port.process_message = function (m) {
         self._private_process_message(m);
     }
 }
@@ -350,7 +412,7 @@ Object.assign(PortSwitcher.prototype, {
                 }
             }
         }
-        
+
         if (this.port.old_process_message) {
             this.port.old_process_message(m);
         }
@@ -393,7 +455,7 @@ Object.assign(PortSwitcher.prototype, {
         }
         //console.log("commands - > ", JSON.stringify(this.commands, null, ' '));
     },
-    
+
     send_command: function (command, info, data)
     {
         var message = {
@@ -411,12 +473,12 @@ address:
     check {address: "underword"} === {greeting: "Hi, oh, you amazing object!"}
     default: {}
 max_times:
-    0 - infinity, n - n times 
+    0 - infinity, n - n times
     default: 0
 response:
     message sending response
     default: {}
-    
+
 */
 function Postal(address)
 {
@@ -453,20 +515,20 @@ Postal.prototype.check_times_limit = function()
 Postal.prototype._private_listener = function (message, sender, sendResponse)
 {
     if (this.check_address(message)) {
-        sendResponse(this.response);   
+        sendResponse(this.response);
         if (this.action) {
             this.action();
         }
         this.times += 1;
         this.check_times_limit();
     }
-    
+
 }
 
 Postal.prototype.create_listener = function ()
 {
     var self = this;
-    function listener(message, sender, sendResponse) 
+    function listener(message, sender, sendResponse)
     {
         self._private_listener;
     }
@@ -493,24 +555,24 @@ function test_postal()
     p.response = {"home": "hello!"};
     p.address = true_address;
 
-    
+
     var result = p.check_address(true_address);
     result = result && !p.check_address(false_address);
     if (!result) {
         console.log("test postal check adress is failed");
     }
-    
+
 
     console.log("test listener response");
     p.create_listener();
 
-      
+
     p.listener(true_address, {}, function (response) {
         console.log("listener must response and response must be " + JSON.stringify(p.response) + " but taken " + JSON.stringify(response));
     });
-    
-    
-    
+
+
+
     var listener_pass = true;
     try{
         //listener dont have to response
@@ -521,8 +583,8 @@ function test_postal()
         listener_pass = false;
     }
     console.log("listener dont have to response, and did it on...", listener_pass);
-    
-    
+
+
 
     p.times = 0;
     p.max_time = 1;
@@ -535,7 +597,7 @@ function test_postal()
         });
 
     });
-    
+
 }
 
 test_postal();
@@ -569,7 +631,7 @@ Sender.prototype.send = function ()
         chrome.runtime.sendMessage(this.message, null, this.listener)
     }  else {
         var shit = browser.runtime.sendMessage(this.message);
-        shit.then(this.listener, this.reject);        
+        shit.then(this.listener, this.reject);
     }
 }
 
@@ -590,7 +652,7 @@ Sender.prototype._private_listener = function (message)
 Sender.prototype.create_listener = function ()
 {
     var self = this;
-    function listener(response) 
+    function listener(response)
     {
         self._private_listener(response);
     }

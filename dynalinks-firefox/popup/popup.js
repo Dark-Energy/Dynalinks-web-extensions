@@ -32,6 +32,7 @@ var Funcs = {};
 Funcs["add-record"] = open_dialog;
 Funcs["show-links"] = open_table;
 Funcs["manage-tabs"] = open_manager;
+Funcs["extract-file"] = extract_file;//test_script;
 
 //console.log("listener " + JSON.stringify(Funcs));    
 //console.log("listener " + Funcs["manage-tabs"]);

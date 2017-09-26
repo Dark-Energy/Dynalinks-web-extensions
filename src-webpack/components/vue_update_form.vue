@@ -24,6 +24,13 @@
         <button class="save-button" type="button" v-on:click="save" id="update-form-save-button">Save</button>
         <button class="cancel-button" type="button" v-on:click="cancel">Cancel</button>
     </div>
+	<div class="features-buttons other-fields fields">
+        <p>
+            Features
+            <button type="button" @click="change_features">{{is_features()}}</button>
+            Text for features <input v-model="features_title">
+        </p>
+	</div>    
     
 </div>
 </template>
@@ -42,6 +49,8 @@ export default {
 	props: ["updated_record"],
 	data: function () {
 		var data = {};
+        data.features = false;
+        data.features_title = '';
 		data.message = '';
 		data.new_tag = '';
         data.record = {};
@@ -51,6 +60,7 @@ export default {
         data.category = '';
         data.tag_list = [];
         data.choosed_tag = '';
+        data._id = '';
         if (this.$dynalinks) {
             data.category_list = this.$dynalinks.category_list;
         } else {
@@ -63,9 +73,8 @@ export default {
     {
         this.category_list = this.$dynalinks.category_list;
         this.category = this.$dynalinks.category_list[0].href;
-        this.change_category();
+        //this.change_category();
         this.prepare_updated_record(this.updated_record);
-        console.log("created");
         //this send empty
     },
     
@@ -73,52 +82,81 @@ export default {
         updated_record : function (value)
         {
             this.prepare_updated_record(value);
-            console.log("watch ", value);
+            //console.log("watch ", value);
             //this not work
+        },
+        
+        category: function (value)
+        {
+            var context = this.$dynalinks.categories[this.category];
+            this.tag_list = context.tags;
+            this.choosed_tag = context.tags[0];
         }
     },
 	methods: {
         prepare_updated_record: function (value)
         {
-            console.log("prepare ", value);
-            if (value === undefined)
+            //console.log("prepare ", value);
+            if (value === undefined  )
             {
                 this.record = 
                 {
+                    _id : '',
                     href: '',
                     text: '',
                     tag: '',
                 };
                 return;
             }
-            //create new 
-            if (value._id === '') {
+
+            if (value.edit)  {
+                this.record = {
+                    _id: value.record._id,
+                    href: value.record.href,
+                    text: value.record.text,
+                    tag: value.record.tag,
+                };
+            }
+            else {
                 this.record = 
                 {
+                    _id: value._id,
                     href: value.href === undefined ? '' : value.href,
                     text: value.text === undefined ? '' : value.text,
-                    tag: value.current_page,
+                    tag: value.current_page === undefined ? '': value.current_page,
                 }
+            }
+
+            //first set category, then tag            
+            if (value.from_browser) {
+                if (this.$dynalinks.categories.length > 0) {
+                    this.category = this.$dynalinks.categories[0].href;
+                    var tag_list = this.$dynalinks.categories[href].tags;
+                    if (tag_list && tag_list.length > 0) {
+                        this.choosed_tag = tag_list[0];
+                    }
+                }
+            } else if (value.empty) {
+                this.category = value.current_category;
+                this.choosed_tag = value.current_page;
+            } else if (value.edit) {
+                this.category = value.current_category;
                 this.choosed_tag = value.current_page;
             }
-            this.category = value.current_category;
-            console.log("updated record", value);
+            //console.log( "new value => " + JSON.stringify(value));
         
         },
-        
+        /*
         change_category() {
             var context = this.$dynalinks.categories[this.category];
             this.tag_list = context.tags;
             this.choosed_tag = context.tags[0];
-            //console.log("change category ", this.category, context);
-        },
+        },*/
         create_category :function (e) {
             var input = this.$refs["new_category_input"];
             var name = input.value.trim();
-            //console.log("create category " + name);
             if (name) {
                 var response = this.$dynalinks.add_category(name);
-                //console.log("create category " + name, response);
                 if (response.valid) {
                     this.category = name;
                     this.change_category(); //why ia must do it by hands? where mere reactivity?
@@ -132,7 +170,10 @@ export default {
 		},
         validate: function ()
         {
-            var tag = this.tag.trim() !== '' || this.new_tag.trim();
+            if (this.new_tag === undefined) {
+                this.new_tag = '';
+            }
+            var tag = this.tag === undefined || this.tag.trim() !== '' || this.new_tag.trim();
             var valid =(tag !== '' && href.trim() !== '' && title !== '');
             if (!valid) {
 				this.message = "Some of required fields is not filled!";
@@ -153,20 +194,30 @@ export default {
 				this.message = '';
 			}
 
-            var tag = this.new_tag.trim();
+            var tag = this.new_tag && this.new_tag.trim();
             if (!tag){
                 tag = this.choosed_tag;
             }
             this.record.tag = tag;
-            var r = this.$dynalinks.add_record_to_category(this.record, this.category) 
-            if (r.valid)
-            {
-                this.$root.$emit("record->update", "accept", this.record);
-            } else {
-                this.$root.$emit("record->update", "reject");
-                console.log("new record rejected becaouse of " + r.reason);
-            }
             
+            if (this.updated_record.edit) {
+                //console.log("update record ", this.record, this.updated_record.current_category);
+                this.$dynalinks.update_record(this.record, this.updated_record.current_category);
+                this.$root.$emit("record->update", "accecpt", this.record);
+            }
+            else {
+                var r = this.$dynalinks.add_record_to_category(this.record, this.category) 
+                if (r.valid)
+                {
+                    this.$root.$emit("record->create", "accept", this.record, this.category);
+                    if (this.features) {
+                        this.$dynalinks.add_features(this.category, this.record, this.features_title);
+                    }
+                } else {
+                    this.$root.$emit("record->create", "reject");
+                    console.log("new record rejected becaouse of " + r.reason);
+                }
+            }
             /*
             var dlink;
             event_hub.$emit("get_database", function (db) {
@@ -181,6 +232,17 @@ export default {
             */
         
 		},
+        
+        change_features: function (e)
+        {
+            this.features = !this.features;
+        },
+        is_features: function ()
+        {
+            if (this.features) 
+                return 'Remove';
+            return 'Add';
+        }
 	},
     activated: function () {
         this.new_tag = undefined;

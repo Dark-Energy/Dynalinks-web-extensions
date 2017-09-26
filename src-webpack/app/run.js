@@ -1,12 +1,10 @@
-//consoel.log("run application");
 
 
 var event_hub;
 
 function Vue_Application(dlink)
 {
-    //console.log("create vue application", dlink);        
- 
+
     this.create_database(dlink);
 }
 
@@ -19,7 +17,6 @@ Vue_Application.prototype.initialize = function ()
     
     this.mixin_vue();
     
-    //console.log("dynalinks is true?", this.dynalinks.categories["English"] !== undefined);
 	this.vue = DAE.create_vue_app(this.dynalinks);
     
     
@@ -40,7 +37,6 @@ Vue_Application.prototype.initialize = function ()
     });
     
     event_hub.$on("get_database", function (callback) {
-        console.log("get database");
         color_console("get_databse", "blue");
         callback(self.dynalinks);
     });
@@ -111,6 +107,72 @@ Vue_Application.prototype.show_search_result = function (value)
 
 
 
+
+Vue_Application.prototype.import_database = function ()
+{
+	var self = this;
+
+
+    function import_data(text)
+    {
+        var db = JSON.parse(text);
+        self.dynalinks.import_database(db);
+        var category = self.dynalinks.category_list[0].href;
+        console.log("Import done!", category);
+        mr.navigate(self.dynalinks.create_url(category), true);        
+    }
+    
+    
+	var params = 
+	{
+		'type': 'file', 
+		handler: function (files) 
+		{
+            var file = files[0];
+            var fr = new FileReader();
+            
+            
+            fr.onloadend = function () { import_data(fr.result); }
+            
+            fr.readAsText(file); // "utf-8" by default
+            
+		}
+	};
+	var form = new PopupForm(params);
+	form.show();
+    
+}
+
+
+Vue_Application.prototype.add_record_from_browser = function (title, url)
+{
+	var self = this;
+
+	var message = 
+	{
+        _id: '',
+        text:title,
+        href: url,
+        tag: '',
+        from_browser: true,
+	};
+    
+    this.vue.$on("record->create", function (response, record, category) {
+        console.log("record->create ", response);
+        if (response === 'reject') {
+            mr.navigate(self.dynalinks.create_url(category), true);
+        }
+        else if (response === "accept") {
+            
+			var tag = record.tag;
+			mr.navigate(self.dynalinks.create_url(category, tag), true);            
+        }
+    });
+    
+	this.vue.$emit("my_command", "update_record", message);    
+}
+
+
 Vue_Application.prototype.add_record_to_category = function (category)
 {
     if (category !== undefined) {
@@ -124,10 +186,11 @@ Vue_Application.prototype.add_record_to_category = function (category)
 
 	var message = 
 	{
-        _id: ''
+        _id: '',
+        empty: true,
 	};
     
-    this.vue.$on("record->update", function (response, record) {
+    this.vue.$on("record->create", function (response, record) {
         if (response === 'reject') {
             mr.navigate(self.dynalinks.create_url(category), true);
         }
@@ -141,81 +204,51 @@ Vue_Application.prototype.add_record_to_category = function (category)
 	this.vue.$emit("my_command", "update_record", message);    
 }
 
-Vue_Application.prototype.add_record_from_browser = function (title, url)
-{
-    //console.log("add record with " + title + "?>" + url);
-	var self = this;
-
-	var message = 
-	{
-        _id: '',
-        text:title,
-        href: url,
-	};
-    
-    this.vue.$on("record->update", function (response, record) {
-        if (response === 'reject') {
-            mr.navigate(self.dynalinks.create_url(category), true);
-        }
-        else if (response === "accept") {
-			var tag = record.tag;
-			mr.navigate(self.dynalinks.create_url(category, tag), true);            
-        }
-    });
-    
-	this.vue.$emit("my_command", "update_record", message);    
-}
-
-
 
 Vue_Application.prototype.update_record = function (category, id)
 {
 	var self = this;
 	var context = self.dynalinks.categories[category];
+    //console.log("update record =>" , JSON.stringify(context, null, ' '), category, id);
 	if (!context) {
 		console.log("Error update record!");
 		return;
 	}
+
 	var record = context.hash[id];
 	if (!record) {
 		console.log("Error update record!");
 		return;
 	}
-    //fucking 2 way data bindings
-    //we need create copy of record that is given to user for editing
-    //if user approve editing, then we need update record in database
-    //if user reject editing, then we do nothing
-    var tag = record.tag;
-    var old_favorite = record.favorite;
-    var item = create_clone_object(record);    
-	self.vue.$emit("my_command", "show_update_form", item, category, function (value ) {
-        //context.check_favorite(record, old_favorite);
-        self.dynalinks.update_item(record, item);
-		mr.navigate(self.dynalinks.create_url(category, value.tag), true);			
-	}, 
-    //cancel
-    function () {			
-        mr.navigate(self.dynalinks.create_url(category, tag), true);
-    }
-    );
+    
+    //console.log("context is good, record is existed, go edit it");
+    
+    var message = {};
+    message.current_page = record.tag;
+    message.current_category = category;    
+    message.edit = true;
+    message.record = record;
+
+    
+    var tag = record.tag;    
+    this.vue.$on("record->update", function (response, fresh) {
+        console.log("record update event", response, fresh);
+        if (response === 'reject') {
+            mr.navigate(self.dynalinks.create_url(category, tag), true);
+        } else {
+            mr.navigate(self.dynalinks.create_url(category, fresh.tag), true);			
+        } 
+    });
+    
+	self.vue.$emit("my_command", "show_update_form", message);
+    
 }
 
 
 Vue_Application.prototype.look_tabs = function ()
 {
-    if (this.port === undefined) {
-        this.port = new Portman("tab-manager", true);
-        this.port.process_message = function (m)
-        {
-            //console.log("test_Ojbect: get message from tab-manager =>" + JSON.stringify(m));
-            if (m) {
-                event_hub.$emit("set->tabinfo", m.tabinfo);
-            }
-        }
-        //console.log("port created");            
-    }
-    this.port.post({command:"get", info:"alltabinfo"});
     
+    //show tab list
     this.vue.$emit("my_command", "tab_manager", 'vueTableGrid');
     
 }

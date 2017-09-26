@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+
+</head>
+
+<body>
+
+<input type="file" id="file_input">
+
+
+<script>
+
+/*
+saveAs(text)
+{
+    var popup = view.open(url, '_blank');
+    if(!popup) {
+        view.location.href = url;
+    }
+    // release reference before dispatching
+    url=undefined; 
+}
+
+*/
+var file_input = document.getElementById("file_input");
+
+
+file_input.addEventListener("change", read_file, false);
+
+function read_file()
+{
+    console.log("read blob");
+    var file_list = file_input.files;
+    
+    var file = file_list[0];
+
+    var fr = new FileReader();
+    fr.onloadend = function ()
+    {
+        console.log("result", fr.result);
+    }
+    
+    fr.readAsText(file) // "utf-8" by default
+    
+       
+    
+}
+</script>
+
+
+<h1>TEST</h1>	
+<div id="main-menu-app">
+
+</div>
+
+
+<div id="app">
+</div>
+
+</body>
+
+
+<script type="text/javascript" src="../external/vue.js"> </script>
+<script type="text/javascript" src="js/utils.js"> </script>
+<script type="text/javascript" src="js/test_dynalinks.js"> </script>
+<script type="text/javascript" src="../build/render.js"> </script>
+<script type="text/javascript" src="../app/my_router.js"> </script>
+<script type="text/javascript" src="../app/app.js"> </script>
+<script type="text/javascript" src="../app/run.js"> </script>
+<script type="text/javascript" src="js/testing_data.js"> </script>
+
+
+
+<script>
+
+var event_hub = DAE.create_event_hub();
+
+
+var dlinks = new Dynalinks(create_testing_data());
+
+var app = new Vue_Application(dlinks);
+
+
+
+
+</script>

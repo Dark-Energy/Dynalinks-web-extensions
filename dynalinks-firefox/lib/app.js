@@ -283,196 +283,6 @@ copy_object(Dynalinks_File_Proxy.prototype, {
 });
 
 ;
-/*if not given, then input elements will create by "type" parameterform - DOM node, contains custom form's fieldstype - type of generated input element, one of "select", "text", "label", "custom"'custom' means to use DOM given in 'form' fielddict - data for "select" input, array or dictionary, where key became 'value' attribue of 'option' element, and value became text{option1 value: option1 text,option2 value: option2 text}value - selected item for "select" input elementparams.type = 'select';params.dict = {"1": "one","2": "two"};params.value = "1";value - value by default for text input elementparams.type = 'text';params.value = 'dummy';params.type = 'label';params.value = 'Title text';handler - callback function, call if user click "ok" buttontitle - title of forminput-container - if form generated, then it may give class name or id of DOM element, witch contain input element, optional, default value 'mt-input-container'not_escape - if ture, not escape/sanitize text input. optional. default value false.fields = [	{	type: select,	options : 		{			"one": "1",			"two": "2"		}	value: "1"	"data-value": "tag"	},	{		type: text,		"data-value": "comment"	}]*/var Form_Fabric = {};Form_Fabric.escape_text = function (text){	if (this.not_escape)		return text;	return text.replace(/'|"/g, '&quot;').replace(/</g, '$lt;').replace(/>/g, '$gt;');}Form_Fabric["select"] = function (dict, selected){	var selected_is_defined = !(typeof selected === 'undefined');	var html = '';	if (Array.isArray(dict)){		for (var key = 0, len = dict.length; key < len; key++){				html += '<option value="' + key + '"';			if (selected_is_defined && selected == key) {				html += " selected ";			}			html += '>' + dict[key]+'</option>';		}	}	else {		for (var key in dict) {			if (Object.prototype.hasOwnProperty.call(dict, key)) {				html += '<option value="' + key + '"';				if (selected_is_defined && selected === key) {					html += " selected ";				}				html += '>' + dict[key]+'</option>';			}		}	}	var form = document.createElement('select');	form.innerHTML = html;	return form;} Form_Fabric["text"] = function (value){	var input = document.createElement('input');	input.type = 'text';	if (value) {		input.value = Form_Fabric.escape_text(value || "");	}	return input;}Form_Fabric["label"] = function (value){	var form = document.createElement('div');	form.className = "popup-form-static-text";	form.style["text-align"] = "center";	form.innerHTML = '<h3>' + Form_Fabric.escape_text(value || " ") + '</h3>';	return form;}Form_Fabric["textarea"] = function (value){	var form = document.createElement('textarea');	if (value) {		form.value = Form_Fabric.escape_text(value || "");	}	return form;}Form_Fabric.create = function (type, value, dict){	var f = this[type];	if (!f) {		throw ("Popup_Form can't create form, parameter 'type' is unknown value", type);	}	var form;	if (type === "select") {		form = f(dict, value);	}	else {		form =  f(value);	}	return form;}Form_Fabric.create_fields = function (fields){	var item, input, div;	var form = document.createElement("div");	for(var i = 0; i < fields.length; i++) {		item = fields[i];		input = this.create(item.type, item.value, item.dict);		if ("data-value" in item) {			input.setAttribute("data-value", item["data-value"]);		}		div = document.createElement("div");		div.className = "dummy";		div.appendChild(input);		form.appendChild(div);	}	return form;}function PopupForm(params){	this.dict = params.dict;		this.selected = params.selected; 	this.type = params.type;	this.template = params.template;		this.handler = params.handler;	this.change_text = params.change_text;	this.title = params.title;	this.not_escape = params.not_escape;			this.text = "";	this.result = -1;	var empty = true;		this.initialize = function ()	{		if (!empty) return;				Form_Fabric.not_escape = !!params.not_escape;		if (params.form) {			this.form = params.form;		}		else if (params.fields) {			this.form = Form_Fabric.create_fields(params.fields);		}		else  {			this.form = Form_Fabric.create(params.type, params.value, params.dict);		}		this.create_template(params);				{			var t = this.template.querySelector(".mt-input-container");			if (!t) {				t = document.createElement("div");				t.className = "mt-input-container";				console.log("not found mt-input-container, need create it");				this.template.appendChild(t);			}			else {				t.innerHTML = '';			}			t.appendChild(this.form);			//обработчики кнопок, если они есть...			var self = this;			t = this.template.querySelector(".edit-form-ok-btn");			t.onclick = function (e) {self._ok();}			t = this.template.querySelector(".edit-form-cancel-btn");			t.onclick = function (e) {self.cancel();}		}				this.init();		empty = false;	}	}PopupForm.prototype.make_unique = function (){	if (this.constructor.prototype.onshow) {		this.constructor.prototype.onshow.cancel();	}	this.constructor.prototype.onshow = this;}PopupForm.prototype.close_unique = function () {	this.constructor.prototype.onshow = null;}PopupForm.prototype.onshow = null;PopupForm.prototype.create_template = function (params){	//создать пустышку, если шаблон не задан...	if (!this.template)			{		this.template = document.createElement('div');		this.template.className = 'edit-form-container';		this.template.style["background-color"] = "#FFFFFF";		var html = this.title ? '<h3 class="edit-form-title">' + this.escape_text(this.title) + '</h3>' : '';		html += '<div class="mt-input-container"></div><button class="edit-form-ok-btn">ОК</button><button class="edit-form-cancel-btn">Отмена</button>';		this.template.innerHTML = html;					this.template.style["background_color"] ="#FFFFFF";		this.template.style["padding"] = "5px";		this.template.style["box-shadow"] = "0 0 10px rgba(0,0,0,0.5)"; 	}	this.template.style["position"] = "fixed";}PopupForm.prototype.escape_text = function (text){	return text.replace(/'|"/g, '&quot;').replace(/</, '$lt;').replace(/>/, '$gt;');}PopupForm.prototype.init = function(){	var self = this;		self.template.onkeydown =  function(e)	{		switch(e.keyCode)		{			case 27: self.cancel(); break;			case 13: self._ok(); break;		}	}	}PopupForm.prototype.attach_focus = function(){	var self = this;	self.template.on("blur", function (e)	{		self.cancel();	});}PopupForm.prototype.insert = function (){	//вставляем в нужное место документа	this.template.style["display"] = "block";	document.body.appendChild(this.template);		var w = window.innerWidth / 2 - this.template.offsetWidth/2;	var h = window.innerHeight / 2 - this.template.offsetHeight/2;	this.template.style["left"]	= w + "px";	this.template.style["top"] = h + "px";}PopupForm.prototype.detach = function (){	//отсоединить от документа	this.template.parentNode.removeChild(this.template);}PopupForm.prototype.save_text = function (jquery_obj){	//получить редактируемый текст из документа	//this.text = jquery_obj.text();	//jquery_obj.text("");}PopupForm.prototype.show = function (jquery_obj){	this.initialize();		this.make_unique();		this.jquery_obj = jquery_obj;		if (this.change_text && jquery_obj) {		this.save_text(jquery_obj);	}	this.insert();		this.result = -1;	this.form.focus();}PopupForm.prototype.hide = function(){	this.close_unique();		this.detach();		//вставить новый текст или восстановить старый	if (this.change_text && this.jquery_obj) {		//this.jquery_obj.text(this.text);	}}PopupForm.prototype.cancel = function(){	this.hide();}PopupForm.prototype._get_values_from_inputs = function(data, inputs) {	if (!inputs) 		return;	var key;	for(var i = 0; i < inputs.length; i++) {		if (inputs[i].hasAttribute('data-value')) {			key = inputs[i].getAttribute('data-value');			if (inputs[i].type === "checkbox") {				data[key] = !!inputs[i].checked;			}			else if (inputs[i].type == 'text') {				if (!this.not_escape) {					data[key] = this.escape_text(inputs[i].value);				} else {					data[key] = inputs[i].value;				}			}			else {				data[key] = inputs[i].value;			}		}	}}PopupForm.prototype._get_value = function (){	var value;	if (this.type === 'custom') {		value = {};		this._get_values_from_inputs(value, this.form.querySelectorAll('input'));		this._get_values_from_inputs(value, this.form.querySelectorAll('select'));		this._get_values_from_inputs(value, this.form.querySelectorAll('textarea'));	}	else if (this.type === "select") {		//new_value = this.form.find(":selected").val();		value = this.form.options[this.form.selectedIndex].value;		//var text = e.options[e.selectedIndex].text;	} else if (this.type === "text") {		value = this.form.value;		if (!this.not_escape) {			value = this.escape_text(value);		}	}	else if (this.type === 'textarea') {		value = this.form.value;		if (!this.not_escape) {			value = this.escape_text(value);		}	}	return value;}PopupForm.prototype._ok = function(){	value = this._get_value();	this.hide();		if (this.handler) {		var done = this.handler(value);		if (done)		{			this.result = value;			//выбрать новый текст из словаря, если у нас список значений			this.text = this.dict ? this.dict[value] : value;		}	}}function ModalForm(){	PopupForm.apply(this, arguments);}ModalForm.prototype = Object.create(PopupForm.prototype);ModalForm.prototype.constructor = ModalForm;ModalForm.prototype.onShow = null;ModalForm.prototype.create_template = function (params){	if (!this.template)			{		this.template = $('<form class="modal-edit-form-container">');			var html = "";		if (params.title) {			html = '<div class="mt-edit-title"><i><h3>'+params.title+'</h3></i></div>';		}		html += '<div class="modal-edit-form mt-input-container"></div><div><button class="inplace-edit-ok">ОК</button><button class="inplace-edit-cancel">Отмена</button></div>'		this.template.html(html);				this.template.css({"background-color": "#FFFFFF"});		this.template.css({"padding": "5px"});		this.template.css({"box-shadow":  "0 0 10px rgba(0,0,0,0.5)"}); 	}	this.template.css({"position": "absolute"});}ModalForm.prototype.insert = function (){	$(document.body).append(this.template);		//вставляем по центру экрана	this.template.css({"display": "block"});		    this.template.css({        'position': 'fixed',        'left': '50%',        'top': '50%',    });    this.template.css({        'margin-left': -this.template.outerWidth() / 2 + 'px',        'margin-top': -this.template.outerHeight() / 2 + 'px'    });	};
-/* FileSaver.js
- * A saveAs() FileSaver implementation.
- * 1.3.2
- * 2016-06-16 18:25:19
- *
- * By Eli Grey, http://eligrey.com
- * License: MIT
- *   See https://github.com/eligrey/FileSaver.js/blob/master/LICENSE.md
- */
-
-/*global self */
-/*jslint bitwise: true, indent: 4, laxbreak: true, laxcomma: true, smarttabs: true, plusplus: true */
-
-/*! @source http://purl.eligrey.com/github/FileSaver.js/blob/master/FileSaver.js */
-
-var saveAs = saveAs || (function(view) {
-	"use strict";
-	// IE <10 is explicitly unsupported
-	if (typeof view === "undefined" || typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
-		return;
-	}
-	var
-		  doc = view.document
-		  // only get URL when necessary in case Blob.js hasn't overridden it yet
-		, get_URL = function() {
-			return view.URL || view.webkitURL || view;
-		}
-		, save_link = doc.createElementNS("http://www.w3.org/1999/xhtml", "a")
-		, can_use_save_link = "download" in save_link
-		, click = function(node) {
-			var event = new MouseEvent("click");
-			node.dispatchEvent(event);
-		}
-		, is_safari = /constructor/i.test(view.HTMLElement) || view.safari
-		, is_chrome_ios =/CriOS\/[\d]+/.test(navigator.userAgent)
-		, throw_outside = function(ex) {
-			(view.setImmediate || view.setTimeout)(function() {
-				throw ex;
-			}, 0);
-		}
-		, force_saveable_type = "application/octet-stream"
-		// the Blob API is fundamentally broken as there is no "downloadfinished" event to subscribe to
-		, arbitrary_revoke_timeout = 1000 * 40 // in ms
-		, revoke = function(file) {
-			var revoker = function() {
-				if (typeof file === "string") { // file is an object URL
-					get_URL().revokeObjectURL(file);
-				} else { // file is a File
-					file.remove();
-				}
-			};
-			setTimeout(revoker, arbitrary_revoke_timeout);
-		}
-		, dispatch = function(filesaver, event_types, event) {
-			event_types = [].concat(event_types);
-			var i = event_types.length;
-			while (i--) {
-				var listener = filesaver["on" + event_types[i]];
-				if (typeof listener === "function") {
-					try {
-						listener.call(filesaver, event || filesaver);
-					} catch (ex) {
-						throw_outside(ex);
-					}
-				}
-			}
-		}
-		, auto_bom = function(blob) {
-			// prepend BOM for UTF-8 XML and text/* types (including HTML)
-			// note: your browser will automatically convert UTF-16 U+FEFF to EF BB BF
-			if (/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
-				return new Blob([String.fromCharCode(0xFEFF), blob], {type: blob.type});
-			}
-			return blob;
-		}
-		, FileSaver = function(blob, name, no_auto_bom) {
-			if (!no_auto_bom) {
-				blob = auto_bom(blob);
-			}
-			// First try a.download, then web filesystem, then object URLs
-			var
-				  filesaver = this
-				, type = blob.type
-				, force = type === force_saveable_type
-				, object_url
-				, dispatch_all = function() {
-					dispatch(filesaver, "writestart progress write writeend".split(" "));
-				}
-				// on any filesys errors revert to saving with object URLs
-				, fs_error = function() {
-					if ((is_chrome_ios || (force && is_safari)) && view.FileReader) {
-						// Safari doesn't allow downloading of blob urls
-						var reader = new FileReader();
-						reader.onloadend = function() {
-							var url = is_chrome_ios ? reader.result : reader.result.replace(/^data:[^;]*;/, 'data:attachment/file;');
-							var popup = view.open(url, '_blank');
-							if(!popup) view.location.href = url;
-							url=undefined; // release reference before dispatching
-							filesaver.readyState = filesaver.DONE;
-							dispatch_all();
-						};
-						reader.readAsDataURL(blob);
-						filesaver.readyState = filesaver.INIT;
-						return;
-					}
-					// don't create more object URLs than needed
-					if (!object_url) {
-						object_url = get_URL().createObjectURL(blob);
-					}
-					if (force) {
-						view.location.href = object_url;
-					} else {
-						var opened = view.open(object_url, "_blank");
-						if (!opened) {
-							// Apple does not allow window.open, see https://developer.apple.com/library/safari/documentation/Tools/Conceptual/SafariExtensionGuide/WorkingwithWindowsandTabs/WorkingwithWindowsandTabs.html
-							view.location.href = object_url;
-						}
-					}
-					filesaver.readyState = filesaver.DONE;
-					dispatch_all();
-					revoke(object_url);
-				}
-			;
-			filesaver.readyState = filesaver.INIT;
-
-			if (can_use_save_link) {
-				object_url = get_URL().createObjectURL(blob);
-				setTimeout(function() {
-					save_link.href = object_url;
-					save_link.download = name;
-					click(save_link);
-					dispatch_all();
-					revoke(object_url);
-					filesaver.readyState = filesaver.DONE;
-				});
-				return;
-			}
-
-			fs_error();
-		}
-		, FS_proto = FileSaver.prototype
-		, saveAs = function(blob, name, no_auto_bom) {
-			return new FileSaver(blob, name || blob.name || "download", no_auto_bom);
-		}
-	;
-	// IE 10+ (native saveAs)
-	if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
-		return function(blob, name, no_auto_bom) {
-			name = name || blob.name || "download";
-
-			if (!no_auto_bom) {
-				blob = auto_bom(blob);
-			}
-			return navigator.msSaveOrOpenBlob(blob, name);
-		};
-	}
-
-	FS_proto.abort = function(){};
-	FS_proto.readyState = FS_proto.INIT = 0;
-	FS_proto.WRITING = 1;
-	FS_proto.DONE = 2;
-
-	FS_proto.error =
-	FS_proto.onwritestart =
-	FS_proto.onprogress =
-	FS_proto.onwrite =
-	FS_proto.onabort =
-	FS_proto.onerror =
-	FS_proto.onwriteend =
-		null;
-
-	return saveAs;
-}(
-	   typeof self !== "undefined" && self
-	|| typeof window !== "undefined" && window
-	|| this.content
-));
-// `self` is undefined in Firefox for Android content script context
-// while `this` is nsIContentFrameMessageManager
-// with an attribute `content` that corresponds to the window
-
-if (typeof module !== "undefined" && module.exports) {
-  module.exports.saveAs = saveAs;
-} else if ((typeof define !== "undefined" && define !== null) && (define.amd !== null)) {
-  define("FileSaver.js", function() {
-    return saveAs;
-  });
-}
-;
 /*
 Router
 */
@@ -625,15 +435,13 @@ My_Router.prototype.start = function (force_hash_change)
 
 
 ;
-//consoel.log("run application");
 
 
 var event_hub;
 
 function Vue_Application(dlink)
 {
-    //console.log("create vue application", dlink);        
- 
+
     this.create_database(dlink);
 }
 
@@ -646,7 +454,6 @@ Vue_Application.prototype.initialize = function ()
     
     this.mixin_vue();
     
-    //console.log("dynalinks is true?", this.dynalinks.categories["English"] !== undefined);
 	this.vue = DAE.create_vue_app(this.dynalinks);
     
     
@@ -667,7 +474,6 @@ Vue_Application.prototype.initialize = function ()
     });
     
     event_hub.$on("get_database", function (callback) {
-        console.log("get database");
         color_console("get_databse", "blue");
         callback(self.dynalinks);
     });
@@ -738,6 +544,72 @@ Vue_Application.prototype.show_search_result = function (value)
 
 
 
+
+Vue_Application.prototype.import_database = function ()
+{
+	var self = this;
+
+
+    function import_data(text)
+    {
+        var db = JSON.parse(text);
+        self.dynalinks.import_database(db);
+        var category = self.dynalinks.category_list[0].href;
+        console.log("Import done!", category);
+        mr.navigate(self.dynalinks.create_url(category), true);        
+    }
+    
+    
+	var params = 
+	{
+		'type': 'file', 
+		handler: function (files) 
+		{
+            var file = files[0];
+            var fr = new FileReader();
+            
+            
+            fr.onloadend = function () { import_data(fr.result); }
+            
+            fr.readAsText(file); // "utf-8" by default
+            
+		}
+	};
+	var form = new PopupForm(params);
+	form.show();
+    
+}
+
+
+Vue_Application.prototype.add_record_from_browser = function (title, url)
+{
+	var self = this;
+
+	var message = 
+	{
+        _id: '',
+        text:title,
+        href: url,
+        tag: '',
+        from_browser: true,
+	};
+    
+    this.vue.$on("record->create", function (response, record, category) {
+        console.log("record->create ", response);
+        if (response === 'reject') {
+            mr.navigate(self.dynalinks.create_url(category), true);
+        }
+        else if (response === "accept") {
+            
+			var tag = record.tag;
+			mr.navigate(self.dynalinks.create_url(category, tag), true);            
+        }
+    });
+    
+	this.vue.$emit("my_command", "update_record", message);    
+}
+
+
 Vue_Application.prototype.add_record_to_category = function (category)
 {
     if (category !== undefined) {
@@ -751,10 +623,11 @@ Vue_Application.prototype.add_record_to_category = function (category)
 
 	var message = 
 	{
-        _id: ''
+        _id: '',
+        empty: true,
 	};
     
-    this.vue.$on("record->update", function (response, record) {
+    this.vue.$on("record->create", function (response, record) {
         if (response === 'reject') {
             mr.navigate(self.dynalinks.create_url(category), true);
         }
@@ -768,81 +641,51 @@ Vue_Application.prototype.add_record_to_category = function (category)
 	this.vue.$emit("my_command", "update_record", message);    
 }
 
-Vue_Application.prototype.add_record_from_browser = function (title, url)
-{
-    //console.log("add record with " + title + "?>" + url);
-	var self = this;
-
-	var message = 
-	{
-        _id: '',
-        text:title,
-        href: url,
-	};
-    
-    this.vue.$on("record->update", function (response, record) {
-        if (response === 'reject') {
-            mr.navigate(self.dynalinks.create_url(category), true);
-        }
-        else if (response === "accept") {
-			var tag = record.tag;
-			mr.navigate(self.dynalinks.create_url(category, tag), true);            
-        }
-    });
-    
-	this.vue.$emit("my_command", "update_record", message);    
-}
-
-
 
 Vue_Application.prototype.update_record = function (category, id)
 {
 	var self = this;
 	var context = self.dynalinks.categories[category];
+    //console.log("update record =>" , JSON.stringify(context, null, ' '), category, id);
 	if (!context) {
 		console.log("Error update record!");
 		return;
 	}
+
 	var record = context.hash[id];
 	if (!record) {
 		console.log("Error update record!");
 		return;
 	}
-    //fucking 2 way data bindings
-    //we need create copy of record that is given to user for editing
-    //if user approve editing, then we need update record in database
-    //if user reject editing, then we do nothing
-    var tag = record.tag;
-    var old_favorite = record.favorite;
-    var item = create_clone_object(record);    
-	self.vue.$emit("my_command", "show_update_form", item, category, function (value ) {
-        //context.check_favorite(record, old_favorite);
-        self.dynalinks.update_item(record, item);
-		mr.navigate(self.dynalinks.create_url(category, value.tag), true);			
-	}, 
-    //cancel
-    function () {			
-        mr.navigate(self.dynalinks.create_url(category, tag), true);
-    }
-    );
+    
+    //console.log("context is good, record is existed, go edit it");
+    
+    var message = {};
+    message.current_page = record.tag;
+    message.current_category = category;    
+    message.edit = true;
+    message.record = record;
+
+    
+    var tag = record.tag;    
+    this.vue.$on("record->update", function (response, fresh) {
+        console.log("record update event", response, fresh);
+        if (response === 'reject') {
+            mr.navigate(self.dynalinks.create_url(category, tag), true);
+        } else {
+            mr.navigate(self.dynalinks.create_url(category, fresh.tag), true);			
+        } 
+    });
+    
+	self.vue.$emit("my_command", "show_update_form", message);
+    
 }
 
 
 Vue_Application.prototype.look_tabs = function ()
 {
-    if (this.port === undefined) {
-        this.port = new Portman("tab-manager", true);
-        this.port.process_message = function (m)
-        {
-            //console.log("test_Ojbect: get message from tab-manager =>" + JSON.stringify(m));
-            if (m) {
-                event_hub.$emit("set->tabinfo", m.tabinfo);
-            }
-        }
-        //console.log("port created");            
-    }
-    this.port.post({command:"get", info:"alltabinfo"});
     
+    //show tab list
     this.vue.$emit("my_command", "tab_manager", 'vueTableGrid');
     
 }

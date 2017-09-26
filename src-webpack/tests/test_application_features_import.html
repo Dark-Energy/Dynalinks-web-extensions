@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+
+      <link rel="stylesheet" type="text/css" href="css/line-menu.css"  />
+      <link rel="stylesheet" type="text/css" href="css/edit-form.css"  />
+        <link rel="stylesheet" type="text/css" href="css/news-2.css"  /> 
+
+</head>
+
+<body>
+
+
+<h1>TEST</h1>	
+<div id="main-menu-app">
+
+</div>
+
+
+<div id="app">
+</div>
+
+</body>
+
+
+<script type="text/javascript" src="../external/vue.js"> </script>
+<script type="text/javascript" src="../../src-utils/dist/utils.js"> </script>
+<script type="text/javascript" src="js/dynalinks_new_features.js"> </script>
+<script type="text/javascript" src="../build/render.js"> </script>
+<script type="text/javascript" src="../app/my_router.js"> </script>
+<script type="text/javascript" src="js/testing_data.js"> </script>
+<script type="text/javascript" src="../../src-utils/edit-form.js"> </script>
+
+<script type="text/javascript" src="../../src-utils/filesaver.js"> </script>
+<script type="text/javascript" src="../app/dynalinks_file_proxy.js"> </script>
+<script type="text/javascript" src="../app/app.js"> </script>
+<script type="text/javascript" src="../app/run.js"> </script>
+<script type="text/javascript" src="js/Dynalinks_Database_new.json"> </script>
+
+
+
+<script>
+
+
+
+var dlinks = new Dynalinks(create_testing_data());
+var App = new Vue_Application(dlinks);    
+
+var index = dlinks.index;
+
+
+
+</script>

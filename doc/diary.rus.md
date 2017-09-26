@@ -260,3 +260,59 @@ Property or method "dynalinks" is not defined on the instance but referenced dur
 Но это очень грубое решение. Требутеся что-то более изящное. Можно использовать порты, которые встроены в WebExtension. Это будет ещё круче. Правда, они сами дерьмовое решение. Нужна какая-то связь с более точной адресацией отправителя к получателю и синхроизация протоколов взаимодейстувия, учитывая команды, отсылаемые в обе стороны. Но это потом. 
 
 А пока я решил проблему очень просто. Пусть компоненты сами всё делают. У меня есть объект Dynalinks, который играет роль хранилища данных. Вся работа идёт через него. Это было очень предусмотрительно. Пусть же компоненты работают напрямую с ним без всяких props. Я добавил его в качестве глоабальной примести $domolink, и теперь он доступен в любом компоненте через this. 
+
+
+
+# Again CSP #
+
+In this time, his is frightened method who cancel link element action by means void javascript
+
+<a href="javascript:void(0);"
+
+
+Hm.
+
+function onClickFunction()
+ {
+  someMethod();
+  this.event.returnValue = false;
+ }
+ 
+ 
+ and use event.preventDefault() :
+
+function call(e){
+    if(e.preventDefault){
+        e.preventDefault();
+    }else{
+        e.returnValue = false; // IE
+    }
+    alert("calling");
+}
+
+i had to rewritten main_menu component. What get in reuslt? Mosnter!
+
+# Last issue #
+
+1) "javascript: void" removed from href attributes of anchor elements, what not frightens Content Security Policy
+
+2) System of features/favorites is rewritten entirly.
+
+3) I append import database from file with json format. New database merged with old. 
+
+4) FileSaver.js contains timers! What is thah frightens CSP! By the way, i am never seen so much ugliest piece of code for my life! It's impossimple to maintan, modify, unpate and customize. Additionly, it out of date. I will have to write my own saver. One more job on my head, damn. 
+
+Surpire, but this code work in popup menu, which appears under extension button on extension panel. Perhaps, world 'self' in 
+
+    "content_security_policy": "script-src 'self' 'unsafe-eval' ;
+    
+means popup menu? Who knows! And this code work in all chrome browsers. Probably, there is it use piece code with no timers and revokeObjectUrl. May be, not. I don't known. It's mistery!    
+
+But i manage to make export all database into file, when extension run on Firefox.
+
+5) Update form entirely rewritten. It's was hard.
+
+Remain one small thing - get sign from Fireofx. And this difficult quest will be done. Almost.
+
+Links catalog are finished. Integration with tab manager not yet. Tab manager in beginning now. But this quests will be performance in future times, and i can't say, when. Because of iam burnout and don't get from this work nothing.
+

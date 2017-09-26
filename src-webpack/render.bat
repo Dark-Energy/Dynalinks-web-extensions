@@ -1,1 +1,3 @@
-npm run build > shit.txt
+npm run build 
+
+echo f|xcopy /Y .\build\render.js ..\dynalinks-firefox\lib\render.js 

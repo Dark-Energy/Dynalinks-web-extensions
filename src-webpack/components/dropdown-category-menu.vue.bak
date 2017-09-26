@@ -18,8 +18,8 @@ export default {name: 'dropdown-category-menu',
         <li v-for="item in category_list">
             <GlueLink  :url="item" :base_url="base_url" />
             <ul v-if="categories[item.href]" class="submenu">
-                <li v-for="link in categories[item.href].favorites">
-                    <a :href="link.href">{{link.favorite_text || link.text}}</a>
+                <li v-for="elem in categories[elem.href].features">
+                    <a :href="elem.href">{{elem.text}}</a>
                 </li>
             </ul>
         </li>

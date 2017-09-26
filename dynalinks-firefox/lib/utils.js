@@ -1,7 +1,54 @@
+
 /*
 Utils functions
 
 */
+
+
+
+
+var Event_Mixin = {
+    _get_event: function (name) {
+        if (!this.events[name]) {
+            this.events[name] = [];
+        }
+        return this.events[name];
+    },
+    "$on" : function (name, func)
+    {
+        var arr = this._get_event(name);
+        arr.push({listener: func});
+    },
+    
+    "$once": function (name, func) 
+    {
+        var arr = this._get_event(name);
+        arr.push({listener: func, once: true});
+        
+    },
+
+    "$emit" : function (name)
+    {
+        var arr = this._get_event(name);
+        if (arr.length === 0) {
+            return;
+        }
+        var args = Array.prototype.slice.call(arguments, 1);
+        for(var i =0; i < arr.length; i++) {
+            arr[i].listener.apply(this, args);
+            if (arr[i].once) {
+                arr.splice(i, 1);
+            }
+        }
+    },
+
+    "events" : {},
+};
+
+//Event_Mixin.$on("test", () => console.log("test") );
+//Event_Mixin.$emit("test");
+
+
 
 
 function keys_to_array(obj)
@@ -248,35 +295,7 @@ console.log(html_clear("asdf <b> asdfsdf </b> asdfds"));
 
 
 if (!Object.assign) {
-  Object.defineProperty(Object, 'assign', {
-    enumerable: false,
-    configurable: true,
-    writable: true,
-    value: function(target, firstSource) {
-      'use strict';
-      if (target === undefined || target === null) {
-        throw new TypeError('Cannot convert first argument to object');
-      }
-
-      var to = Object(target);
-      for (var i = 1; i < arguments.length; i++) {
-        var nextSource = arguments[i];
-        if (nextSource === undefined || nextSource === null) {
-          continue;
-        }
-
-        var keysArray = Object.keys(Object(nextSource));
-        for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
-          var nextKey = keysArray[nextIndex];
-          var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
-          if (desc !== undefined && desc.enumerable) {
-            to[nextKey] = nextSource[nextKey];
-          }
-        }
-      }
-      return to;
-    }
-  });
+    Object.prototype.assign = copy_object;
 } 
 
 
@@ -406,3 +425,6 @@ function color_console(text, style)
     var color = style_table[style];
     console.log("%c"+text, color)
 }
+
+
+

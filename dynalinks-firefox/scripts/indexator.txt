@@ -1,0 +1,45 @@
+/*
+Dynalinks.Indexator = function Indexator(dlink)
+{
+    this.index = [];
+    this.hash = {};
+    var self = this;   
+    var keys = dlink.database.keys();
+    keys.forEash(function (key) {
+        var category = dlink.database[key];
+        self.add_array(category);
+    });
+    console.log(index);
+}
+
+Object.assign(Dynalinks.Indexator.prototype, {
+    constructor: Dynalinks.Indexator,
+    add_index : function (record) 
+    {
+        this.hash[record.href] = record._id;
+        if (this.index.indexOf(record.href) < 0) {
+            this.index.push(record.href);
+        }
+    },
+    add_array: function (arr)
+    {
+        var self= this;
+        arr.foEach(function (elem) {
+            self.add_index(elem);
+        });
+    },
+    remove_index: function (record)
+    {
+        delete hash[record.href];
+        var ind = this.index.indexOf(record.href);
+        if (ind >= 0) {
+            this.index.splice(ind, 1);
+        }
+    },
+    update_index: function (old, record)
+    {
+        remove_index(old);
+        add_index(record);
+    }
+});
+*/

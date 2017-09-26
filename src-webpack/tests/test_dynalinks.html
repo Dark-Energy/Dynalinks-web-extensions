@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+
+</head>
+
+<body>
+
+
+<h1>TEST</h1>	
+<div id="main-menu-app">
+
+</div>
+
+
+<div id="app">
+</div>
+
+</body>
+
+
+<script type="text/javascript" src="../external/vue.js"> </script>
+<script type="text/javascript" src="js/utils.js"> </script>
+<script type="text/javascript" src="js/dynalinks_new.js"> </script>
+<script type="text/javascript" src="../build/render.js"> </script>
+<script type="text/javascript" src="../app/app.js"> </script>
+<script type="text/javascript" src="../app/run.js"> </script>
+<script type="text/javascript" src="js/testing_data.js"> </script>
+
+
+
+<script>
+
+
+var event_hub = DAE.create_event_hub();
+
+var app = {};
+
+var dlinks = new Dynalinks(create_testing_data());
+
+
+var vue = DAE.create_vue_app(dlinks);
+
+vue.$emit("my_command", "show_page", "English", "Словари", dlinks);
+
+var index = dlinks.index;
+console.log("index is ", JSON.stringify(index, null, ' '));
+
+dlinks.remove_tag("English", "Словари");
+console.log("index is ", JSON.stringify(index, null, ' '));
+
+</script>

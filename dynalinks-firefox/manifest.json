@@ -30,14 +30,15 @@
     "scripts": [ 
         "scripts/relation.js",    
         "lib/utils.js",              
-        "lib/framework.js",
+        "lib/framework.js",        
         "lib/tab_manager.js",
         "scripts/testing_data.js",    
         "scripts/init.js",
         "scripts/fabric_dialog.js",
         "scripts/dynalinks.min.js", 
-        "scripts/create_dynalinks.js", 
-        "scripts/proxy_data.js" 
+        "scripts/dynalinks_proxy.js", 
+        "scripts/proxy_data.js",
+        "scripts/popup_fabrices.js"
         ]
     },
  
@@ -48,5 +49,5 @@
         "/pages/links_view/links_view.html"
     ],
    
-    "content_security_policy": "script-src 'self' moz-extension: chrome-extension: 'unsafe-eval' ; object-src 'self'; img-src 'self' 'unsafe-eval'"
+    "content_security_policy": "script-src 'self' 'unsafe-eval' ; object-src 'self'; img-src 'self' 'unsafe-eval'"
 }

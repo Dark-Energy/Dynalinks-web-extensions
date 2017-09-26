@@ -29,15 +29,15 @@ function create_table_view(dlink) {
 
 function creating_dynalinks_for_app()
 {
-  console.log("create dynalinks from proxy");
+  //console.log("create dynalinks from proxy");
    proxy = new Dynalinks_Proxy();
-   proxy.onloaded = listener;
-   proxy.Create_Dynalinks();
-   
    function listener(dlink)
    {
         create_table_view(dlink);
    }
+   proxy.onloaded = listener;
+   proxy.Create_Dynalinks();
+   
 }
 
 //create dynalinks, dynalinks proxy, get created dynalinks and create app;

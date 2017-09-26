@@ -1,0 +1,51 @@
+/*
+if not given, then input elements will create by "type" parameter
+form - DOM node, contains custom form's fields
+type - type of generated input element, one of "select", "text", "label", "custom"
+'custom' means to use DOM given in 'form' field
+dict - data for "select" input, array or dictionary, where key became 'value' attribue of 'option' element, and value became text
+{
+option1 value: option1 text,
+option2 value: option2 text
+}
+value - selected item for "select" input element
+
+params.type = 'select';
+params.dict = {
+"1": "one",
+"2": "two"
+};
+params.value = "1";
+
+value - value by default for text input element
+
+params.type = 'text';
+params.value = 'dummy';
+
+params.type = 'label';
+params.value = 'Title text';
+
+handler - callback function, call if user click "ok" button
+title - title of form
+input-container - if form generated, then it may give class name or id of DOM element, witch contain input element, optional, default value 'mt-input-container'
+not_escape - if ture, not escape/sanitize text input. optional. default value false.
+
+fields = [
+	{
+	type: select,
+	options : 
+		{
+			"one": "1",
+			"two": "2"
+		}
+	value: "1"
+	"data-value": "tag"
+	},
+	{
+		type: text,
+		"data-value": "comment"
+	}
+]
+
+*/
+

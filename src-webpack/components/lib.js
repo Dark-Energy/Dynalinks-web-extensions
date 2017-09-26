@@ -53,3 +53,6 @@ export {MainComponent};
 export {event_hub, create_event_hub} from './event_hub.js';
 import GlueLink from './glue_link.vue';
 export {GlueLink};
+
+//import CategoryTagSelect from './category_tag_select.vue';
+//export {CategoryTagSelect}

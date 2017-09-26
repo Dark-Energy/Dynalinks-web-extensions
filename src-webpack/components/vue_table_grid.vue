@@ -9,13 +9,15 @@
             <span v-on:click="sort_title"> Title </span>
             </th>
             <th>Close tab</th>
+            <th>Go</ht>
         </tr>
         </thead>
         <tbody>
         <tr v-for="item in tab_info_list">
             <td><a v-bind:href="item.url">{{item.url}}</a></td>
             <td>{{item.title}}</td>
-            <td v-on:click="close_tab" :key="item.id" style="grid-tab"><button type="button" :data-id="item.my_id">X</button></td>
+            <td @click="close_tab" :key="item.id" style="grid-tab"><button type="button" :data-id="item.my_id">X</button></td>
+            <td :key="item.id" style="grid-tab"><button type="button" @click="go":data-id="item.my_id">Go</button></td>
         </tr>
         </tbody>
     </table></div>
@@ -24,6 +26,11 @@
 
 <script>
 
+var Proxy_Object =
+{
+};
+
+//page manager
 var vueTableGrid = {};
 
    vueTableGrid.name = "vueTableGrid";
@@ -32,37 +39,6 @@ var vueTableGrid = {};
  
     vueTableGrid.methods =
     {
-        
-        creating_remove_method: function (self)
-        {
-            if (this.port === undefined) {
-                this.port = new Portman("tab-manager");                        
-            } else {
-                return;
-            }
-            
-            this._inner_close_tab = function (id) 
-            {
-                this.port.post({
-                    "command": "tab", 
-                    "info" : "remove", 
-                    "id": id});
-                //console.log("require remove tab by id " + id);
-                //FIX IT! First error, cause by fact what truth tab id is uuid, 
-                //but attribute named 'id'
-                remove_by_field_value(this.tab_info_list, "my_id", id);
-            }
-            
-        },
-        
-        close_tab: function (event)
-        {
-            var id = event.target.getAttribute('data-id');
-            this._inner_close_tab(id);
-        },
-        
-        move_to: function (e) {
-        },
         
         sort_address: function ()
         {
@@ -86,7 +62,72 @@ var vueTableGrid = {};
                 return 0;
             });
             
-        }
+        },
+
+        go: function (event) {
+            var uuid = event.target.getAttribute('data-id');
+            Tab_Manager.go(uuid);
+        },
+
+        
+        close_tab: function (event)
+        {
+            var uuid = event.target.getAttribute('data-id');
+            //console.log("remove tab " + uuid);            
+            this.remove_tab(uuid);
+            remove_by_field_value(this.tab_info_list, "my_id", uuid);
+        },
+        
+        remove_tab: function (uuid) {
+            Tab_Manager.remove(uuid);
+        },
+        create_connection_and_get_info: function ()
+        {
+            //console.log(JSON.stringify(Tab_Manager), "tab manager");
+            Tab_Manager.$on("get_all_tabs_info", (m) => 
+            {
+                this.tab_info_list = m.tabinfo;
+                //console.log("tabinfo " + JSON.stringify(m, null, ' '));
+            });
+            Tab_Manager.get_all_tabs_info();
+            //console.log(JSON.stringify(Tab_Manager), "tab manager");            
+        },
+        
+        /*
+        remove_tab: function (uuid)
+        {
+            //CAVEAT! First error, cause by fact what truth tab id is uuid, 
+            //but attribute named 'id'
+            var command = {               
+                "command": "tab", 
+                "info" : "remove", 
+                "id": uuid
+            };
+            //console.log("command : tab->remove", uuid);
+            if (Proxy_Object.port.port === undefined ) console.log("WTF?");
+            console.log(Proxy_Object.port);
+            Proxy_Object.port.post(command);
+            
+        },
+
+
+        create_connection_and_get_info: function ()
+        {
+            var self = this;
+            console.log("request tabinfo");
+            //get info from tab-manager and give it tab-list    
+            if (Proxy_Object.port === undefined) {
+                Proxy_Object.port = new Portman("tab-manager", true);
+                Proxy_Object.port.process_message = function (m) {
+                   console.log("get tabinfo");// + JSON.stringify(m));
+                   self.tab_info_list = m.tabinfo;
+                Proxy_Object.port.process_message = undefined;   
+                }
+            }
+            Proxy_Object.port.post({command:"get", info:"alltabinfo"});
+        },
+        */
+        
     }
 
     
@@ -102,22 +143,8 @@ var vueTableGrid = {};
     vueTableGrid.created = function ()
     {
         var self=this;
-        /*
-        //test code
-        event_hub.$on("start", function () {
-            console.log("get started");
-            event_hub.$emit("get", function (d) {
-                self.tab_info_list= d;
-                console.log("callback bring info", JSON.stringify(d));
-            });      
-        });*/
        
-        event_hub.$on("set->tabinfo", function (tabinfo) {
-            //console.log("get event set->tabinfo" + JSON.stringify(tabinfo));
-            self.tab_info_list = tabinfo;
-            self.creating_remove_method();            
-            
-        });
+        this.create_connection_and_get_info();
     }
 
 export default  vueTableGrid;
