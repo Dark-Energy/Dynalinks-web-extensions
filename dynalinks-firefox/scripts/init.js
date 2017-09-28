@@ -4,37 +4,40 @@ This file not contain nothing but installation event listener and verification d
 */
 
 
-var My_Dynalinks_Extension = {};
-My_Dynalinks_Extension.App = null;
-My_Dynalinks_Extension.key_name = "Dynalinks_Data";
+var My_Dynalinks_Extension = {
+    key_name : "Dynalinks_Data",
+    installed : false,
+    
+    ready : function () {
+        //console.log("...installation ends. Need messages send");
+        creating_dynalinks();
+    },
 
-My_Dynalinks_Extension.installed = false;
+    create_empty_data : function()
+    {
+            var database = {
+                database: {
+                    'unknown': [],
+                },
+                names: {'unknown':'unknown'},
+                features: {},
+            };
+        return database;
+    },
 
-My_Dynalinks_Extension.ready = function () {
-    console.log("...installation ends. Need messages send");
-    creating_dynalinks();
-}
+    
+    "create_testing_data" : create_testing_data,
+
+    initialize_data: function ()
+    {
+        this.testing_data = this.create_testing_data();
+        this.empty_data = this.create_empty_data();
+    },
+   
+};
 
 
 
-
-My_Dynalinks_Extension.create_empty_data = create_empty_data = function()
-{
-        var database = {
-            database: {
-                'unknown': [],
-            },
-            names: {'unknown':'unknown'},
-            features: {},
-        };
-    return database;
-}
-
-
-My_Dynalinks_Extension.create_testing_data = create_testing_data;
-
-My_Dynalinks_Extension.empty_data = My_Dynalinks_Extension.create_empty_data();
-My_Dynalinks_Extension.testing_data = My_Dynalinks_Extension.create_testing_data();
     
 
 My_Dynalinks_Extension.load_real_data = function ()
@@ -47,7 +50,7 @@ My_Dynalinks_Extension.load_real_data = function ()
             self.real_data = data;
             self.work_is_done("read real data");            
         } else {
-            console.log("found data, but else", JSON.stringify(data));
+            console.log("found data, but other", JSON.stringify(data));
         }
     }
     function fail(e)
@@ -61,36 +64,45 @@ My_Dynalinks_Extension.load_real_data = function ()
 
 My_Dynalinks_Extension.work_is_done = function (message)
 {
-    console.log("Work will be done for "+ message)
+    //console.log("Work will be done for "+ message)
     if (!this.installed) {
    
-        console.log("Work is over. this.installed= true. Get Ready closed event");
+        //console.log("Work is over. this.installed= true. Get Ready closed event");
         if (this.ready) {
             this.ready();
         }
     }
     this.installed = true;     
+    console.log(message);
+    console.log("...installation done");
 }
 
 
 My_Dynalinks_Extension.check_read_write = function ()
 {
 
+    this.initialize_data();
+
     var self=this;
 
     var ms = new MyStorage();
     
     
+    function read_testing_data() 
+    {
+        //console.error("Test data had writed. Check it.") 
+        ms.$on_read = function (data) {
+            //console.log("data must be right");
+            //console.log(JSON.stringify(data));
+        }
+        ms.read('Dynalinks_Data');                
+        
+    }
+    
     function write_testing_data () {
         ms.$on_write = function (key)
         {
-            console.error("Test data had writed. Check it.")            
-            ms.$on_read = function (data) {
-                console.log("data must be right");
-                console.log(JSON.stringify(data));
-            }
-            ms.read('Dynalinks_Data');                
-            
+            read_testing_data();
             self.work_is_done("writing test data!");                    
         }
         var shit = {};
@@ -102,10 +114,9 @@ My_Dynalinks_Extension.check_read_write = function ()
     function read_first_time(data)
     {
         var valid = ms.check_data("Dynalinks_Data")        
-        //console.log("Dump", JSON.stringify(data));
         if (valid.valid)
         {
-            console.error("its real data!");
+            //console.error("its real data!");
             self.work_is_done("loading real data!");
         } else {
             console.error("data is empty or corrupted \n" + valid.reason + "\n\n");            
@@ -124,11 +135,8 @@ My_Dynalinks_Extension.check_is_first = function ()
         return;
     }
     
-    console.log("Check is first times");
-    
-    this.check_read_write();
+   this.check_read_write();
 }
-
 
  
 

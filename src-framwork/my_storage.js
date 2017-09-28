@@ -22,7 +22,7 @@ Object.assign(MyStorage.prototype, {
         //console.log("write ", key);
         function write_success()
         {
-           self._private_write(key);
+           self._private_write_success(key);
         }
 
         this.last_written_data = {};
@@ -40,7 +40,7 @@ Object.assign(MyStorage.prototype, {
             });
         }
      },
-     _private_write(key)
+     _private_write_success: function (key)
      {
         if (this.$on_write !== undefined) {
             this.$on_write(key);

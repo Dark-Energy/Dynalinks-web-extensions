@@ -35,16 +35,19 @@ var proxy;
 
 function creating_dynalinks()
 {
-  
+   if (proxy !== undefined) {
+        return;
+   }
    proxy = new Dynalinks_Proxy();
    proxy.onloaded = listener;
-   proxy.Create_Dynalinks();
    
    function listener(dynalinks)
    {
         My_Extension.Dynalinks = proxy.dynalinks;
         My_Extension.created = true;
    }
+   
+   proxy.Create_Dynalinks();   
 }
 
 
@@ -75,9 +78,6 @@ Its a listener onConnect and get port from function-caller
             "yes"/'y'/true, false/null/etc
         }
         */
-
-
-
 
 var proxy_mixin = 
 {
@@ -152,8 +152,11 @@ var proxy_mixin =
     },
     
 };
-var port = new PortObjListener("request_to_proxy");
-var switcher = new PortSwitcher(port);
-switcher.add_mixin(proxy_mixin, '-');
-port.run();
+
+if (port !== undefined) {
+    var port = new PortObjListener("request_to_proxy");
+    var switcher = new PortSwitcher(port);
+    switcher.add_mixin(proxy_mixin, '-');
+    port.run();
+}
 

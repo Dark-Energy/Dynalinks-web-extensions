@@ -1,6 +1,13 @@
 {
+    "applications": {
+      "gecko": {
+        "id": "dynalinks@iamdarkenergy.org",
+        "strict_min_version": "55.0"
+      }
+    },
+
   "name": "Dynalinks",
-  "version": "1.0",  
+  "version": "1.0.1",
   "description": "Dynalinks Firefox",
   "manifest_version": 2,
   "homepage_url": "https://github.com/Dark-Energy",

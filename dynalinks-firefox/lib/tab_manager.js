@@ -14,6 +14,9 @@ query
 get_all_tabs
 get_all_tabs_info
 script injected successed
+go (uuid)
+update
+make_active (tab.id)
 
 EVENTS
 
@@ -48,7 +51,6 @@ var public_methods = {
         function created (tab)
         {
             self.tab = tab;
-            //self.call_job_done();
             self.$emit("open_active_tab", tab);
         }
     },
@@ -56,11 +58,11 @@ var public_methods = {
     find_active_tab : function ()
     {
         var self = this;
+
         function success(tabs)
         {
             self.tab = tabs[0];
             self.$emit("find_active_tab", self.tab);
-            self.call_job_done();            
         }
 
         var query_params = 
@@ -81,11 +83,11 @@ var public_methods = {
         var self = this;
         function success(tabs)
         {
+            //console.log("query done");
             self.tablist = tabs;
-            self.call_job_done();
             self.$emit("query", tabs);
         }
-        
+        //console.log("query with params", params);
         if (is_chrome) {
             chrome.tabs.query(params, success);
         } else {
@@ -164,6 +166,38 @@ var public_methods = {
         }
     },
     
+    
+    update: function (tab_id, params)
+    {
+        
+        function success(tab)
+        {
+            Tab_Manager.$emit("update", tab);
+        }
+        
+        if (!is_chrome) {
+            browser.tabs.update(tab_id, params).then(success, null);
+        } else {
+            chrome.tabs.update(tab_id, params, success);
+        }
+    },
+    
+    
+    make_active: function (tab_id)
+    {
+        function success(tab)
+        {
+            Tab_Manager.$emit("make_active", tab);
+        }
+
+        if (!is_chrome) {
+            browser.tabs.update(tab_id, {active: true}).then(success, null);
+        } else {
+            chrome.tabs.update(tab_id, {active: true}, success);
+        }
+    },
+
+    
     inject_script: function (id, code, file)
     {
         var params= 
@@ -175,7 +209,7 @@ var public_methods = {
         var self = this;
         function success(data)
         {
-            console.log("inject success");
+            //console.log("inject success");
             self.$emit("script injected", data);
         }
         if (id === undefined || id === null) {
@@ -320,7 +354,7 @@ Object.assign(Tab_Manager, private_methods);
 LEGACY
 
 */
-Tab_Manager.$job_done = undefined;
+
 Tab_Manager.port = new PortObjListener("tab-manager");
 Tab_Manager.port.run();
 Tab_Manager.port.process_conntection = function (p)
@@ -331,9 +365,7 @@ Tab_Manager.switcher = new PortSwitcher(Tab_Manager.port);
 
 Tab_Manager.call_job_done = function ()
 {
-   if (this.$job_done) {
-       this.$job_done.call(this, this.tab);
-   }
+    console.error("who call job done?");
 }
 
 

@@ -1,0 +1,4 @@
+﻿This is ambitious project - to integrate tab manager with thematic link catalog. In fact, second is done, tab manager is developed. Integration not finished yet. But this problems will be solved in future, i hope. 
+Planned in future
+different presentation of tab - list, grouping tabs by domen and other parameters, mass operations with using regular expressions, integration with cloud servis (like Yandex.Disc etc), cryptofication.
+Unfortunately, i work alone, with no enough assistance. Because of work progress is slow. And i have to spend time to working money for life, developing extension in rest time.

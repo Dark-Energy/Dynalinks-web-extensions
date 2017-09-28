@@ -1,17 +1,6 @@
-/* FileSaver.js
- * A saveAs() FileSaver implementation.
- * 1.3.2
- * 2016-06-16 18:25:19
- *
- * By Eli Grey, http://eligrey.com
- * License: MIT
- *   See https://github.com/eligrey/FileSaver.js/blob/master/LICENSE.md
- */
 
-/*global self */
-/*jslint bitwise: true, indent: 4, laxbreak: true, laxcomma: true, smarttabs: true, plusplus: true */
-
-/*! @source http://purl.eligrey.com/github/FileSaver.js/blob/master/FileSaver.js */
+function extract_file ()
+{
 
 var saveAs = saveAs || (function(view) {
 	"use strict";
@@ -239,7 +228,7 @@ Object.assign(MyStorage.prototype, {
             });
         }
      },
-     _private_write(key)
+     _private_write : function(key)
      {
         if (this.$on_write !== undefined) {
             this.$on_write(key);
@@ -333,14 +322,17 @@ Object.assign(MyStorage.prototype, {
 });
 
 
-function extract_file()
+function extract_file_within_popup()
 {
     var ms = new MyStorage();
     ms.$on_read = function (data) {
         var text = JSON.stringify(data);
-        var blob = new Blob([text], {type: "text/plain;charset=utf-8"});	
+        var blob = new Blob([text], {type: "text/plain;charset=utf-8"}, false);	
         saveAs(blob, "Dynalinks Database.json"); 
     }
     ms.read("Dynalinks_Data");
 }
 
+}
+
+extract_file();

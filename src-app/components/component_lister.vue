@@ -2,7 +2,7 @@
 <div id="app">
     <DropdownCategoryMenu :base_url="base_url" :category_list="category_list" :categories="categories" />
 
-    <div class="clear-block"><br/></div>
+    <div class="clear-block">&nbsp;</div>
 
     <FeaturesLine v-bind:features="features" />
     <PageMenu v-bind:tags="tags" v-bind:base_url="category_url" />

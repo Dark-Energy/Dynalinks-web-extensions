@@ -1,5 +1,9 @@
-//console.log("dynalinks proxy");
-
+///proxy dynalinks to storage.local
+///read data from storage, check it, then 
+///create object dynalinks, 
+///binding event listener "change", 
+///which write data to storage on every time when dynalinks change
+///keep link to dynalinks object
 function Dynalinks_Proxy()
 {
     this.dynalinks = undefined;
@@ -60,7 +64,7 @@ Object.assign( Dynalinks_Proxy.prototype, {
 
     write_to_storage : function()
     {
-        //console.log("write change to storage");
+
         var json = this.dynalinks.toJSON();
         json.key_name = this.key_name;   
         
@@ -68,14 +72,6 @@ Object.assign( Dynalinks_Proxy.prototype, {
         ms.$on_write = success;
         ms.write(this.key_name, json);
         
-        
-      
-        /*
-        console.log("where we write", JSON.stringify(json, null, ' '));
-        browser.storage.local.get(this.key_name).then (function (data) {
-            console.log("testing ", JSON.stringify(data, null, ' '));
-        });
-        */
         function fail()
         {
             console.log("failed to save database in callback");
@@ -96,7 +92,6 @@ Object.assign( Dynalinks_Proxy.prototype, {
         //console.error("binding event listener to database");
         var self= this;
         this.dynalinks.$on("change", function () {
-            //console.log("write changes");
             self.write_to_storage();
         });
 

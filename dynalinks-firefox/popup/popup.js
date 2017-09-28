@@ -1,4 +1,3 @@
-//console.log("popup script");
 
 /*
 function create_obj(keys, funcs)
@@ -34,28 +33,33 @@ Funcs["show-links"] = open_table;
 Funcs["manage-tabs"] = open_manager;
 Funcs["extract-file"] = extract_file;//test_script;
 
-//console.log("listener " + JSON.stringify(Funcs));    
-//console.log("listener " + Funcs["manage-tabs"]);
 
-function click_listener(e)
+
+
+
+
+
+function set_click_listener()
 {
-    var id = e.target.id;
-    
-    var fabric = Funcs[id];
-    
-    
-    if (fabric) {
-        fabric();
-    }else  {
-        browser.tabs.reload();
-        window.close();
+    function click_listener(e)
+    {
+        var id = e.target.id;
+        
+        var fabric = Funcs[id];
+        
+        if (fabric) {
+            fabric();
+        }else  {
+            browser.tabs.reload();
+            window.close();
+        }
+        
     }
-    
+
+    document.addEventListener("click", click_listener);
 }
 
-
-
-document.addEventListener("click", click_listener);
+set_click_listener();
 
 /*
 var post = new Postal({command:"init"});

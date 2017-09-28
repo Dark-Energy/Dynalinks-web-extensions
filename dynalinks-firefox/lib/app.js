@@ -259,8 +259,8 @@ copy_object(Dynalinks_File_Proxy.prototype, {
     save_data_to_file : function(filename, data, varname)
     {
         var text = JSON.stringify(data, null, " ");
-        text = "var " + varname + " = " + text + ";\n";
-        var blob = new Blob([text], {type: "text/plain;charset=utf-8"});	
+        //text = "var " + varname + " = " + text + ";\n";
+        var blob = new Blob([text], {type: "text/plain;charset=utf-8"}, false);	
         console.log("blob created.... saving");
         saveAs(blob, filename); 
     },
@@ -513,7 +513,13 @@ Vue_Application.prototype.add_item = function ()
 	}
 }
 
-
+Vue_Application.prototype.show_category_view = function ()
+{
+    var category = this.dynalinks.category_list[0].href;
+    var url = this.dynalinks.create_url(category);
+    mr.navigate(url, true);        
+    console.log("show category view", url);
+}
 
 Vue_Application.prototype.show_category_page = 	function (category, page)
 {
@@ -690,6 +696,11 @@ Vue_Application.prototype.look_tabs = function ()
     
 }
 
+Vue_Application.prototype.default_category_view = function()
+{
+    this.vue.$emit("my_command", "show_category", null, this.dynalinks);
+}
+
 Vue_Application.prototype.init_router = function ()
 {
 	var self = this;
@@ -707,8 +718,8 @@ Vue_Application.prototype.init_router = function ()
 		
 	mr.add_default( function (url) 
 		{
+            this.default_category_view
             
-            this.vue.$emit("my_command", "show_category", null, this.dynalinks);
 		}, this);
 		
 		

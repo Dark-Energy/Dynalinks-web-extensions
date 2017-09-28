@@ -17,8 +17,8 @@ copy_object(Dynalinks_File_Proxy.prototype, {
     save_data_to_file : function(filename, data, varname)
     {
         var text = JSON.stringify(data, null, " ");
-        text = "var " + varname + " = " + text + ";\n";
-        var blob = new Blob([text], {type: "text/plain;charset=utf-8"});	
+        //text = "var " + varname + " = " + text + ";\n";
+        var blob = new Blob([text], {type: "text/plain;charset=utf-8"}, false);	
         console.log("blob created.... saving");
         saveAs(blob, filename); 
     },

@@ -1,0 +1,14 @@
+This object recive message and send response, if need.
+
+Recived message is a JSON like object. He is must have key 'address'. Postal have a field is named 'address'. If this two address identity, Postal send response. This JSON-like object. He is assigned to field 'response'
+
+var p= new Postal('nowhere'); // reciving message with {address: 'nowhere'}
+p.response = {answer: 'nothing'};
+
+Postal don't begin wait message automatically. He need command. This do method 'wait'
+
+p.wait();
+
+Postal have events, fired after response was sended.
+
+p.$onresponse = function (response) { console.log("oh, shit!");}

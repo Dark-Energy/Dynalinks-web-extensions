@@ -1252,7 +1252,6 @@ vueTableGrid.created = function () {
     watch: {
         updated_record: function (value) {
             this.prepare_updated_record(value);
-            console.log("watch ", value);
             //this not work
         },
 
@@ -1264,7 +1263,6 @@ vueTableGrid.created = function () {
     },
     methods: {
         prepare_updated_record: function (value) {
-            console.log("prepare ", value);
             if (value === undefined) {
                 this.record = {
                     _id: '',
@@ -1307,7 +1305,6 @@ vueTableGrid.created = function () {
                 this.category = value.current_category;
                 this.choosed_tag = value.current_page;
             }
-            //console.log( "new value => " + JSON.stringify(value));
         },
         /*
         change_category() {
@@ -1362,7 +1359,6 @@ vueTableGrid.created = function () {
             this.record.tag = tag;
 
             if (this.updated_record.edit) {
-                //console.log("update record ", this.record, this.updated_record.current_category);
                 this.$dynalinks.update_record(this.record, this.updated_record.current_category);
                 this.$root.$emit("record->update", "accecpt", this.record);
             } else {
@@ -1374,7 +1370,6 @@ vueTableGrid.created = function () {
                     }
                 } else {
                     this.$root.$emit("record->create", "reject");
-                    console.log("new record rejected becaouse of " + r.reason);
                 }
             }
             /*

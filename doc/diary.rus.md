@@ -316,3 +316,37 @@ Remain one small thing - get sign from Fireofx. And this difficult quest will be
 
 Links catalog are finished. Integration with tab manager not yet. Tab manager in beginning now. But this quests will be performance in future times, and i can't say, when. Because of iam burnout and don't get from this work nothing.
 
+
+# Версия 1.01 #
+
+Внезапно обнаружилось, что на подписанной и установленной версии не работает Tab_Manager, точнее, мозилла не может найти этот файл, веротяно, потому что в src атрибуте script, где он запрашивается, он почему-то записан с заглавными буквами, а само имя файла не содержит заглавных букв. Исправимо. 
+
+Также хотелось бы иметь одно окно вместо хреновой тучи. Функция tabs.query умеет искать по заголовку и адресу, используя шаблоны. Но шаблоны запрещают искать окна приложений, как гооврят на stackoverflow. 
+
+FORBID using the moz-extension://
+
+Кстати, если не указать  какой-либо шаблон url, то в результате вам вернут лишь набор информации о вкладках без какого-либо url вообще. 
+
+//https://developer.chrome.com/apps/match_patterns
+
+
+# Popup #
+
+Нужно что-то сделать с ней, чтобы закрывалась после нажатия на кнопку. Или отключать её как-то. 
+
+Disable the browser action when clicked, and re-enable it every time a new tab is opened:
+
+browser.tabs.onCreated.addListener(() => {
+  browser.browserAction.enable();
+});
+
+browser.browserAction.onClicked.addListener(() => {
+  browser.browserAction.disable();
+});
+
+
+Disable the browser action only for the active tab:
+
+browser.browserAction.onClicked.addListener((tab) => {
+  browser.browserAction.disable(tab.id);
+});

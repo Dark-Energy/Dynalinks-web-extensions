@@ -19,12 +19,11 @@ Object.assign(MyStorage.prototype, {
      write: function (key, obj) {
 
         var self = this;
-        //console.log("write ", key);
         function write_success()
         {
-           self._private_write(key);
+           self._private_write_success(key);
         }
-
+        
         this.last_written_data = {};
         if (obj === undefined) {
             this.last_written_data = key;
@@ -40,7 +39,7 @@ Object.assign(MyStorage.prototype, {
             });
         }
      },
-     _private_write(key)
+     _private_write_success: function(key)
      {
         if (this.$on_write !== undefined) {
             this.$on_write(key);
@@ -59,7 +58,6 @@ Object.assign(MyStorage.prototype, {
             self._private_read_fail(e);
          }
 
-         //console.log("read <<"+key+">> data from storage");
          if (is_chrome) {
              chrome.storage.local.get(key, success);
          } else {
@@ -142,6 +140,7 @@ Object.assign(MyStorage.prototype, {
     this.try_reconnect = !!try_reconnect;
     this.process_message = undefined;
     this.last_message = '';
+    this.disconnected = false;
 
 
     this.private_create_port();
@@ -156,7 +155,6 @@ Object.assign(Portman.prototype,
 
     private_create_port: function ()
     {
-        //console.log("Create port " + this.name);
         if (this.port !== undefined) return;
 
         this.port = browser.runtime.connect({"name":this.name});
@@ -164,10 +162,12 @@ Object.assign(Portman.prototype,
             this.create_message_listener();
             this.port.onMessage.addListener(this.message_listener);
         }
+        self.disconnected = false;
 
         var self = this;
         this.disconnect_listener = function (port)
         {
+            self.disconnected = true;
             console.error("active port with name {{ " + port.name +" }}get message about disconnect");
             console.error("port.error is "+port.error);
             console.error("port object is ", port);
@@ -183,7 +183,7 @@ Object.assign(Portman.prototype,
     restart_on_disconnect: function ()
     {
         this.dispose();
-        console.log("trying create new port");
+        //console.log("trying create new port");
         this.private_create_port();
     },
 
@@ -469,6 +469,9 @@ Object.assign(PortSwitcher.prototype, {
 
 /*
 params
+this object give message only with right filled field 'address'
+process waiting don't run automatically, his run by means method 'wait'
+which create listener and add to browser.runtime
 address:
     check {address: "underword"} === {greeting: "Hi, oh, you amazing object!"}
     default: {}
@@ -487,20 +490,20 @@ function Postal(address)
     this.message = {};
     this.times = 0;
     this.response = {};
-    this.action = null;
+    this.$onresponse = undefined;
+    this.$onmessage = undefined;
 }
 
 //
 Postal.prototype.check_address = function (m)
 {
-    for(var key in this.address) {
-        if (Object.prototype.hasOwnProperty.call(this.address, key)) {
-            if (this.address[key] !== m[key]) {
-                console.log("address message is false", m, this.address);
-                return false;
-            }
+    var self = this;
+    every_property(this.address, function (key) {
+        if (self.address[key] !== m[key]) {
+            //console.log("address message is false", m, self.address);
+            return false;
         }
-    }
+    });
     return true;
 }
 
@@ -514,10 +517,13 @@ Postal.prototype.check_times_limit = function()
 
 Postal.prototype._private_listener = function (message, sender, sendResponse)
 {
+    if (this.$onmessage) {
+        this.$onmessage(message);
+    }
     if (this.check_address(message)) {
         sendResponse(this.response);
-        if (this.action) {
-            this.action();
+        if (this.$onresponse) {
+            this.$onresponse(this.response)
         }
         this.times += 1;
         this.check_times_limit();
@@ -530,7 +536,8 @@ Postal.prototype.create_listener = function ()
     var self = this;
     function listener(message, sender, sendResponse)
     {
-        self._private_listener;
+        //console.log("postal get message", message, sender, sendResponse);        
+        self._private_listener(message, sender, sendResponse);
     }
     this.listener = listener;
 }
@@ -545,70 +552,14 @@ Postal.prototype.wait = function ()
     }
 }
 
-/*
-function test_postal()
-{
-    var true_address = {"address": "home"};
-    var false_address = {"freak":"ugly"}
-
-    var p = new Postal();
-    p.response = {"home": "hello!"};
-    p.address = true_address;
 
 
-    var result = p.check_address(true_address);
-    result = result && !p.check_address(false_address);
-    if (!result) {
-        console.log("test postal check adress is failed");
-    }
-
-
-    console.log("test listener response");
-    p.create_listener();
-
-
-    p.listener(true_address, {}, function (response) {
-        console.log("listener must response and response must be " + JSON.stringify(p.response) + " but taken " + JSON.stringify(response));
-    });
-
-
-
-    var listener_pass = true;
-    try{
-        //listener dont have to response
-        p.listener(false_address, {}, null)
-    }
-    catch (e) {
-        console.log("listener fail", e);
-        listener_pass = false;
-    }
-    console.log("listener dont have to response, and did it on...", listener_pass);
-
-
-
-    p.times = 0;
-    p.max_time = 1;
-    p.listener(true_address, {}, function (response) {
-        console.log("message get, listener must be removed");
-
-        setInterval(0, function () {
-            p.listener(true_address, {}, function (response) {
-            console.log("removed failed", p.listener); })
-        });
-
-    });
-
-}
-
-test_postal();
-
-*/
-
-
-
-
-
-
+//message is a JSON like object
+//sender don't send message automatically, 
+//message send by means method 'send'
+//which create callback for taking response
+//var s = new Sender({address: 'nowhere'})
+//s.send();
 function Sender(message)
 {
     this.message = message;
@@ -617,9 +568,9 @@ function Sender(message)
     this.count = 0;
 }
 
-Sender.prototype.reject = function ()
+Sender.prototype.reject = function (e)
 {
-    //console.error("this is error!");
+    console.error("this is error on message sending!", e);
 }
 
 
@@ -637,7 +588,7 @@ Sender.prototype.send = function ()
 
 Sender.prototype._private_listener = function (message)
 {
-    console.log("sender get a message", message);
+    //console.log("sender get a message", message);
     if (message === undefined && is_chrome) {
         console.log(chrome.runtime.lastError)
         return;
