@@ -4,7 +4,6 @@ var event_hub;
 
 function Vue_Application(dlink)
 {
-
     this.create_database(dlink);
 }
 
@@ -53,17 +52,11 @@ Vue_Application.prototype.mixin_vue = function ()
     });
 }
 
+/*
 
-Vue_Application.prototype.clear_ls = function ()
-{
-    delete localStorage["Dynalinks"];
-}
+COMMANDS
 
-Vue_Application.prototype.save_to_ls = function ()
-{
-    var text = this.dynalinks.toJSON();
-    localStorage.setItem("Dynalinks", text);
-}
+*/
 
 Vue_Application.prototype.add_item = function ()
 {
@@ -78,12 +71,12 @@ Vue_Application.prototype.add_item = function ()
 
 Vue_Application.prototype.show_category_view = function ()
 {
-    /*
+    
     var category = this.dynalinks.category_list[0].href;
     var url = this.dynalinks.create_url(category);
     mr.navigate(url, true);        
     console.log("show category view", url);
-    */
+    
 }
 
 Vue_Application.prototype.show_category_page = 	function (category, page)
@@ -111,9 +104,6 @@ Vue_Application.prototype.show_search_result = function (value)
 	this.search_results = results;
 	this.vue.$emit("my_command", "show_search_result", results);
 }
-
-
-
 
 
 Vue_Application.prototype.import_database = function ()
@@ -156,6 +146,8 @@ Vue_Application.prototype.add_record_from_browser = function (title, url)
 {
 	var self = this;
 
+    console.log("add record from browser", title, url);
+    
 	var message = 
 	{
         _id: '',

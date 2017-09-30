@@ -46,7 +46,7 @@ import {event_hub} from './event_hub.js';
 
 export default {
     name: "UpdateForm",
-	props: ["updated_record"],
+	props: ["updated_record","reshow"],
 	data: function () {
 		var data = {};
         data.features = false;
@@ -79,6 +79,10 @@ export default {
     },
     
     watch: {
+        reshow: function (value) {
+            this.prepare_updated_record(this.updated_record);
+        },
+        
         updated_record : function (value)
         {
             this.prepare_updated_record(value);
@@ -95,6 +99,7 @@ export default {
 	methods: {
         prepare_updated_record: function (value)
         {
+            //console.log("prepare update form", value);
             if (value === undefined  )
             {
                 this.record = 
@@ -114,6 +119,8 @@ export default {
                     text: value.record.text,
                     tag: value.record.tag,
                 };
+                this.features = this.$dynalinks.is_features(value.current_category, value.record._id);
+                //console.log("is feature?", this.features)
             }
             else {
                 this.record = 
@@ -141,7 +148,8 @@ export default {
                 this.category = value.current_category;
                 this.choosed_tag = value.current_page;
             }
-        
+            this.new_tag = '';
+            
         },
         /*
         change_category() {
@@ -200,6 +208,8 @@ export default {
             if (this.updated_record.edit) {
                 this.$dynalinks.update_record(this.record, this.updated_record.current_category);
                 this.$root.$emit("record->update", "accecpt", this.record);
+                
+                
             }
             else {
                 var r = this.$dynalinks.add_record_to_category(this.record, this.category) 
@@ -231,6 +241,15 @@ export default {
         change_features: function (e)
         {
             this.features = !this.features;
+            
+            if (this.updated_record.edit) {
+                if (this.features) {
+                    this.$dynalinks.add_features(this.category, this.record, this.features_title);
+                } else {
+                    this.$dynalinks.remove_features_by_link(this.category, this.record._id);
+                }
+            }
+
         },
         is_features: function ()
         {
@@ -240,7 +259,7 @@ export default {
         }
 	},
     activated: function () {
-        this.new_tag = undefined;
+        this.prepare_updated_record(this.updated_record);
     },
 
 }

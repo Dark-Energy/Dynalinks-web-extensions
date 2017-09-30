@@ -18,7 +18,7 @@ function read_message(dlink)
     var ms = new MyStorage();
     ms.$on_read = function (data)
     {
-        //console.log("message to application from storage " + JSON.stringify(data));        
+        console.log("message to application from storage " + JSON.stringify(data));        
         var dlink = data['dlink-temp'];
         if (dlink === undefined) {
             App.show_category_view();
@@ -33,6 +33,7 @@ function read_message(dlink)
         } else if (command == "create->record") {
             var url = dlink.url;
             var title = dlink.title;
+            console.log("active create record", url, title);
             App.add_record_from_browser(title, url);
         } else {
             App.show_category_view();

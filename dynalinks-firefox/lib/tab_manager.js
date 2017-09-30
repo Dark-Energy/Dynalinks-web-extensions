@@ -54,6 +54,25 @@ var public_methods = {
             self.$emit("open_active_tab", tab);
         }
     },
+    
+    
+    move: function (tab_id, index)
+    {
+        var self=this;
+        function success(tab) 
+        {
+            self.$emit("move_tab", tab, index);
+        }
+        function error(e) {
+            console.error("error in moving tab", e);
+        }
+        if (!is_chrome) {
+            browser.tabs.move(tab_id, {index: index}).then(success, error);
+        } else {
+            chrome.tabs.move(tab_id, {index: index}, success);
+        }
+        
+    },
 
     find_active_tab : function ()
     {

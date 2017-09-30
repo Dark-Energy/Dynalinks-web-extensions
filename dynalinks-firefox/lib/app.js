@@ -76,11 +76,6 @@ Application.prototype.move_tag = function ()
 	form.show();
 }
 
-//show form and add link to database
-Application.prototype.add_item = function ()
-{
-}
-
 
 Application.prototype.edit_item = function (id)
 {
@@ -108,28 +103,30 @@ Application.prototype.edit_item = function (id)
 	
 }
 
-Application.prototype.turn_edit = function ()
-{
-	if (this.dynalinks.display.mode === "page_view") {
-		this.dynalinks.display.mode = "page_edit";
-	}
-	else {
-		this.dynalinks.display.mode = "page_view";
-	}
-	this.dynalinks.show_page(this.dynalinks.context.current_tag);
-}
 
 Application.prototype.export_category = function ()
 {
-    var saver = new Dynalinks_File_Proxy(this.dynalinks);
-	saver.export_category(this.dynalinks.context.category_name);
+    
+    var name = this.dynalinks.context.category_name;
+    var data = this.dynalinks.database[name];
+    var text = JSON.stringify(data);
+    
+    var saver = new Dynalinks_File_Proxy();
+    saver.save_text_as_blob(text, "category_"+name+".json");
+
 }
 
 Application.prototype.export_tag = function ()
 {
-    var saver = new Dynalinks_File_Proxy(this.dynalinks);
-	saver.export_tag(this.dynalinks.context.category_name, 
-		this.dynalinks.context.current_tag);
+	var category = this.dynalinks.context.category_name;
+    var tag = this.dynalinks.context.current_tag;
+    
+    var context = this.dynalinks.get_category_context(category);
+    var data = context.pages[tag];
+    var text = JSON.stringify(data);
+    
+    var saver = new Dynalinks_File_Proxy();
+    saver.save_text_as_blob(text, tag+".json");
 }
 
 Application.prototype.remove_category = function ()
@@ -180,11 +177,6 @@ Application.prototype.create_category = function ()
 	form.show();
 }
 
-Application.prototype.move_item = function ()
-{
-	
-}
-
 
 Application.prototype.search = function (text)
 {
@@ -198,20 +190,6 @@ Application.prototype.search = function (text)
 Application.prototype.show_search_results = function (value)
 {
 	var results = this.dynalinks.search(["text", "href"], value);	
-
-	var context = 
-	{
-		results:results
-	};
-	var view = document.getElementById("page-content");
-	ko.cleanNode(view);
-	view.innerHTML = '';
-	
-	ko.renderTemplate("template-search-result", context, {}, view);	
-}
-
-Application.prototype.init_router = function()
-{
 }
 
 
@@ -223,64 +201,12 @@ Application.prototype.get_database_name = function ()
 
 Application.prototype.save_to_file = function (filename)
 {
-    var saver = new Dynalinks_File_Proxy(this.dynalinks);
-	saver.save_to_file(filename || this.Save_Filename);
+    //var saver = new Dynalinks_File_Proxy(this.dynalinks);
+	//saver.save_to_file(filename || this.Save_Filename);
+    
+    var proxy = new Dynalinks_File_Proxy();
+    proxy.save_storage_to_file();
 }
-
-Application.prototype.initialize = function ()
-{
-	this.init_router();
-	if (this._child_init) {
-		this._child_init();
-	}
-	
-}
-
-
-
-
-;
-
-
-function Dynalinks_File_Proxy(dlink)
-{
-    this.dlink = dlink;
-    this.dynalinks = dlink;
-}
-
-copy_object(Dynalinks_File_Proxy.prototype, {
-    constructor: Dynalinks_File_Proxy,
-    save_to_file : function (filename, varname)
-    {
-        var json = this.dlink.toJSON();
-        this.save_data_to_file(filename || this.Database_Name, json, this.Database_Var);
-    },
-    
-    save_data_to_file : function(filename, data, varname)
-    {
-        var text = JSON.stringify(data, null, " ");
-        //text = "var " + varname + " = " + text + ";\n";
-        var blob = new Blob([text], {type: "text/plain;charset=utf-8"}, false);	
-        console.log("blob created.... saving");
-        saveAs(blob, filename); 
-    },
-    
-    Database_Name : "database.txt",
-    
-   Database_Var : "my_links",
-   
-    export_tag : function (category, tag)
-    {
-        var context = this.dlink.get_category_context(category);
-        var data = context.pages[tag];
-        this.save_data_to_file(tag + ".txt", data, "my_page");
-    },
-    
-    export_category : function (name)
-    {
-        this.save_data_to_file(name + ".txt", this.dlink.database[name], "my_cat");
-    }
-});
 
 ;
 /*
@@ -491,16 +417,6 @@ Vue_Application.prototype.mixin_vue = function ()
 }
 
 
-Vue_Application.prototype.clear_ls = function ()
-{
-    delete localStorage["Dynalinks"];
-}
-
-Vue_Application.prototype.save_to_ls = function ()
-{
-    var text = this.dynalinks.toJSON();
-    localStorage.setItem("Dynalinks", text);
-}
 
 Vue_Application.prototype.add_item = function ()
 {
@@ -515,10 +431,12 @@ Vue_Application.prototype.add_item = function ()
 
 Vue_Application.prototype.show_category_view = function ()
 {
+    
     var category = this.dynalinks.category_list[0].href;
     var url = this.dynalinks.create_url(category);
     mr.navigate(url, true);        
     console.log("show category view", url);
+    
 }
 
 Vue_Application.prototype.show_category_page = 	function (category, page)
@@ -591,6 +509,8 @@ Vue_Application.prototype.add_record_from_browser = function (title, url)
 {
 	var self = this;
 
+    console.log("add record from browser", title, url);
+    
 	var message = 
 	{
         _id: '',

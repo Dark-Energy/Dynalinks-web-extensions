@@ -31,7 +31,7 @@ var Funcs = {};
 Funcs["add-record"] = open_dialog;
 Funcs["show-links"] = open_table;
 Funcs["manage-tabs"] = open_manager;
-Funcs["extract-file"] = extract_file;//test_script;
+//Funcs["extract-file"] = extract_file;//test_script;
 
 
 

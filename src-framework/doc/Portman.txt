@@ -1,0 +1,38 @@
+  
+
+Active end of connection, which may be also listen messsages  
+  
+  function Portman(name, bipolar, try_reconnect)
+  
+name = name of port in function runtime.connect({name: this.name});
+bipolar - port may listen arrived messages
+try_reconnect - when rise event onDisconnect, try reset all and begin connection again
+
+
+EVENTS
+process_message - only event, purposed for message listener
+
+PROPERTIES
+last_message -  last arrived message saved here
+try_reconnect - if true, when rise disconnect, port trying reset all and begin connection again
+this.disconnected - boolean, true or false
+
+
+METHODS
+post - send message, which is JSON-like object 
+
+
+var port = new Portman("nowhere", true);
+port.processMessage = function (m)
+{
+    console.log("there is response!", m);
+}
+
+port.post({request: "please, answer me"});
+
+
+TO DO
+
+May be, all active port must be bipolar. 
+And message listener need pass as parameter to constructor.
+

@@ -23,7 +23,7 @@ Application.prototype.create_database = function(dynalinks)
 	this.get_database_name();    
 	
 	var self = this;
-    if (this.initialize()) {
+    if (this.initialize) {
         this.initialize();
 	}
 }
@@ -76,60 +76,30 @@ Application.prototype.move_tag = function ()
 	form.show();
 }
 
-//show form and add link to database
-Application.prototype.add_item = function ()
-{
-}
-
-
-Application.prototype.edit_item = function (id)
-{
-	var item = this.dynalinks.get_from_active_context(id);
-	var params = {
-		'type': 'custom'
-	};
-	
-	//create edit form
-	var foo = document.createElement("div");
-	var context = {};
-	context.tags = this.dynalinks.context.tags;
-	context.item = item;
-	ko.renderTemplate("edit-item-template", context, {}, foo);
-	params.form = foo;	
-
-	var self = this;
-	params.handler = function (value) 
-	{
-		var result = self.dynalinks.update_item(item, value);
-		mr.navigate(self.dynalinks.create_url(result.category, result.tag), true);			
-	}
-	var form = new PopupForm(params);
-	form.show();
-	
-}
-
-Application.prototype.turn_edit = function ()
-{
-	if (this.dynalinks.display.mode === "page_view") {
-		this.dynalinks.display.mode = "page_edit";
-	}
-	else {
-		this.dynalinks.display.mode = "page_view";
-	}
-	this.dynalinks.show_page(this.dynalinks.context.current_tag);
-}
 
 Application.prototype.export_category = function ()
 {
-    var saver = new Dynalinks_File_Proxy(this.dynalinks);
-	saver.export_category(this.dynalinks.context.category_name);
+    
+    var name = this.dynalinks.context.category_name;
+    var data = this.dynalinks.database[name];
+    var text = JSON.stringify(data);
+    
+    var saver = new Dynalinks_File_Proxy();
+    saver.save_text_as_blob(text, "category_"+name+".json");
+
 }
 
 Application.prototype.export_tag = function ()
 {
-    var saver = new Dynalinks_File_Proxy(this.dynalinks);
-	saver.export_tag(this.dynalinks.context.category_name, 
-		this.dynalinks.context.current_tag);
+	var category = this.dynalinks.context.category_name;
+    var tag = this.dynalinks.context.current_tag;
+    
+    var context = this.dynalinks.get_category_context(category);
+    var data = context.pages[tag];
+    var text = JSON.stringify(data);
+    
+    var saver = new Dynalinks_File_Proxy();
+    saver.save_text_as_blob(text, tag+".json");
 }
 
 Application.prototype.remove_category = function ()
@@ -180,11 +150,6 @@ Application.prototype.create_category = function ()
 	form.show();
 }
 
-Application.prototype.move_item = function ()
-{
-	
-}
-
 
 Application.prototype.search = function (text)
 {
@@ -198,20 +163,6 @@ Application.prototype.search = function (text)
 Application.prototype.show_search_results = function (value)
 {
 	var results = this.dynalinks.search(["text", "href"], value);	
-
-	var context = 
-	{
-		results:results
-	};
-	var view = document.getElementById("page-content");
-	ko.cleanNode(view);
-	view.innerHTML = '';
-	
-	ko.renderTemplate("template-search-result", context, {}, view);	
-}
-
-Application.prototype.init_router = function()
-{
 }
 
 
@@ -223,19 +174,7 @@ Application.prototype.get_database_name = function ()
 
 Application.prototype.save_to_file = function (filename)
 {
-    var saver = new Dynalinks_File_Proxy(this.dynalinks);
-	saver.save_to_file(filename || this.Save_Filename);
+    var proxy = new Dynalinks_File_Proxy();
+    proxy.save_storage_to_file();
 }
-
-Application.prototype.initialize = function ()
-{
-	this.init_router();
-	if (this._child_init) {
-		this._child_init();
-	}
-	
-}
-
-
-
 

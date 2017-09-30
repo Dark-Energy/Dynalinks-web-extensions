@@ -161,3 +161,4 @@ ready_port.run();
 */
 
 browser.runtime.onInstalled.addListener(test_install);
+

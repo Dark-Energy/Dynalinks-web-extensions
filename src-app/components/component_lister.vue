@@ -10,6 +10,7 @@
     <keep-alive>
         <component :is="page_content_view" 
         :updated_record="updated_record"
+        :reshow = "reshow"
         :message="message"
         :links_array="current_page"
         :category="this.current_category_name">
@@ -72,6 +73,9 @@ export default {
                 "main_page_view": "page-content-grid",
                 "features": {},
                 "update_info": {},
+                
+                
+                "reshow": true,
             }
 
 
@@ -136,14 +140,16 @@ export default {
 			},
 			"show_update_form": function (message)
 			{
-                //console.log("Show update form", message);
+                console.log("Show update form", message);
                 
                 if (!message.from_browser) {
                     message.current_category = this.current_category_name;
                     message.current_page = this.active_page_name;
                 }
-                this.updated_record = message;
-                this.page_content_view = UpdateForm;                
+                this.updated_record = undefined;
+                this.page_content_view = UpdateForm;
+                this.updated_record = message;                
+                this.reshow = !this.reshow;
                
                 //console.log("show message go to dialog ", message);
 
@@ -167,7 +173,13 @@ export default {
 				this.category_url = this.base_url + category_name + "/";
 				this.active_page_name = '';
 				this.current_category_name = category_name;
-			},
+                
+                //show first page        
+                this.page_content_view = page_view_grid;
+                this.active_page_name = current_category.tags[0];
+				this.current_page = current_category.pages[this.active_page_name];
+                   
+            },
 
 
 			"show_page": function (category_name, page_name, dlink)
@@ -191,12 +203,10 @@ export default {
                     console.error("Terrify error! Category " + category_name + "was requsted, but undefined got");
                 }
 
-                var page = category.pages[page_name];
-
-				this.current_page = page;
-                this.active_page_name = page_name;
-
                 this.page_content_view = page_view_grid;
+                this.active_page_name = page_name;
+				this.current_page = category.pages[this.active_page_name];
+                
 
 
 			},

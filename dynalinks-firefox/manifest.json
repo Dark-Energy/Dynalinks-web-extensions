@@ -7,7 +7,7 @@
     },
 
   "name": "Dynalinks",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "Dynalinks Firefox",
   "manifest_version": 2,
   "homepage_url": "https://github.com/Dark-Energy",
@@ -20,6 +20,7 @@
     "activeTab",
     "tabs",
     "storage",
+    "unlimitedStorage",
     "nativeMessaging"
   ],
 
@@ -39,7 +40,7 @@
         "lib/utils.js",              
         "lib/framework.js",        
         "lib/tab_manager.js",
-        "scripts/testing_data.js",    
+        "scripts/testing_data.js",
         "scripts/init.js",
         "scripts/fabric_dialog.js",
         "scripts/dynalinks.min.js", 
@@ -56,5 +57,5 @@
         "/pages/links_view/links_view.html"
     ],
    
-    "content_security_policy": "script-src 'self' 'unsafe-eval' ; object-src 'self'; img-src 'self' 'unsafe-eval'"
+    "content_security_policy": "script-src 'self' 'unsafe-eval' ; object-src 'self' ; img-src 'self' 'unsafe-eval'"
 }

@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+
+</head>
+
+<body>
+
+<input type="file" id="file_input">
+
+
+<script>
+
+var text;
+var file;
+
+function saveAs(text)
+{
+
+    var url = "data:text/plain;charset=utf-8," + text;
+    //var url = "data:attachment/file;" + text;
+    //var url = "data:text/application;charset=utf-8," + text;    
+    
+    /*
+    //not working, save only small fragment data with any mime type
+    var popup = window.open(url, '_blank');
+    if(!popup) {
+        window.location.href = url;
+    }
+    // release reference before dispatching
+    url=undefined; 
+    */
+    
+    /*
+    //also dont work, save only small fragment
+    a = document.createElement('a');
+    a.href= url;
+	var event = new MouseEvent("click");
+	a.dispatchEvent(event); 
+    */
+    
+    
+    
+  
+    file.type = "data:text/plain;charset=utf-8";
+    var url = window.URL.createObjectURL(file);
+    console.log("blob url", url);
+    
+    /*
+    //open blob in window, blocks by adblockers
+    var opened = window.open(url, "_blank");
+    if (!opened) {
+        window.location.href = object_url;
+    }
+    */
+    
+    /*
+    var save_link = document.createElement('a');
+    save_link.href = url;
+    save_link.download = "test";
+	var event = new MouseEvent("click");
+	save_link.dispatchEvent(event); 
+            
+    //dispatch_all();
+    //revoke(object_url);
+    */
+}
+
+
+var file_input = document.getElementById("file_input");
+
+
+file_input.addEventListener("change", read_file, false);
+
+
+
+
+function read_file()
+{
+    console.log("read blob");
+    var file_list = file_input.files;
+    
+    file = file_list[0];
+
+    var fr = new FileReader();
+    fr.onloadend = function ()
+    {
+        text = fr.result
+    }
+    
+    fr.readAsText(file) // "utf-8" by default
+    
+       
+    
+}
+</script>
+
+<button id="save" type="button" onclick="saveAs(text)">save</button>
+
+<h1>TEST</h1>	
+<div id="main-menu-app">
+
+</div>
+
+
+<div id="app">
+</div>
+
+</body>
+

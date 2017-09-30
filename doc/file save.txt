@@ -1,0 +1,94 @@
+file = file_list[0];
+
+var fr = new FileReader();
+fr.onloadend = function ()
+{
+    text = fr.result
+}
+
+fr.readAsText(file) // "utf-8" by default
+    
+    
+    //not working, save only small fragment data with any mime type    
+function saveAs(text)
+{
+
+    var url = "data:text/plain;charset=utf-8," + text;
+    //var url = "data:attachment/file;" + text;
+    //var url = "data:text/application;charset=utf-8," + text;    
+    var popup = window.open(url, '_blank');
+    if(!popup) {
+        window.location.href = url;
+    }
+    
+    
+}
+    
+It's too
+function saveAs(text)    
+{
+    var url = "data:text/plain;charset=utf-8," + text;
+    //var url = "data:attachment/file;" + text;
+    //var url = "data:text/application;charset=utf-8," + text;    
+    
+    //also dont work, save only small fragment
+    a = document.createElement('a');
+    a.href= url;
+
+	var event = new MouseEvent("click");
+	a.dispatchEvent(event); 
+    
+    url=undefined;     
+}    
+    
+    
+    //open blob in window, blocks by adblockers    
+function saveAs(file)
+{    
+    file.type = "data:text/plain;charset=utf-8";
+    var url = window.URL.createObjectURL(file);
+    var opened = window.open(url, "_blank");
+    if (!opened) {
+        window.location.href = object_url;
+    }
+}
+   
+   
+   
+function save_as(file)   
+{
+
+    file.type = "data:text/plain;charset=utf-8";
+    var url = window.URL.createObjectURL(file);
+   
+    var save_link = document.createElement('a');
+    save_link.href = url;
+    save_link.download = "test";
+	var event = new MouseEvent("click");
+	save_link.dispatchEvent(event); 
+            
+    //we are not give message, when file saved
+    //because give some time for this process and free resources
+    //because of this us need timer
+    
+    var timeout = 60.0/4.0 // in ms
+    function action ()
+    {
+        window.URL.revokeObjectURL(url);
+        console.log("revoke this");
+    }
+    //setTimeout(revoker, arbitrary_revoke_timeout);
+    browser.alarms.create({ delayInMinutes: timeout });
+}
+   
+
+   
+for purpose extension we need replace this with alarms   
+
+
+object url 
+blob:moz-extension://ff30b198-2b2d-4be8-9361-a141b0e4533e/fb8b44c2-5f36-4de7-a865-17b24c6b4093
+
+
+blob url 
+blob:moz-extension://ff30b198-2b2d-4be8-9361-a141b0e4533e/8ca9db42-1281-4cf3-8040-4d51913f3f32

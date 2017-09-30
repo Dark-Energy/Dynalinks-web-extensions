@@ -1,3 +1,4 @@
+
   function Portman(name, bipolar, try_reconnect)
 {
     this.name = name;
@@ -5,6 +6,7 @@
     this.try_reconnect = !!try_reconnect;
     this.process_message = undefined;
     this.last_message = '';
+    this.disconnected = false;
 
 
     this.private_create_port();
@@ -19,7 +21,6 @@ Object.assign(Portman.prototype,
 
     private_create_port: function ()
     {
-        //console.log("Create port " + this.name);
         if (this.port !== undefined) return;
 
         this.port = browser.runtime.connect({"name":this.name});
@@ -27,10 +28,12 @@ Object.assign(Portman.prototype,
             this.create_message_listener();
             this.port.onMessage.addListener(this.message_listener);
         }
+        this.disconnected = false;
 
         var self = this;
         this.disconnect_listener = function (port)
         {
+            self.disconnected = true;
             console.error("active port with name {{ " + port.name +" }}get message about disconnect");
             console.error("port.error is "+port.error);
             console.error("port object is ", port);
@@ -46,7 +49,7 @@ Object.assign(Portman.prototype,
     restart_on_disconnect: function ()
     {
         this.dispose();
-        console.log("trying create new port");
+        //console.log("trying create new port");
         this.private_create_port();
     },
 
@@ -93,3 +96,4 @@ Object.assign(Portman.prototype,
        this.message_listener = listener;
     },
 });
+

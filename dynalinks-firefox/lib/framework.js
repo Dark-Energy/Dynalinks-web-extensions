@@ -162,7 +162,7 @@ Object.assign(Portman.prototype,
             this.create_message_listener();
             this.port.onMessage.addListener(this.message_listener);
         }
-        self.disconnected = false;
+        this.disconnected = false;
 
         var self = this;
         this.disconnect_listener = function (port)
@@ -262,22 +262,26 @@ Object.assign(PortObjListener.prototype, {
 
         dispose : function ()
         {
-           this.dispose_message_listener();
            if (this.port !== undefined) {
+                this.dispose_message_listener();               
                 if (this._inner_connect_listener !== undefined) {
                     this.port.onConnect.removeListener(this._inner_connect_listener);
                     this._inner_connect_listener = undefined;
                 }
            }
+           this.port.onDisconnect.removeListener(this.disconnect_listener);
+           this.port = undefined;
         },
 
         private_set_disconnect_listener: function ()
         {
+            var self = this;
             if (!this.disconnect_listener) {
                 this.disconnect_listener = function (e)
                 {
                     console.log("Disconnect port with name {{"+e.name+"}} with passive ends");
                     console.log(e);
+                    self.dispose();
                 }
             }
             this.port.onDisconnect.addListener(this.disconnect_listener);
@@ -306,9 +310,10 @@ Object.assign(PortObjListener.prototype, {
 
         _private_message_listener: function (message)
         {
-            //console.log("port "+this.port.name+"get message", message);
+            console.log("port "+this.port.name+" get message ", message);
+            console.log(this.process_message);
             this.last_message = message;
-            this.messages.push(message);
+            //this.messages.push(message);
             if (this.process_message) {
                 this.process_message(this.last_message);
             }
@@ -330,8 +335,8 @@ Object.assign(PortObjListener.prototype, {
 
         _private_connect_listener : function (port)
         {
+            console.log("connect offer " +this.name + " from "+ port.name);            
             this.$emit_connect_event(port);
-            //console.log("connect offer", this.name, port.name);
             if (port.name === this.name) {
                 //console.log("name of ports identity<"+port.name+ ">, connect!");
                this.port = port;
