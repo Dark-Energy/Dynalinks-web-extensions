@@ -6,6 +6,7 @@
       <link rel="stylesheet" type="text/css" href="css/edit-form.css"  />
         <link rel="stylesheet" type="text/css" href="css/news-2.css"  /> 
 
+
 </head>
 
 <body>
@@ -38,9 +39,10 @@
 
 var event_hub = DAE.create_event_hub();
 
-var app = {};
 
 var dlinks = new Dynalinks(create_testing_data());
+
+console.log(dlinks);
 
 Vue.mixin({
     created: function () {
@@ -49,26 +51,16 @@ Vue.mixin({
 }); 
 
 
-var vue = DAE.create_vue_app(dlinks);
-///console.log(vue);
-
-vue.$emit("my_command", "show_page", "English", "Словари", dlinks);
-/*
-vue.$emit("my_command", "show_category", "English", dlinks);
-vue.$emit("my_command", "show_error", "fuck");
-vue.$emit("my_command", "show_page", "English", "Словари", dlinks);
-vue.$emit("my_command", "show_error", "shit");
-vue.$emit("my_command", "show_page", "English", "Словари", dlinks);
-vue.$emit("my_command", "show_error", "sucker");
-vue.$emit("my_command", "show_page", "English", "Словари", dlinks);
-*/
-
-/*
-vue.$emit("my_command", "show_update_form", true, 'English', "Словари", '', '', function (i) {
-    console.log(i)
-}, function(i) {console.log(i)});
-
-*/
-
+var app = new Vue({ el:"#app",
+    template: '<CategoryView :category="category" :page="page" :base_url="base_url" />',
+    data : {
+        category: "English",
+        "base_url": "view/",
+        "page": "",
+    },
+    components: {
+        'CategoryView': DAE.CategoryView,
+    }
+});
 
 </script>

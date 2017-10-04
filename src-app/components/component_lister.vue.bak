@@ -4,15 +4,16 @@
 
     <div class="clear-block">&nbsp;</div>
 
+    <FeaturesLine v-bind:features="features" />
+    <PageMenu v-bind:tags="tags" v-bind:base_url="category_url" />
+
     <keep-alive>
         <component :is="page_content_view" 
         :updated_record="updated_record"
         :reshow = "reshow"
-        :message="message" 
-        :page_name="active_page_name"        
-        :category="current_category_name"
-
-        :base_url="base_url">
+        :message="message"
+        :links_array="current_page"
+        :category="this.current_category_name">
         </component>
     </keep-alive>
 </div>
@@ -22,13 +23,15 @@
 <script>
 
 import {event_hub} from './event_hub.js';
+import FeaturesLine from './features-line.vue';
 import DropdownCategoryMenu from './dropdown-category-menu.vue';
+import PageMenu from './page-menu.vue';
 import vueTableGrid from './vue_table_grid.vue';
+import page_view_grid from './page-view-grid.vue';
 import page_view_table from './page-view-table.vue';
 import CategoryLineMenu from './category-menu.vue';
 import ErrorMessage from './error-message.vue';
 import UpdateForm from './vue_update_form.vue';
-import CategoryView from './category_view.vue';
 
 export default {
         name: "MainComponent",
@@ -36,8 +39,10 @@ export default {
         components: {
             'form-update': UpdateForm,
             'vueTableGrid': vueTableGrid,
-            'CategoryView': CategoryView,
+            'FeaturesLine': FeaturesLine,
+			'PageMenu': PageMenu,
 
+			'page-view-grid': page_view_grid,
 			'page-view-table': page_view_table,
 
 			'CategoryLineMenu': CategoryLineMenu,
@@ -63,10 +68,11 @@ export default {
 
                 "current_category_name" : "",
 
-                "page_content_view": CategoryView,
+                "page_content_view": "page-content-grid",
                 "error_message": {},
+                "main_page_view": "page-content-grid",
+                "features": {},
                 "update_info": {},
-                "active_page_name" : '',
                 
                 
                 "reshow": true,
@@ -116,6 +122,15 @@ export default {
             });
         },
 
+        watch: {
+            dynalinks: function (value)
+            {
+            	this.category_list = value.category_list;
+                this.categories = value.dynalinks.categories;
+
+            }
+        },
+
 		methods: {
 
 			"show_error": function (error)
@@ -147,29 +162,53 @@ export default {
 				}
 			},
 
-			"show_category": function (category_name)
+			"show_category": function (category_name, dlink)
 			{
-                //console.log("function show category", category_name);
                 if (!category_name) {
-                    category_name = this.$dynalinks.category_list[0].href;
+                    category_name = dlink.category_list[0].href;
                 }
+				var current_category = dlink.categories[category_name];
+                this.tags = current_category.tags;
+                this.features = current_category.features;
+				this.category_url = this.base_url + category_name + "/";
+				this.active_page_name = '';
+				this.current_category_name = category_name;
                 
-                this.current_category_name = category_name;                
-                var category = this.$dynalinks.categories[category_name];
-                this.active_page_name = category.tags[0];
-
-                this.page_content_view = CategoryView;                
+                //show first page        
+                this.page_content_view = page_view_grid;
+                this.active_page_name = current_category.tags[0];
+				this.current_page = current_category.pages[this.active_page_name];
+                   
             },
 
 
 			"show_page": function (category_name, page_name, dlink)
 			{
-                //console.log("function show page", category_name, page_name);
-                this.show_category(category_name, dlink);
+
+                //console.log("show page category <<" + category_name+">>" +"page<<"+page_name+">>");
+                
+                //need change category
+                if (category_name && category_name !== this.current_category_name) {
+                    this.show_category(category_name, dlink);
+                }
             
-                //console.log("change active page name", page_name);
-                this.active_page_name = page_name || '';
-                this.page_content_view = CategoryView;
+                //show category only
+                if (!page_name) {
+                    //this.show_category(category_name, dlink);
+                    //return;
+                }
+
+                var category = dlink.categories[this.current_category_name];
+                if (!category) {
+                    console.error("Terrify error! Category " + category_name + "was requsted, but undefined got");
+                }
+
+                this.page_content_view = page_view_grid;
+                this.active_page_name = page_name;
+				this.current_page = category.pages[this.active_page_name];
+                
+
+
 			},
 
 			"show_search_result": function (results)
@@ -186,6 +225,8 @@ export default {
 
 			"change_page_view": function (new_view)
 			{
+				this.main_page_view = new_view;
+				//this.page_content_view = new_view;
 				this.show_page(this.active_page_name);
 			},
 

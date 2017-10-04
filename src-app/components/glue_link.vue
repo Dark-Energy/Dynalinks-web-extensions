@@ -4,7 +4,6 @@ export default {
 			name: 'GlueLink' ,
 			props: ['base_url','url'],
 			render: function (createElement) {
-                //console.log("Glue", this.base_url, this.url);
 				var href = '#' + this.base_url;
 				var text = this.url.text || this.url;
 				if (this.url.href) {

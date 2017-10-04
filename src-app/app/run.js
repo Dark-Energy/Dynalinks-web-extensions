@@ -72,11 +72,13 @@ Vue_Application.prototype.add_item = function ()
 Vue_Application.prototype.show_category_view = function ()
 {
     
+    //mr.hash_change();
+
     var category = this.dynalinks.category_list[0].href;
     var url = this.dynalinks.create_url(category);
     mr.navigate(url, true);        
-    console.log("show category view", url);
-    
+    //console.log("show category view", url);
+
 }
 
 Vue_Application.prototype.show_category_page = 	function (category, page)
@@ -86,6 +88,7 @@ Vue_Application.prototype.show_category_page = 	function (category, page)
         console.log("Either: 1) category " + category + " is wrong");
 		this.vue.$emit("my_command", "show_error", "Error! Category " + category + " not found!");
 	} else {
+        //console.log("routing", category,page);
         this.dynalinks.set_category(category);
 		if (page) {
 			this.dynalinks.set_page(page);	
@@ -192,6 +195,7 @@ Vue_Application.prototype.add_record_to_category = function (category)
     
     this.vue.$on("record->create", function (response, record) {
         if (response === 'reject') {
+            console.log("reject to ", self.dynalinks.create_url(category));
             mr.navigate(self.dynalinks.create_url(category), true);
         }
         else if (response === "accept") {

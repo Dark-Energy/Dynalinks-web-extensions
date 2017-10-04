@@ -1,13 +1,13 @@
 ﻿<template>
 <div class="tab-content" id="page-content">
 	<div class="control-panel">
-		<a href="" class="edit-button link-button" @click.stop.prevent="turn_edit"> Правка </a>
+		<a href="" class="edit-button link-button" @click.stop.prevent="turn_edit"> Edit </a>
 	</div>
     <div class="data-grid">
         <div class="editable-link" v-for="item in links_array">
             <div class="button-panel" v-if="edit_mode">
-                <a class="edit-btn" :href="build_update_link(item)" :key="item._id"> Правка </a>
-                <button type="button" class="delete-btn"  @click="delete_record(item._id)" v-bind:key="item._id"> Удалить </button>
+                <a class="edit-btn" :href="build_update_link(item)" :key="item._id"> Edit </a>
+                <button type="button" class="delete-btn"  @click="delete_record(item._id)" v-bind:key="item._id"> Remove </button>
             </div>
             <a :href="item.href" :key="item._id"> {{item.text}} </a>
         </div>

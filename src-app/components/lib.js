@@ -56,3 +56,6 @@ export {GlueLink};
 
 //import CategoryTagSelect from './category_tag_select.vue';
 //export {CategoryTagSelect}
+
+import CategoryView from './category_view.vue';
+export {CategoryView}

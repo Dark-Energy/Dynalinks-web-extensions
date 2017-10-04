@@ -146,17 +146,18 @@ export default {
                 this.choosed_tag = value.current_page;
             } else if (value.edit) {
                 this.category = value.current_category;
-                this.choosed_tag = value.current_page;
+                this.choosed_tag = value.record.tag;
             }
             this.new_tag = '';
             
         },
-        /*
+        
         change_category() {
-            var context = this.$dynalinks.categories[this.category];
-            this.tag_list = context.tags;
-            this.choosed_tag = context.tags[0];
-        },*/
+            //var context = this.$dynalinks.categories[this.category];
+            //this.tag_list = context.tags;
+            //this.choosed_tag = context.tags[0];
+            
+        },
         create_category :function (e) {
             var input = this.$refs["new_category_input"];
             var name = input.value.trim();
@@ -164,14 +165,18 @@ export default {
                 var response = this.$dynalinks.add_category(name);
                 if (response.valid) {
                     this.category = name;
-                    this.change_category(); //why ia must do it by hands? where mere reactivity?
+                    //this.change_category(); //why ia must do it by hands? where mere reactivity?
                 } else {
                     console.error(response.reason);
                 }
             }
         },
 		cancel: function () {
-            this.$root.$emit("record->update", "reject");
+            if (this.updated_record.edit) {
+                this.$root.$emit("record->update", "reject");
+            } else {
+               this.$root.$emit("record->create", "reject");
+            }
 		},
         validate: function ()
         {

@@ -3,10 +3,10 @@
         <thead>
         <tr>
             <th>
-            <span v-on:click="sort_address"> Address </span>
+            <button type="button" v-on:click="sort_address"> Sort by Address </button>
             </th>
             <th>
-            <span v-on:click="sort_title"> Title </span>
+            <button type="button" v-on:click="sort_title"> Sort by Title </button>
             </th>
             <th>Close tab</th>
             <th>Go</ht>

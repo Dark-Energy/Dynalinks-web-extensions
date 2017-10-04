@@ -350,3 +350,11 @@ Disable the browser action only for the active tab:
 browser.browserAction.onClicked.addListener((tab) => {
   browser.browserAction.disable(tab.id);
 });
+
+
+
+# —охран€лка #
+
+»так, € выбросил filesaver.js и использовал простой код сохранени€. ѕри помощи data url и атрибута download элемента a (ссылка) почти любой текст можно сохранить в виде файла.   сожалению, текст должен быть закодирован как любое url, либо приходитс€ использовать blob. 
+
+get rid of ugly fileserver.js, instead it apply my own saver. Unforntunatly, either i have to use blobs, or coding file with url encoding.

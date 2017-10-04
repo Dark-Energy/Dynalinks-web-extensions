@@ -23,7 +23,7 @@ Application.prototype.create_database = function(dynalinks)
 	this.get_database_name();    
 	
 	var self = this;
-    if (this.initialize()) {
+    if (this.initialize) {
         this.initialize();
 	}
 }
@@ -74,33 +74,6 @@ Application.prototype.move_tag = function ()
 	}
 	var form = new PopupForm(params);
 	form.show();
-}
-
-
-Application.prototype.edit_item = function (id)
-{
-	var item = this.dynalinks.get_from_active_context(id);
-	var params = {
-		'type': 'custom'
-	};
-	
-	//create edit form
-	var foo = document.createElement("div");
-	var context = {};
-	context.tags = this.dynalinks.context.tags;
-	context.item = item;
-	ko.renderTemplate("edit-item-template", context, {}, foo);
-	params.form = foo;	
-
-	var self = this;
-	params.handler = function (value) 
-	{
-		var result = self.dynalinks.update_item(item, value);
-		mr.navigate(self.dynalinks.create_url(result.category, result.tag), true);			
-	}
-	var form = new PopupForm(params);
-	form.show();
-	
 }
 
 
@@ -201,9 +174,6 @@ Application.prototype.get_database_name = function ()
 
 Application.prototype.save_to_file = function (filename)
 {
-    //var saver = new Dynalinks_File_Proxy(this.dynalinks);
-	//saver.save_to_file(filename || this.Save_Filename);
-    
     var proxy = new Dynalinks_File_Proxy();
     proxy.save_storage_to_file();
 }
@@ -367,7 +337,6 @@ var event_hub;
 
 function Vue_Application(dlink)
 {
-
     this.create_database(dlink);
 }
 
@@ -416,7 +385,11 @@ Vue_Application.prototype.mixin_vue = function ()
     });
 }
 
+/*
 
+COMMANDS
+
+*/
 
 Vue_Application.prototype.add_item = function ()
 {
@@ -432,11 +405,13 @@ Vue_Application.prototype.add_item = function ()
 Vue_Application.prototype.show_category_view = function ()
 {
     
+    //mr.hash_change();
+
     var category = this.dynalinks.category_list[0].href;
     var url = this.dynalinks.create_url(category);
     mr.navigate(url, true);        
-    console.log("show category view", url);
-    
+    //console.log("show category view", url);
+
 }
 
 Vue_Application.prototype.show_category_page = 	function (category, page)
@@ -446,6 +421,7 @@ Vue_Application.prototype.show_category_page = 	function (category, page)
         console.log("Either: 1) category " + category + " is wrong");
 		this.vue.$emit("my_command", "show_error", "Error! Category " + category + " not found!");
 	} else {
+        //console.log("routing", category,page);
         this.dynalinks.set_category(category);
 		if (page) {
 			this.dynalinks.set_page(page);	
@@ -464,9 +440,6 @@ Vue_Application.prototype.show_search_result = function (value)
 	this.search_results = results;
 	this.vue.$emit("my_command", "show_search_result", results);
 }
-
-
-
 
 
 Vue_Application.prototype.import_database = function ()
@@ -555,6 +528,7 @@ Vue_Application.prototype.add_record_to_category = function (category)
     
     this.vue.$on("record->create", function (response, record) {
         if (response === 'reject') {
+            console.log("reject to ", self.dynalinks.create_url(category));
             mr.navigate(self.dynalinks.create_url(category), true);
         }
         else if (response === "accept") {
