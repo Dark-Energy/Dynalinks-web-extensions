@@ -3,7 +3,6 @@
 
 
 function create_main_menu(application, element_id) {
-        console.log(application, "appl");
     if (element_id === undefined) {
         console.error("undefined element_id in create_main_menu!");
         element_id = '#main-menu-app';
@@ -54,8 +53,8 @@ export {event_hub, create_event_hub} from './event_hub.js';
 import GlueLink from './glue_link.vue';
 export {GlueLink};
 
-//import CategoryTagSelect from './category_tag_select.vue';
-//export {CategoryTagSelect}
+import CategoryTagSelect from './category_tag_select.vue';
+export {CategoryTagSelect}
 
 import CategoryView from './category_view.vue';
 export {CategoryView}

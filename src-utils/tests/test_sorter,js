@@ -1,0 +1,99 @@
+/*
+
+var test_set = [
+    "http://somesite.com/asdfa/asdfd/asdf%c37%d25%e11",
+    "https://somesite.com/asdfa/asdfd/asdf%c37%d25%e11",
+    "file://C:/asdfdf",
+];
+
+
+for(var i = 0; i < test_set.length; i++) {
+    var x = test_set[i];
+    x = x.replace(/^([a-z]+?\:\/\/)/, '');
+    console.log(x);
+}
+
+*/
+
+function Sorter()
+{
+    this.directions = {};
+}
+
+Sorter.prototype.sort_by_key = function(list, key, prepare_func)
+{
+    if (this.directions[key] === undefined) {
+        this.directions[key] = true;
+    }
+    
+    var reverse = !this.directions[key];
+    
+    function cmp_func(a,b)
+    {
+        var x = a[key];
+        var y = b[key];
+        if (prepare_func) {
+            x = prepare_func(x);
+            y = prepare_func(y);
+        }
+        
+        var r = 0;
+        if (x > y) {
+          r = 1;
+        } else if (x < y) {
+          r = -1;
+        }
+        if (reverse) {
+            r = 0 - r;
+        }
+        return r;
+    }
+
+    list.sort(cmp_func);
+}
+
+Sorter.prototype.toggle_direction = function(key)
+{
+    if (this.directions[key] === undefined){
+        this.directions[key] = true;
+    } else {
+        this.directions[key] = !this.directions[key];
+    }
+}
+
+
+var s = new Sorter();
+
+
+function gen_list()
+{
+    var list = [];
+   for(var i =0;i < 5; i++) {
+       list.push({
+           "digit": i,
+           "text": "test " + (5-i),
+       });
+   }
+   return list;
+}
+var list = gen_list();
+
+s.sort_by_key(list, 'digit');
+console.log(list);
+console.log("by text");
+s.sort_by_key(list, 'text');
+console.log(list);
+console.log('reverse');
+s.toggle_direction('text');
+s.sort_by_key(list, 'text');
+console.log(list);
+
+console.log("test prepare");
+s.sort_by_key(list, 'digit', function (x) {return 10+x;});
+console.log(list);
+s.sort_by_key(list, 'digit', function (x) {return 10-x;});
+console.log(list);
+
+
+
+

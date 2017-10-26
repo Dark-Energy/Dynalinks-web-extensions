@@ -39,10 +39,12 @@ var Tab_Manager =
         title: "other title",
         index: 1,
     },
+
+    
     ],
     get_all_tabs_info: function () {
-        console.log("give all tab info", this.tablist);
-        this.$emit("get_all_tabs_info", {tabinfo:this.tablist});
+        console.log("give all tab info");
+        this.$emit("get_all_tabs_info", this.tablist);
     }
 };
 
@@ -53,23 +55,32 @@ Object.assign(Tab_Manager, Event_Mixin);
 
 <script type="text/javascript" src="../external/vue.js"> </script>
 <script type="text/javascript" src="../build/render.js"> </script>
-<script type="text/javascript" src="../../dynalinks-firefox/scripts/dynalinks.min.js"> </script>
-<script type="text/javascript" src="js/testing_data.js"> </script>
 
 
 <script>
 
 
+
+var test_data =
+[
+    {
+        url: "!",
+        title: "fuck",
+        id: 0,
+        my_id: "asdf",
+        
+    },
+    
+    {
+        url: "2",
+        title: "shit",
+        id: 5,
+        my_id: ";lkj",
+    },
+];
+
+
 var event_hub = new Vue();
-
-
-var dlinks = new Dynalinks(create_testing_data());
-Vue.mixin({
-    created: function () {
-        this.$dynalinks= dlinks;
-    }
-}); 
-
 
 	var app = new Vue({
 		el: '#app',
@@ -79,8 +90,18 @@ Vue.mixin({
         components: {
             'vueTableGrid': DAE.vueTableGrid,
         },
-        template: '<vueTableGrid :event_hub="event_hub"/>',
+        template: '<vueTableGrid v-bind:event_hub="event_hub"/>',
     });
 
+    /*
+    event_hub.$on("get", function (callback) { 
+        console.log("give callback, have to give them info", test_data);
+        callback(test_data);
+    });  
+    
+    event_hub.$emit("start", "get started");
+    */
+    
+    //event_hub.$emit("set->tabinfo", test_data);
 
 </script>

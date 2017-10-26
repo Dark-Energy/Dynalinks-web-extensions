@@ -259,3 +259,38 @@ function color_console(text, style)
 
 
 
+function copy_keys_if_defined(src, dest, keys)
+{
+    for(var i = 0;i < keys.length; i++) {
+        var key = keys[i];
+        if (src[key] !== undefined) {
+            dest[key] = src[key];
+        }
+    }
+}
+
+
+
+function filter_list(list, filter)
+{
+    var result = [];
+    for(var i = 0; i < list.length; i++) {
+        var elem = list[i];
+        if (filter(elem)) {
+            result.push(elem);
+        }
+    }
+    return result;
+}
+
+
+
+//return these elements from list, which value is in object 
+function filter_list_by_dict(list, dict, key)
+{
+    var r = filter_list(list, function (elem) {
+        var value = elem[key];
+        return (dict[value] !== undefined);
+    });
+    return r;
+}

@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+      <link rel="stylesheet" type="text/css" href="css/line-menu.css"  />
+      <link rel="stylesheet" type="text/css" href="css/edit-form.css"  />
+        <link rel="stylesheet" type="text/css" href="css/news-2.css"  /> 
+
+
+</head>
+
+<body>
+
+
+<h1>TEST</h1>	
+<div id="main-menu-app">
+
+</div>
+
+
+<div id="app">
+</div>
+
+</body>
+
+
+<script type="text/javascript" src="../external/vue.js"> </script>
+<script type="text/javascript" src="../../src-utils/dist/utils.js"> </script>
+<script type="text/javascript" src="../../dynalinks-firefox/scripts/dynalinks.min.js"> </script>
+<script type="text/javascript" src="../build/render.js"> </script>
+<script type="text/javascript" src="../app/app.js"> </script>
+<script type="text/javascript" src="../app/run.js"> </script>
+<script type="text/javascript" src="js/testing_data.js"> </script>
+
+
+
+<script>
+
+
+var event_hub = DAE.create_event_hub();
+
+
+var dlinks = new Dynalinks(create_testing_data());
+
+Vue.mixin({
+    created: function () {
+        this.$dynalinks= dlinks;
+    }
+}); 
+
+
+var app = new Vue({ el:"#app",
+    template: '<CategoryTagSelect :category="category" :tag="page" ref="category_tag_select" />',
+    data : {
+        category: "English",
+        "page": "",
+    },
+    components: {
+        'CategoryTagSelect': DAE.CategoryTagSelect,
+    }
+});
+
+</script>

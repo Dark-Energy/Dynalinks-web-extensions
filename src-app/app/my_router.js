@@ -36,13 +36,14 @@ My_Router.prototype.test_hash = function (url)
 		groups = item.re.exec(url);
 		if (groups) {
 			this.apply_route(groups, item);
-			
+			//console.log("apply route!");
 			return true;
 		}
 	}
 	
 	//if nothing match
 	if (this.default_route) {
+        //console.log("default route");
 		this.default_route.callback.apply(this.default_route.obj, [url]);
 	}
 }
@@ -123,9 +124,11 @@ My_Router.prototype.navigate = function (hash, change_location)
 	if (change_location) {
 		var new_hash = "#"+hash;
 		if (window.location.hash == new_hash) {
+            //console.log("router - test hash");
 			this.test_hash(hash);
 		}
 		else {
+            //console.log("router change location.hash");
 			window.location.hash = new_hash;
 		}
 	}
@@ -136,16 +139,22 @@ My_Router.prototype.navigate = function (hash, change_location)
 
 My_Router.prototype.start = function (force_hash_change)
 {
+    //console.log("router start listen");
 	var self = this;
-	window.addEventListener("hashchange", function (e) 
+    this.private_listener = function (e) 
 	{
+        //console.log("router listenrer - hash changed!", e);
 		self.hash_change(e);
-	}, false);
+	}
+	window.addEventListener("hashchange", this.private_listener, false);
 	
 	if (force_hash_change) {
 		this.hash_change();
 	}
 }
 
-
+My_Router.prototype.stop = function ()
+{
+    window.removeEventListener("hashchange", this.private_listener);
+}
 

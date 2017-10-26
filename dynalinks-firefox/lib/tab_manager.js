@@ -26,6 +26,16 @@ on get all tabs info
 on open active tab
 on find active tab
 
+PROPERTIES
+tabinfo: array of Objects
+{
+    url:  tab.url,
+    title : tab.title,
+    id : parseInt(tab.id),
+    index: tab.index,
+}
+
+
 */
 
 Object.assign(Tab_Manager, Event_Mixin);
@@ -141,34 +151,52 @@ var public_methods = {
         
     },
     
+    is_myself: function (tabinfo)
+    {
+        var page_url = "/pages/links_view/links_view.html";
+        if (tabinfo.url.search(extension_scheme) !== -1 && 
+        tabinfo.url.search(page_url) !== -1)
+            return true;
+        //tabinfo.title.search('Dynalinks') !== -1
+        return false;
+            
+    },
+    
     remove : function (my_id)
     {
         //console.log("remove by my id " + my_id);
         
         var record = this.tab_by_my_id[my_id];
         if (!record) {
-            return;
+            return false;
+        }
+        
+        //don't remove itself by itself
+        if (this.is_myself(record)) {
+            return false;
         }
 
-        //FIX IT! First error, cause by fact what truth tab id is uuid, 
-        //but attribute named 'id'
+        //remove tab from tab data
+        //FIX IT! We used my_id which is uuid but attribute named 'id'
+        //what may be confusion because of tab.id
         remove_by_field_value(this.tablist_info, "my_id", my_id);        
         delete this.tab_by_my_id[my_id];    
         
         var tab_id = record.id;
         delete this.tab_changer[tab_id];
-        //console.log("my id " + my_id + "record id " + id;
         
         function error(e)
         {
             //console.log("tab <"+id+">removed ;;;" + typeof id);
         }
-        id = parseInt(tab_id);
+        //id = parseInt(tab_id);
         if (is_chrome) {
             chrome.tabs.remove(tab_id, error);
         } else {
             browser.tabs.remove(tab_id).then(error);
         }
+        
+        return true;
     },
     
     go: function (uuid)
@@ -277,12 +305,14 @@ var private_methods =
              var record = {
                 url:  t.url,
                 title : t.title,
-                id : parseInt(t.id)
+                id : parseInt(t.id),
+                index: t.index,
              }
              this.tablist_info.push(record);
         }
 
         this.set_update_listener();
+        this.set_remove_listener();
 
         this.generate_my_info();
 
@@ -299,6 +329,35 @@ var private_methods =
         delete this.tab_changer[oldid];
         this.tab_changer[newid] = record;
         record.id = newid;
+        
+    },
+    
+    change_tab_info: function (id, changer_info)
+    {
+        var record = this.tab_changer[id];
+        var keys = ['url', 'title', 'index'];
+        if (changer_info.url || changer_info.title || changer_info.index !== undefined) {
+            copy_keys_if_defined(changer_info, record, keys);
+            //console.log("tab change url or title", changer_info.title, changer_info.url, changer_info.index, changer_info.status);
+        }
+        //HACK for vue 
+        //dont need while Tab_Manager and Vue share one scope
+        //will be need if Tab_Manager move to background and use port connection instead events
+        
+        if (changer_info.status === "complete") {
+            /*
+            console.log("hack for framework watch");
+            var i = find_index_by_field_value(this.tablist_info, "id", id);
+            if (i === -1) {
+                console.error("fail update info!");
+            }
+            var record = this.tablist_info[i];
+            console.log("record is ", JSON.stringify(record));
+            //this.tablist_info.splice(i, 1, record);
+            */
+            //this.$emit("record->update", id);
+        }
+        
     },
 
 
@@ -314,7 +373,7 @@ var private_methods =
         };
 
         this.tablist_info.push(record);
-        this.tab_changer[newId] = record;
+        this.tab_changer[id] = record;
         this.tab_by_my_id[record.my_id] = record;
         
         this.switcher.send_command("tab", "create", record);
@@ -333,18 +392,22 @@ var private_methods =
         
         var tab_id = get_id(newId, tab);
         if (tab_id === null) {
-            //console.error("Incorrect tab " + JSON.stringify(tab) + " newId " + newId + " changerInfo " + JSON.stringify(changerInfo));
+            console.error("Incorrect tab " + JSON.stringify(tab));
+            // + " newId " + newId + " changerInfo " + JSON.stringify(changerInfo));
             return;
         }
             //new tab
-        var create_new = (tab === undefined || newId === undefined);
-        if (tab && (tab.id === newId && this.tab_changer[tab.id] === undefined)) 
-        
+        var create_new = (tab === undefined || newId === undefined) 
+            || this.tab_changer[tab_id] === undefined;
+        //if (tab && (tab.id === newId && this.tab_changer[tab.id] === undefined)) 
+        //console.log("tab changed ", changerInfo);
         if (create_new)
         {
+            //console.log("create new");
             this.add_new_tab(newId, changerInfo.url, changerInfo.title);
         } else  {
-            this.change_tab_id(newId, tab.id);
+            this.change_tab_id(newId, tab.id);            
+            this.change_tab_info(newId, changerInfo);
         }
     },
 
@@ -361,7 +424,37 @@ var private_methods =
         } else {
             browser.tabs.onUpdated.addListener(callback)
         }
-    }
+    },
+
+    private_remove_callback: function(tab_id, remove_info)
+    {
+        var record = this.tab_changer[tab_id];
+        //most perhaps this is event of tab, closed by Tab Manager
+        if (record === undefined) {
+            //console.error("removed undefined tab!");
+            return;
+        }
+        var my_id = record.my_id;
+        delete this.tab_changer[tab_id];
+        delete this.tab_by_my_id[my_id];                
+        remove_by_field_value(this.tablist_info, "my_id", my_id);                
+    },
+    
+    set_remove_listener: function ()
+    {
+        var self = this;
+        function callback(tab_id, remove_info)
+        {
+            self.private_remove_callback(tab_id, remove_info);
+        }
+        
+        if (is_chrome) {
+            chrome.tabs.onRemoved.addListener(callback);
+        } else {
+            browser.tabs.onRemoved.addListener(callback)
+        }
+        
+    },
 };
 
 
@@ -370,7 +463,7 @@ Object.assign(Tab_Manager, private_methods);
 
 /*
 
-LEGACY
+LEGACY or FUTURE?
 
 */
 

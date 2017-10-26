@@ -102,6 +102,46 @@ Application.prototype.export_tag = function ()
     saver.save_text_as_blob(text, tag+".json");
 }
 
+
+Application.prototype.import_database = function ()
+{
+	var self = this;
+
+
+    function import_data(text)
+    {
+        if (!text || text === '') {
+            throw ("Error importing database! Data is empty!");
+        }
+        var json = JSON.parse(text);
+        self.dynalinks.import_database(json);
+        var category = self.dynalinks.category_list[0].href;
+        //console.log("Import done!", category);
+        mr.navigate(self.dynalinks.create_url(category), true);        
+    }
+    
+    
+	var params = 
+	{
+		'type': 'file', 
+		handler: function (files) 
+		{
+            var file = files[0];
+            var fr = new FileReader();
+            
+            
+            fr.onloadend = function () { import_data(fr.result); }
+            
+            fr.readAsText(file); // "utf-8" by default
+            
+		}
+	};
+	var form = new PopupForm(params);
+	form.show();
+    
+}
+
+
 Application.prototype.remove_category = function ()
 {
 	var params = {
@@ -148,6 +188,18 @@ Application.prototype.create_category = function ()
 	}
 	var form = new PopupForm(params);
 	form.show();
+}
+
+//navigate to page with form creating new record
+Application.prototype.add_item = function ()
+{
+	var context = this.dynalinks.get_active_context();
+	if (context) {
+		var category = context.category_name;
+		mr.navigate('add/'+category, true);
+	} else {
+		console.log("Error add record! Category not found!", this.dynalinks.category_name);
+	}
 }
 
 

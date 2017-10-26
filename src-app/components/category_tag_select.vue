@@ -16,18 +16,26 @@
 </template>
 
 <script>
-export default CategoryTagSelectPanel
+export default 
 {
+    name: 'CategoryTagSelectPanel',
     props: ["category", "tag"],
     
     data : function () {
         return {
             choosed_tag: '',
             choosed_category: '',
-            tag_list = [],
-            category_list = [],
-            new_tag = '',
+            tag_list: [],
+            category_list: [],
+            new_tag: '',
         }
+    },
+    
+    created: function ()
+    {
+        this.category_list = this.$dynalinks.category_list;
+        this.choosed_category = this.category_list[0].href;
+        this.change_category();
     },
     
     watch: {
@@ -40,14 +48,14 @@ export default CategoryTagSelectPanel
         tag: function (value) {
             if (value) {
                 this.choosed_tag = value;
-            {
+            }
         }
     },
     
     
     methods: {
         change_category() {
-            var context = this.$dynalinks.categories[this.category];
+            var context = this.$dynalinks.categories[this.choosed_category];
             this.tag_list = context.tags;
             this.choosed_tag = context.tags[0];
         },
@@ -69,6 +77,10 @@ export default CategoryTagSelectPanel
             if (this.new_tag && this.new_tag.trim() !== '') 
                 return this.new_tag;
             return this.choosed_tag;
+        },
+        get_category: function ()
+        {
+            return this.choosed_category;
         }
     }
 }

@@ -300,89 +300,6 @@ if (!Object.assign) {
 
 
 
-function My_Select_Form()
-{
-    this.selected = '';
-    this.options = [];
-}
-
-Object.assign(My_Select_Form.prototype, {
-    constructor: My_Select_Form,
-    get_element: function (id)
-    {
-        this.form = document.getElementById(id);
-        this.after_create();
-    },
-    create: function (id, parent_id) {
-        //crete input element and assign their id
-        var form = document.createElement('select');
-        form.id = id;
-        //append to parent item
-        var parent = document.getElementById(parent_id);
-        parent.appendChild(form);
-        
-        this.form = form;
-        this.after_create();
-    },
-    after_create: function ()
-    {
-        this.set_change_listener();
-    },
-    set_change_listener :function ()
-    {
-        var self = this;
-        function onchange_callback() {
-            self.selected = self.form.value;                
-            if (self.onchange) {
-                self.onchange(self.selected);
-            }
-        }
-        this.form.addEventListener("change", onchange_callback);
-    },
-    set_options : function (list, selected)
-    {
-        this.options = list;
-        this.selected = selected;
-        
-        var html = ''
-        for(var i =0; i < list.length;i++) {
-            var text = list[i];
-            html += '<option';
-            if (selected === text) {
-                html += " selected ";
-            }
-            html += ">" + text + '</option>';
-        }
-        this.form.innerHTML = html;
-    },
-    add_option: function (item)
-    {
-        var index = this.options.indexOf(item);
-        if (index < 0) {
-            this.options.push(item)
-            this.set_options(this.options, item);
-        }
-    },
-    set_selected: function (selected) 
-    {
-        this.set_options(this.options, selected);
-    },
-    get_value : function ()
-    {
-        return this.selected;
-    },
-    clear: function ()
-    {
-        this.selected = '';
-        this.options = [];
-        
-        this.form.innerHTML = '';
-        /*while (this.form.firstChild) {
-            this.form.removeChild(myNode.firstChild);
-        }*/
-        
-    }
-}); 
 
 
     // http://www.broofa.com/Tools/Math.uuid.htm
@@ -428,3 +345,84 @@ function color_console(text, style)
 
 
 
+function copy_keys_if_defined(src, dest, keys)
+{
+    for(var i = 0;i < keys.length; i++) {
+        var key = keys[i];
+        if (src[key] !== undefined) {
+            dest[key] = src[key];
+        }
+    }
+}
+
+function Sorter()
+{
+    this.directions = {};
+}
+
+Sorter.prototype.sort_by_key = function(list, key, prepare_func)
+{
+    if (this.directions[key] === undefined) {
+        this.directions[key] = true;
+    }
+    
+    var reverse = !this.directions[key];
+    this.last_sort_key = key;
+    
+    function cmp_func(a,b)
+    {
+        var x = a[key];
+        var y = b[key];
+        if (prepare_func) {
+            x = prepare_func(x);
+            y = prepare_func(y);
+        }
+        
+        var r = 0;
+        if (x > y) {
+          r = 1;
+        } else if (x < y) {
+          r = -1;
+        }
+        if (reverse) {
+            r = 0 - r;
+        }
+        return r;
+    }
+
+    list.sort(cmp_func);
+}
+
+Sorter.prototype.toggle_direction = function(key)
+{
+    if (this.directions[key] === undefined){
+        this.directions[key] = true;
+    } else {
+        this.directions[key] = !this.directions[key];
+    }
+}
+
+
+function filter_list(list, filter)
+{
+    var result = [];
+    for(var i = 0; i < list.length; i++) {
+        var elem = list[i];
+        if (filter(elem)) {
+            result.push(elem);
+        }
+    }
+    return result;
+}
+
+
+
+//return these elements from list, which value is in object 
+function filter_list_by_dict(list, dict, key)
+{
+    var r = filter_list(list, function (elem) {
+        var value = elem[key];
+        return (dict[value] !== undefined);
+    });
+    return r;
+}

@@ -58,16 +58,7 @@ COMMANDS
 
 */
 
-Vue_Application.prototype.add_item = function ()
-{
-	var context = this.dynalinks.get_active_context();
-	if (context) {
-		var category = context.category_name;
-		mr.navigate('add/'+category, true);
-	} else {
-		console.log("Error add record! Category not found!", this.dynalinks.category_name);
-	}
-}
+
 
 Vue_Application.prototype.show_category_view = function ()
 {
@@ -109,40 +100,6 @@ Vue_Application.prototype.show_search_result = function (value)
 }
 
 
-Vue_Application.prototype.import_database = function ()
-{
-	var self = this;
-
-
-    function import_data(text)
-    {
-        var db = JSON.parse(text);
-        self.dynalinks.import_database(db);
-        var category = self.dynalinks.category_list[0].href;
-        console.log("Import done!", category);
-        mr.navigate(self.dynalinks.create_url(category), true);        
-    }
-    
-    
-	var params = 
-	{
-		'type': 'file', 
-		handler: function (files) 
-		{
-            var file = files[0];
-            var fr = new FileReader();
-            
-            
-            fr.onloadend = function () { import_data(fr.result); }
-            
-            fr.readAsText(file); // "utf-8" by default
-            
-		}
-	};
-	var form = new PopupForm(params);
-	form.show();
-    
-}
 
 
 Vue_Application.prototype.add_record_from_browser = function (title, url)
@@ -161,14 +118,13 @@ Vue_Application.prototype.add_record_from_browser = function (title, url)
 	};
     
     this.vue.$on("record->create", function (response, record, category) {
-        console.log("record->create ", response);
-        if (response === 'reject') {
-            mr.navigate(self.dynalinks.create_url(category), true);
-        }
-        else if (response === "accept") {
-            
+        console.log("record->create from browser", response);
+        if (response === "accept") {
 			var tag = record.tag;
 			mr.navigate(self.dynalinks.create_url(category, tag), true);            
+        } else { //if (response === 'reject') 
+            console.log("reject ", self.dynalinks.create_url(category));
+            mr.navigate(self.dynalinks.create_url(category), true);
         }
     });
     
@@ -277,10 +233,8 @@ Vue_Application.prototype.init_router = function ()
     mr.add_route("tabs/all", this.look_tabs, this);
 	
 		
-	mr.add_default( function (url) 
-		{
-            this.default_category_view
-            
+	mr.add_default( function (url) {
+            this.default_category_view();
 		}, this);
 		
 		

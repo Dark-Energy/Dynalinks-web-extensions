@@ -102,6 +102,46 @@ Application.prototype.export_tag = function ()
     saver.save_text_as_blob(text, tag+".json");
 }
 
+
+Application.prototype.import_database = function ()
+{
+	var self = this;
+
+
+    function import_data(text)
+    {
+        if (!text || text === '') {
+            throw ("Error importing database! Data is empty!");
+        }
+        var json = JSON.parse(text);
+        self.dynalinks.import_database(json);
+        var category = self.dynalinks.category_list[0].href;
+        //console.log("Import done!", category);
+        mr.navigate(self.dynalinks.create_url(category), true);        
+    }
+    
+    
+	var params = 
+	{
+		'type': 'file', 
+		handler: function (files) 
+		{
+            var file = files[0];
+            var fr = new FileReader();
+            
+            
+            fr.onloadend = function () { import_data(fr.result); }
+            
+            fr.readAsText(file); // "utf-8" by default
+            
+		}
+	};
+	var form = new PopupForm(params);
+	form.show();
+    
+}
+
+
 Application.prototype.remove_category = function ()
 {
 	var params = {
@@ -148,6 +188,18 @@ Application.prototype.create_category = function ()
 	}
 	var form = new PopupForm(params);
 	form.show();
+}
+
+//navigate to page with form creating new record
+Application.prototype.add_item = function ()
+{
+	var context = this.dynalinks.get_active_context();
+	if (context) {
+		var category = context.category_name;
+		mr.navigate('add/'+category, true);
+	} else {
+		console.log("Error add record! Category not found!", this.dynalinks.category_name);
+	}
 }
 
 
@@ -217,13 +269,14 @@ My_Router.prototype.test_hash = function (url)
 		groups = item.re.exec(url);
 		if (groups) {
 			this.apply_route(groups, item);
-			
+			//console.log("apply route!");
 			return true;
 		}
 	}
 	
 	//if nothing match
 	if (this.default_route) {
+        //console.log("default route");
 		this.default_route.callback.apply(this.default_route.obj, [url]);
 	}
 }
@@ -304,9 +357,11 @@ My_Router.prototype.navigate = function (hash, change_location)
 	if (change_location) {
 		var new_hash = "#"+hash;
 		if (window.location.hash == new_hash) {
+            //console.log("router - test hash");
 			this.test_hash(hash);
 		}
 		else {
+            //console.log("router change location.hash");
 			window.location.hash = new_hash;
 		}
 	}
@@ -317,18 +372,24 @@ My_Router.prototype.navigate = function (hash, change_location)
 
 My_Router.prototype.start = function (force_hash_change)
 {
+    //console.log("router start listen");
 	var self = this;
-	window.addEventListener("hashchange", function (e) 
+    this.private_listener = function (e) 
 	{
+        //console.log("router listenrer - hash changed!", e);
 		self.hash_change(e);
-	}, false);
+	}
+	window.addEventListener("hashchange", this.private_listener, false);
 	
 	if (force_hash_change) {
 		this.hash_change();
 	}
 }
 
-
+My_Router.prototype.stop = function ()
+{
+    window.removeEventListener("hashchange", this.private_listener);
+}
 
 ;
 
@@ -391,16 +452,7 @@ COMMANDS
 
 */
 
-Vue_Application.prototype.add_item = function ()
-{
-	var context = this.dynalinks.get_active_context();
-	if (context) {
-		var category = context.category_name;
-		mr.navigate('add/'+category, true);
-	} else {
-		console.log("Error add record! Category not found!", this.dynalinks.category_name);
-	}
-}
+
 
 Vue_Application.prototype.show_category_view = function ()
 {
@@ -442,40 +494,6 @@ Vue_Application.prototype.show_search_result = function (value)
 }
 
 
-Vue_Application.prototype.import_database = function ()
-{
-	var self = this;
-
-
-    function import_data(text)
-    {
-        var db = JSON.parse(text);
-        self.dynalinks.import_database(db);
-        var category = self.dynalinks.category_list[0].href;
-        console.log("Import done!", category);
-        mr.navigate(self.dynalinks.create_url(category), true);        
-    }
-    
-    
-	var params = 
-	{
-		'type': 'file', 
-		handler: function (files) 
-		{
-            var file = files[0];
-            var fr = new FileReader();
-            
-            
-            fr.onloadend = function () { import_data(fr.result); }
-            
-            fr.readAsText(file); // "utf-8" by default
-            
-		}
-	};
-	var form = new PopupForm(params);
-	form.show();
-    
-}
 
 
 Vue_Application.prototype.add_record_from_browser = function (title, url)
@@ -494,14 +512,13 @@ Vue_Application.prototype.add_record_from_browser = function (title, url)
 	};
     
     this.vue.$on("record->create", function (response, record, category) {
-        console.log("record->create ", response);
-        if (response === 'reject') {
-            mr.navigate(self.dynalinks.create_url(category), true);
-        }
-        else if (response === "accept") {
-            
+        console.log("record->create from browser", response);
+        if (response === "accept") {
 			var tag = record.tag;
 			mr.navigate(self.dynalinks.create_url(category, tag), true);            
+        } else { //if (response === 'reject') 
+            console.log("reject ", self.dynalinks.create_url(category));
+            mr.navigate(self.dynalinks.create_url(category), true);
         }
     });
     
@@ -592,6 +609,7 @@ Vue_Application.prototype.look_tabs = function ()
 
 Vue_Application.prototype.default_category_view = function()
 {
+    console.log("default category view");
     this.vue.$emit("my_command", "show_category", null, this.dynalinks);
 }
 
@@ -610,10 +628,8 @@ Vue_Application.prototype.init_router = function ()
     mr.add_route("tabs/all", this.look_tabs, this);
 	
 		
-	mr.add_default( function (url) 
-		{
-            this.default_category_view
-            
+	mr.add_default( function (url) {
+            this.default_category_view();
 		}, this);
 		
 		
