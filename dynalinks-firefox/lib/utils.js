@@ -265,6 +265,22 @@ function every_property(obj, callback)
     }
 }
 
+function check_every_property(obj, func)
+{
+    if (!callback) {
+        console.log("callback given every_property is undefined or null!")
+        return false;
+    }
+    for(var key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            if (!callback(key)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 function every_index(arr, callback) 
 {
     if (!callback) {

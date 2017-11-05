@@ -294,3 +294,20 @@ function filter_list_by_dict(list, dict, key)
     });
     return r;
 }
+
+
+function check_every_property(obj, func)
+{
+    if (!callback) {
+        console.log("callback given every_property is undefined or null!")
+        return;
+    }
+    for(var key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            if (!callback(key)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}

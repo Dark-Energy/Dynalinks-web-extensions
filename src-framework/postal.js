@@ -17,6 +17,9 @@ response:
 function Postal(address)
 {
     this.address = address || {};
+    if (typeof address === 'string') {
+        this.address = {'address': address};
+    }
     this.max_times = 0; //infinte
     this.message = {};
     this.times = 0;
@@ -29,13 +32,12 @@ function Postal(address)
 Postal.prototype.check_address = function (m)
 {
     var self = this;
-    every_property(this.address, function (key) {
+    return check_every_property(this.address, function (key) {
         if (self.address[key] !== m[key]) {
-            console.log("address message is false", m, this.address);
             return false;
         }
+        return true;
     });
-    return true;
 }
 
 Postal.prototype.check_times_limit = function()
@@ -48,10 +50,14 @@ Postal.prototype.check_times_limit = function()
 
 Postal.prototype._private_listener = function (message, sender, sendResponse)
 {
-    if (this.$onmessage) {
-        this.$onmessage(message);
-    }
+    
     if (this.check_address(message)) {
+        
+        if (this.$onmessage) {
+            this.$onmessage(message);
+        }
+    
+      
         sendResponse(this.response);
         if (this.$onresponse) {
             this.$onresponse(this.response)

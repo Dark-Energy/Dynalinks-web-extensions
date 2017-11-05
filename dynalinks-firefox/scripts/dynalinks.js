@@ -208,8 +208,10 @@ Dynalinks.prototype.create_index = function ()
     
     every_property(this.database, function (key) {
         var cat = self.database[key];
-        cat.forEach( function (record) {
-            self.index[record.href] = record._id
+        //cat.forEach(
+        every_index(cat, function (i) {
+            var record = cat[i];
+            self.index[record.href] = record._id;
         });
     });
 

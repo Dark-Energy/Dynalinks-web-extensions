@@ -2,6 +2,12 @@ This object recive message and send response, if need.
 
 Recived message is a JSON like object. He is must have key 'address'. Postal have a field is named 'address'. If this two address identity, Postal send response. This JSON-like object. He is assigned to field 'response'
 
+Event $onmessage is a callback, which call, when message arrived. It pass a JSON object, contaning the message.
+
+this.$onmessage = function (m) {
+    console.log("we have a message", JSON.stringify(m));
+}
+
 var p= new Postal('nowhere'); // reciving message with {address: 'nowhere'}
 p.response = {answer: 'nothing'};
 
@@ -12,3 +18,6 @@ p.wait();
 Postal have events, fired after response was sended.
 
 p.$onresponse = function (response) { console.log("oh, shit!");}
+
+
+Address passed to constructor must be JSON like object or string, then it converted to object {address: string};

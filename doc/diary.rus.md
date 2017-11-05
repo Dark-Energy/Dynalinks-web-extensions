@@ -358,3 +358,34 @@ browser.browserAction.onClicked.addListener((tab) => {
 Итак, я выбросил filesaver.js и использовал простой код сохранения. При помощи data url и атрибута download элемента a (ссылка) почти любой текст можно сохранить в виде файла. К сожалению, текст должен быть закодирован как любое url, либо приходится использовать blob. 
 
 get rid of ugly fileserver.js, instead it apply my own saver. Unforntunatly, either i have to use blobs, or coding file with url encoding.
+
+
+# Новая неприятность #
+
+Почему-то не работают обратки в функциях tabs.create и tabs.update, когда я делаю вкладку активной и вызываю эти функции из меню-всплывашки (popup) в Chrome и Opera. На Firefox всё нормально. Оказывается, так и надо. Активная вкладка захватывает фокус, всплывашка уничтожается вместе с её контекстом и функциями обратного вызова. Не правда ли, великолепный кусок говна от Google?
+
+
+
+When you create a new tab, by default it opens focused, and that causes the popup to close. When the popup closes, its JavaScript context is destroyed and there's no callback left to call.
+
+You have 2 options:
+
+    Move logic to the background/event page, which will survive the popup being closed. For example, instead of opening the tab from the popup, you can message the background page to do it for you.
+
+    Specify that you want to open the tab unfocused:
+
+    chrome.tabs.create(
+      {
+        url: "http://google.com",
+        active: false 
+      }, function(tab) {
+        /* ... */
+      }
+    );
+
+    However, this won't simply cause the tab to not focus - Chrome won't switch to it (opening it in the background). Might not be what you want. You can switch after your other operations are done though - with chrome.tabs.update to set active: true.
+
+Note that there is no way for a popup to survive focus loss, this is by design.
+
+
+Ну и ладно, очередной рефакторинг пойдёт дополнению только на пользу. 

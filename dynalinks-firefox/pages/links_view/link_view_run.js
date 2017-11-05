@@ -10,15 +10,18 @@ function create_table_view(dlink) {
 
     App = new Vue_Application(dlink);
 
-    read_message(dlink);
+    console.log("Create application and read message from storage");
+    read_message(dlink, "create_table_view");
 }
 
-function read_message(dlink)
+function read_message(dlink, _from)
 {
     var ms = new MyStorage();
     ms.$on_read = function (data)
     {
-        console.log("message to application from storage " + JSON.stringify(data));        
+        console.log("message to application from storage " + JSON.stringify(data));
+        console.log("call from " + _from);
+        
         var dlink = data['dlink-temp'];
         if (dlink === undefined) {
             App.show_category_view();
@@ -71,15 +74,14 @@ relation_to_popup.process_message = function (message)
 relation_to_popup.run();
 */
 
-var relation_to_fabric = new Postal("view");
+var relation_to_fabric = new Postal({address:"view"});
 relation_to_fabric.response = {answer: "forever ready!"}
 //relation_to_fabric.$onresponse = function (r) {console.log("my answer ", r); }
 relation_to_fabric.$onmessage = function (m) 
 {
-    //console.log("message is ", m);
-    console.log("read from storage");
+    console.log("we have a message " + JSON.stringify(m));
     if (App) {
-        read_message(the_dlink);
+        read_message(the_dlink, "postal");
     }
 }
 relation_to_fabric.wait();

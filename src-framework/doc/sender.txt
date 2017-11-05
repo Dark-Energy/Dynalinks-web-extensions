@@ -1,0 +1,23 @@
+Sender is a wrapper of runtime.send method. 
+
+It construct by calling function Sender with argument 'message', whiche are contain address of reciver. When reciver get a message, it check 'address' field of one. If 'address' don't match, reciver ignore it.
+
+Also message may contain other fields.
+
+var snd = new Sender({address: 'nowhere', action: 'fire!'});
+
+Message don't send automatically. It need to call method 'send' that really send it.
+
+snd.send();
+
+This method also create callback for reciving response. 
+
+Response message store in field 'response'.
+
+Method 'action' may be called, when response arrived, if he have set.
+
+snd.action = function (response) 
+{
+    console.log("we have a response!", JSON.stringify(response));
+}
+

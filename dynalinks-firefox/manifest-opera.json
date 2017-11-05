@@ -1,10 +1,4 @@
 {
-    "applications": {
-      "gecko": {
-        "id": "dynalinks@iamdarkenergy.org",
-        "strict_min_version": "55.0"
-      }
-    },
 
   "name": "Dynalinks",
   "version": "1.0.9",

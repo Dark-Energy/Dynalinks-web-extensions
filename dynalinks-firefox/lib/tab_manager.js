@@ -1,8 +1,10 @@
-console.log("load tab manager");
 
-var Tab_Manager = {}
+var Tab_Manager;
 
 
+function Tab_Manager_Class()
+{
+}
 
 
 /*
@@ -13,6 +15,10 @@ open_active_tab
 query
 get_all_tabs
 get_all_tabs_info
+    is really key method, which not only collect data about tabs,
+    but add listeners to events
+    this need refactoring
+    
 script injected successed
 go (uuid)
 update
@@ -38,12 +44,23 @@ tabinfo: array of Objects
 
 */
 
-Object.assign(Tab_Manager, Event_Mixin);
 
 var public_methods = {
 
-    open_active_tab : function (url)
+    open_active_tab : function (url, callback)
     {
+        
+        var self = this;
+        function success (tab)
+        {
+            self.tab = tab;
+            console.log("tab created" + JSON.stringify(tab));
+            self.$emit("open_active_tab", tab);
+            if (callback) {
+                callback(tab);
+            }
+        }
+        
         var fullurl = browser.runtime.getURL(url);
         var params = 
         {
@@ -52,17 +69,16 @@ var public_methods = {
         };
         
         if (is_chrome) {
-            chrome.tabs.create(params, created);
+            chrome.tabs.create(params, function (tab) {
+                self.$emit("open_active_tab", tab);
+                if (callback) {
+                    callback(tab);
+                }
+            });
         } else {
-            browser.tabs.create(params).then(created, null);
+            browser.tabs.create(params).then(success, null);
         }
         
-        var self = this;
-        function created (tab)
-        {
-            self.tab = tab;
-            self.$emit("open_active_tab", tab);
-        }
     },
     
     
@@ -84,7 +100,7 @@ var public_methods = {
         
     },
 
-    find_active_tab : function ()
+    find_active_tab : function (callback)
     {
         var self = this;
 
@@ -92,6 +108,9 @@ var public_methods = {
         {
             self.tab = tabs[0];
             self.$emit("find_active_tab", self.tab);
+            if (callback) {
+                callback(self.tab);
+            }
         }
 
         var query_params = 
@@ -129,7 +148,10 @@ var public_methods = {
     {
         this.query({});
     },
-    
+
+    //FIX: is really key method, which not only collect data about tabs,
+    //but add listeners to events
+    //need fix this
     get_all_tabs_info : function ()
     {
         var self = this;
@@ -138,7 +160,6 @@ var public_methods = {
         {
             self.collect_info();
             var message = {tabinfo: self.tablist_info};
-            //console.error("send tabinfo");
             self.$emit("get_all_tabs_info", message);
         }            
         
@@ -216,10 +237,10 @@ var public_methods = {
     
     update: function (tab_id, params)
     {
-        
+        var self = this;
         function success(tab)
         {
-            Tab_Manager.$emit("update", tab);
+            self.$emit("update", tab);
         }
         
         if (!is_chrome) {
@@ -230,17 +251,22 @@ var public_methods = {
     },
     
     
-    make_active: function (tab_id)
+    make_active: function (tab_id, callback)
     {
+        var self = this;
         function success(tab)
         {
-            Tab_Manager.$emit("make_active", tab);
+            //console.log("tabs.update callback triggered");
+            if (callback) {
+                callback(tab);
+            }
+            self.$emit("make_active", tab);
         }
 
-        if (!is_chrome) {
-            browser.tabs.update(tab_id, {active: true}).then(success, null);
-        } else {
+        if (is_chrome) {
             chrome.tabs.update(tab_id, {active: true}, success);
+        } else {
+            browser.tabs.update(tab_id, {active: true}).then(success, null);
         }
     },
 
@@ -269,7 +295,6 @@ var public_methods = {
 };
     
 
-Object.assign(Tab_Manager, public_methods);
     
 
 
@@ -310,12 +335,17 @@ var private_methods =
              }
              this.tablist_info.push(record);
         }
+        
+        this.generate_my_info();
+        this.set_listeners();
+    },
+    
+    set_listeners: function ()
+    {
 
         this.set_update_listener();
         this.set_remove_listener();
-
-        this.generate_my_info();
-
+        this.set_create_listener();
     },
 
 
@@ -332,7 +362,7 @@ var private_methods =
         
     },
     
-    change_tab_info: function (id, changer_info)
+    change_tab_info: function (id, changer_info, tab)
     {
         var record = this.tab_changer[id];
         var keys = ['url', 'title', 'index'];
@@ -343,6 +373,10 @@ var private_methods =
         //HACK for vue 
         //dont need while Tab_Manager and Vue share one scope
         //will be need if Tab_Manager move to background and use port connection instead events
+        
+        if (record.index === undefined) {
+            record.index = tab.index;
+        }
         
         if (changer_info.status === "complete") {
             /*
@@ -369,7 +403,6 @@ var private_methods =
             title: title,
             id: id,
             my_id : generateUUID(),
-         
         };
 
         this.tablist_info.push(record);
@@ -377,6 +410,7 @@ var private_methods =
         this.tab_by_my_id[record.my_id] = record;
         
         this.switcher.send_command("tab", "create", record);
+        return record;
     },
 
     _private_update_listener : function(newId, changerInfo, tab)
@@ -406,8 +440,8 @@ var private_methods =
             //console.log("create new");
             this.add_new_tab(newId, changerInfo.url, changerInfo.title);
         } else  {
-            this.change_tab_id(newId, tab.id);            
-            this.change_tab_info(newId, changerInfo);
+            this.change_tab_id(newId, tab.id);
+            this.change_tab_info(newId, changerInfo, tab);
         }
     },
 
@@ -455,50 +489,80 @@ var private_methods =
         }
         
     },
+
+    private_oncreated_listener: function (tab)
+    {
+        var record = this.add_new_tab(tab.id, tab.url, tab.title);
+        record.index = tab.index;
+    },
+    
+    set_create_listener: function ()
+    {
+        var self= this;
+        function callback(tab) {
+            //console.log("on create event listener triggered");
+            self.private_oncreated_listener(tab);
+        }
+        if (is_chrome) {
+            chrome.tabs.onCreated.addListener(callback);
+        } else {
+            browser.tabs.onCreated.addListener(callback)
+        }
+    },
 };
 
 
-Object.assign(Tab_Manager, private_methods);
 
-
-/*
-
-LEGACY or FUTURE?
-
-*/
-
-Tab_Manager.port = new PortObjListener("tab-manager");
-Tab_Manager.port.run();
-Tab_Manager.port.process_conntection = function (p)
+function create_tab_manager_communication()
 {
-   //console.log("connect with tab-manager from " + p.name);
-}
-Tab_Manager.switcher = new PortSwitcher(Tab_Manager.port);
-
-Tab_Manager.call_job_done = function ()
-{
-    console.error("who call job done?");
-}
-
+    Tab_Manager.port = new PortObjListener("tab-manager");
+    Tab_Manager.port.run();
+    Tab_Manager.port.process_conntection = function (p)
+    {
+       //console.log("connect with tab-manager from " + p.name);
+    }
+    Tab_Manager.switcher = new PortSwitcher(Tab_Manager.port);
 
 
-
-Tab_Manager.switcher.add_command("get", "alltabinfo", function (p)
-{
-    Tab_Manager.$on("get_all_tabs_info", function (m) {
-        this.port.post(m); 
+    Tab_Manager.switcher.add_command("get", "alltabinfo", function (p)
+    {
+        Tab_Manager.$on("get_all_tabs_info", function (m) {
+            this.port.post(m); 
+        });
+        Tab_Manager.get_all_tabs_info();
     });
-    Tab_Manager.get_all_tabs_info();
-});
 
-/*
-sender post message, where tab identifies by my uuid, 
-but names this key just 'id'
-this may become reason for errors
-*/
-Tab_Manager.switcher.add_command("tab", "remove", function (message) 
+    /*
+    sender post message, where tab identifies by my uuid, 
+    but names this key just 'id'
+    this may become reason for errors
+    */
+    Tab_Manager.switcher.add_command("tab", "remove", function (message) 
+    {
+        Tab_Manager.remove(message.id);
+    });
+}
+
+
+function create_tab_manager_class()
 {
-    Tab_Manager.remove(message.id);
-});
+    Object.assign(Tab_Manager_Class.prototype, Event_Mixin);
+    Object.assign(Tab_Manager_Class.prototype, public_methods);
+    Object.assign(Tab_Manager_Class.prototype, private_methods);
+}
+
+function create_tab_manager_singleton()
+{
+    Tab_Manager = new Tab_Manager_Class();
+}
+
+if (Tab_Manager === undefined)
+{
+    console.log("create tab manager");
+    create_tab_manager_class();    
+    create_tab_manager_singleton();
+    //FIX: is really need?
+    create_tab_manager_communication();
+}
 
 

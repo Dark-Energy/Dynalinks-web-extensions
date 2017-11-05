@@ -129,7 +129,9 @@ Object.assign(PortObjListener.prototype, {
 
         post: function (message)
         {
-            this.port.postMessage(message);
+            if (this.port !== undefined) {
+                this.port.postMessage(message);
+            }
         },
 
 });
