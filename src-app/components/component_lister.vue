@@ -32,7 +32,6 @@ import CategoryView from './category_view.vue';
 
 export default {
         name: "MainComponent",
-        props: ["dynalinks"],
         components: {
             'form-update': UpdateForm,
             'vueTableGrid': vueTableGrid,
@@ -80,10 +79,8 @@ export default {
         
         created: function (){
 
-            if (this.dynalinks) {
-                this.category_list = this.dynalinks.category_list;
-                this.categories = this.dynalinks.categories;
-            }
+            this.category_list = this.$dynalinks.category_list;
+            this.categories = this.$dynalinks.categories;
             
             //console.log("catlist", this.category_list, this.dynalinks);
         

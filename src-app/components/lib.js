@@ -1,4 +1,7 @@
 ﻿import ApplicationMainMenu from './main-menu.vue'
+//import Vue from 'vue'
+
+
 
 
 
@@ -7,19 +10,8 @@ function create_main_menu(application, element_id) {
         console.error("undefined element_id in create_main_menu!");
         element_id = '#main-menu-app';
     }
-	var app_main_menu = new Vue( {
-			el: element_id,
-            data : {
-                application: application
-            },
-            template: 
-                '<ApplicationMainMenu  :application="application"/>'
-            ,
-			components: {
-				"ApplicationMainMenu": ApplicationMainMenu
-			},
-		});
-		return app_main_menu;
+
+    return new Vue(ApplicationMainMenu).$mount(element_id);
 }
 
 import vueTableGrid from './vue_table_grid.vue';
@@ -32,18 +24,19 @@ function create_vue_app(dynalinks, element_id)
         element_id = '#app';
         console.error("undefined element id in create vue app!");
     }
+    
+    return new Vue(MainComponent).$mount(element_id);    
+    /*
 	var app = new Vue({
 		el: element_id,
-        data: {
-            dynalinks : dynalinks,
-        },
-        template: '<MainComponent :dynalinks="dynalinks" />',
+        template: '<MainComponen"/>',
         components : {
             'vueTableGrid': vueTableGrid,
             'MainComponent': MainComponent,
 		},
     });
 	return app;
+    -*/
 }
 
 export {create_vue_app, create_main_menu};

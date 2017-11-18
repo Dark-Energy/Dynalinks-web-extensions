@@ -410,24 +410,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__category_view_vue__ = __webpack_require__(4);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "CategoryView", function() { return __WEBPACK_IMPORTED_MODULE_6__category_view_vue__["a"]; });
 
+//import Vue from 'vue'
+
 
 function create_main_menu(application, element_id) {
     if (element_id === undefined) {
         console.error("undefined element_id in create_main_menu!");
         element_id = '#main-menu-app';
     }
-    var app_main_menu = new Vue({
-        el: element_id,
-        data: {
-            application: application
-        },
-        template: '<ApplicationMainMenu  :application="application"/>',
 
-        components: {
-            "ApplicationMainMenu": __WEBPACK_IMPORTED_MODULE_0__main_menu_vue__["a" /* default */]
-        }
-    });
-    return app_main_menu;
+    return new Vue(__WEBPACK_IMPORTED_MODULE_0__main_menu_vue__["a" /* default */]).$mount(element_id);
 }
 
 
@@ -439,18 +431,19 @@ function create_vue_app(dynalinks, element_id) {
         element_id = '#app';
         console.error("undefined element id in create vue app!");
     }
+
+    return new Vue(__WEBPACK_IMPORTED_MODULE_2__component_lister_vue__["a" /* default */]).$mount(element_id);
+    /*
     var app = new Vue({
-        el: element_id,
-        data: {
-            dynalinks: dynalinks
-        },
-        template: '<MainComponent :dynalinks="dynalinks" />',
-        components: {
-            'vueTableGrid': __WEBPACK_IMPORTED_MODULE_1__vue_table_grid_vue__["a" /* default */],
-            'MainComponent': __WEBPACK_IMPORTED_MODULE_2__component_lister_vue__["a" /* default */]
-        }
+    el: element_id,
+        template: '<MainComponen"/>',
+        components : {
+            'vueTableGrid': vueTableGrid,
+            'MainComponent': MainComponent,
+    },
     });
     return app;
+    -*/
 }
 
 
@@ -741,7 +734,6 @@ function create_vue_app(dynalinks, element_id) {
 
 /* harmony default export */ __webpack_exports__["a"] = ({
     name: "MainComponent",
-    props: ["dynalinks"],
     components: {
         'form-update': __WEBPACK_IMPORTED_MODULE_6__vue_update_form_vue__["a" /* default */],
         'vueTableGrid': __WEBPACK_IMPORTED_MODULE_2__vue_table_grid_vue__["a" /* default */],
@@ -783,10 +775,8 @@ function create_vue_app(dynalinks, element_id) {
 
     created: function () {
 
-        if (this.dynalinks) {
-            this.category_list = this.dynalinks.category_list;
-            this.categories = this.dynalinks.categories;
-        }
+        this.category_list = this.$dynalinks.category_list;
+        this.categories = this.$dynalinks.categories;
 
         //console.log("catlist", this.category_list, this.dynalinks);
 
@@ -1064,31 +1054,31 @@ table.actions["Edit"] = [{
     title: "Create record",
     id: "create_record",
     action: function () {
-        this.application.add_item();
+        this.$application.add_item();
     }
 }, {
     title: "Create category",
     id: "create_category",
     action: function () {
-        this.application.create_category();
+        this.$application.create_category();
     }
 }, {
     title: "Move page to other category",
     id: "move_page",
     action: function () {
-        this.application.move_tag();
+        this.$application.move_tag();
     }
 }, {
     title: "Remove page",
     id: "remove_page",
     action: function () {
-        this.application.remove_tag();
+        this.$application.remove_tag();
     }
 }, {
     title: "Remove category",
     id: "remove_category",
     action: function () {
-        this.application.remove_category();
+        this.$application.remove_category();
     }
 }];
 
@@ -1096,32 +1086,32 @@ table.actions["Files"] = [{
     title: "Save to file",
     id: "save_to_file",
     action: function () {
-        this.application.save_to_file();
+        this.$application.save_to_file();
     }
 }, {
     title: "Save page",
     id: "save_page",
     action: function () {
-        this.application.export_tag();
+        this.$application.export_tag();
     }
 }, {
     title: "Save category",
     id: "save_category",
     action: function () {
-        this.application.export_category();
+        this.$application.export_category();
     }
 }, {
     title: "Import database",
     id: "import_database",
     action: function () {
-        this.application.import_database();
+        this.$application.import_database();
     }
 }];
 table.actions["Tabs"] = [{
     title: "Tab list",
     id: "tab_list",
     action: function () {
-        this.application.look_tabs();
+        this.$application.look_tabs();
     }
 }, {
     title: "Tab Groups",
@@ -1177,7 +1167,7 @@ table.actions["Search"] = [{
             }
         },
         search_record: function () {
-            //this.application.search(this.search_text);
+            //this.$application.search(this.search_text);
         }
     }
 });

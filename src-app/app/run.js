@@ -48,6 +48,7 @@ Vue_Application.prototype.mixin_vue = function ()
     Vue.mixin({
         created: function () {
             this.$dynalinks= self.dynalinks;
+            this.$application = self;
         }
     });
 }

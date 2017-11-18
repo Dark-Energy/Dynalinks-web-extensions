@@ -26,27 +26,27 @@ table.actions["Edit"] = [
     {
         title: "Create record",
         id: "create_record",
-        action: function () { this.application.add_item();}
+        action: function () { this.$application.add_item();}
     },
     {
         title: "Create category",
         id: "create_category",
-        action: function () { this.application.create_category();}
+        action: function () { this.$application.create_category();}
     },
     {
         title: "Move page to other category",
         id: "move_page",
-        action: function () { this.application.move_tag(); }
+        action: function () { this.$application.move_tag(); }
     },
     {
         title: "Remove page",
         id: "remove_page",
-        action: function () { this.application.remove_tag(); }
+        action: function () { this.$application.remove_tag(); }
     },
     {
         title: "Remove category",
         id: "remove_category",
-        action: function () { this.application.remove_category(); }
+        action: function () { this.$application.remove_category(); }
     }
 ];
 
@@ -54,22 +54,22 @@ table.actions["Files"] = [
     {
         title: "Save to file",
         id: "save_to_file",
-        action: function () {this.application.save_to_file();}
+        action: function () {this.$application.save_to_file();}
     },
     {
         title: "Save page",
         id: "save_page",
-        action: function () { this.application.export_tag();}
+        action: function () { this.$application.export_tag();}
     },
     {
         title: "Save category",
         id: "save_category",
-        action: function () {this.application.export_category();}
+        action: function () {this.$application.export_category();}
     },
     {
         title: "Import database",
         id: "import_database",
-        action: function () {this.application.import_database();}
+        action: function () {this.$application.import_database();}
     }
     
 ];
@@ -77,7 +77,7 @@ table.actions["Tabs"] = [
     {
         title: "Tab list",
         id: "tab_list",
-        action: function () {this.application.look_tabs();}
+        action: function () {this.$application.look_tabs();}
     },
     {
         title: "Tab Groups",
@@ -139,7 +139,7 @@ export default {
         },
 		search_record: function ()
 		{
-			//this.application.search(this.search_text);
+			//this.$application.search(this.search_text);
 		},
 	}
 };

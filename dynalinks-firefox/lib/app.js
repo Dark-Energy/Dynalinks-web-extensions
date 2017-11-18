@@ -442,6 +442,7 @@ Vue_Application.prototype.mixin_vue = function ()
     Vue.mixin({
         created: function () {
             this.$dynalinks= self.dynalinks;
+            this.$application = self;
         }
     });
 }
@@ -609,7 +610,6 @@ Vue_Application.prototype.look_tabs = function ()
 
 Vue_Application.prototype.default_category_view = function()
 {
-    console.log("default category view");
     this.vue.$emit("my_command", "show_category", null, this.dynalinks);
 }
 
