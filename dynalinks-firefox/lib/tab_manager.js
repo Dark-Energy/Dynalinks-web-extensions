@@ -174,6 +174,9 @@ var public_methods = {
     
     is_myself: function (tabinfo)
     {
+        if (!!!tabinfo || !!!tabinfo.url) {
+            return true;
+        }
         var page_url = "/pages/links_view/links_view.html";
         if (tabinfo.url.search(extension_scheme) !== -1 && 
         tabinfo.url.search(page_url) !== -1)
